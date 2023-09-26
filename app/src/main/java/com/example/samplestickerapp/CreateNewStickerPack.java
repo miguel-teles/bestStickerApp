@@ -73,7 +73,7 @@ public class CreateNewStickerPack extends Activity {
                             edtNomePacote.getText().toString(),
                             "Aplicativo Foda",
                             uriImagemStickerPack.getPath(),
-                            "1",
+                            "934",
                             false);
 
 

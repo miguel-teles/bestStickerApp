@@ -18,25 +18,22 @@ import android.content.res.AssetManager;
 import android.database.Cursor;
 import android.database.MatrixCursor;
 import android.net.Uri;
-import android.os.Environment;
 import android.text.TextUtils;
 import android.util.Log;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.example.samplestickerapp.database.MyDatabase;
+import com.example.samplestickerapp.exception.StickerException;
+import com.example.samplestickerapp.exception.StickerExceptionHandler;
 import com.example.samplestickerapp.model.Sticker;
 import com.example.samplestickerapp.model.StickerPack;
 import com.example.samplestickerapp.utils.ContentFileParser;
+import com.example.samplestickerapp.utils.Folders;
 
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -47,23 +44,20 @@ public class StickerContentProvider extends ContentProvider {
     /**
      * Do not change the strings listed below, as these are used by WhatsApp. And changing these will break the interface between sticker app and WhatsApp.
      */
-    public static final String STICKER_PACK_IDENTIFIER_IN_QUERY = "sticker_pack_identifier";
-    public static final String STICKER_PACK_NAME_IN_QUERY = "sticker_pack_name";
-    public static final String STICKER_PACK_PUBLISHER_IN_QUERY = "sticker_pack_publisher";
-    public static final String STICKER_PACK_ICON_IN_QUERY = "sticker_pack_icon";
-    public static final String ANDROID_APP_DOWNLOAD_LINK_IN_QUERY = "android_play_store_link";
-    public static final String IOS_APP_DOWNLOAD_LINK_IN_QUERY = "ios_app_download_link";
-    public static final String PUBLISHER_EMAIL = "sticker_pack_publisher_email";
-    public static final String PUBLISHER_WEBSITE = "sticker_pack_publisher_website";
-    public static final String PRIVACY_POLICY_WEBSITE = "sticker_pack_privacy_policy_website";
-    public static final String LICENSE_AGREENMENT_WEBSITE = "sticker_pack_license_agreement_website";
-    public static final String IMAGE_DATA_VERSION = "image_data_version";
-    public static final String AVOID_CACHE = "whatsapp_will_not_cache_stickers";
-    public static final String ANIMATED_STICKER_PACK = "animated_sticker_pack";
+    public static final String IDENTIFIER = "identifier";
+    public static final String NAME = "name";
+    public static final String PUBLISHER = "publisher";
+    public static final String TRAY_IMAGE_FILE = "trayImageFile";
+    public static final String PUBLISHER_EMAIL = "publisherEmail";
+    public static final String PUBLISHER_WEBSITE = "publisherWebsite";
+    public static final String PRIVACY_POLICY_WEBSITE = "privacePolicyWebsite";
+    public static final String LICENSE_AGREENMENT_WEBSITE = "licenseAgreementWebsite";
+    public static final String IMAGE_DATA_VERSION = "imageDataVersion";
+    public static final String AVOID_CACHE = "avoidCache";
+    public static final String ANIMATED_STICKER_PACK = "animatedStickerPack";
 
-    public static final String STICKER_FILE_NAME_IN_QUERY = "sticker_file_name";
-    public static final String STICKER_FILE_EMOJI_IN_QUERY = "sticker_emoji";
-    private static final String CONTENT_FILE_NAME = "contents.json";
+    public static final String STICKER_FILE_NAME_IN_QUERY = "imageFile";
+    public static final String STICKER_FILE_EMOJI_IN_QUERY = "emoji";
 
 
     public static final Uri AUTHORITY_URI = new Uri.Builder().scheme(ContentResolver.SCHEME_CONTENT).authority(BuildConfig.CONTENT_PROVIDER_AUTHORITY).appendPath(StickerContentProvider.METADATA).build();
@@ -80,7 +74,7 @@ public class StickerContentProvider extends ContentProvider {
     static final String STICKERS = "stickers";
     private static final int STICKERS_CODE = 3;
 
-    static final String STICKERS_ASSET = "stickers_asset";
+    static final String STICKER_PACKS_PATH = "files/packs";
     private static final int STICKERS_ASSET_CODE = 4;
 
     private static final int STICKER_PACK_TRAY_ICON_CODE = 5;
@@ -105,9 +99,9 @@ public class StickerContentProvider extends ContentProvider {
         MATCHER.addURI(authority, STICKERS + "/*", STICKERS_CODE);
 
         for (StickerPack stickerPack : getStickerPackList()) {
-            MATCHER.addURI(authority, STICKERS_ASSET + "/" + stickerPack.getIdentifier() + "/" + stickerPack.getTrayImageFile(), STICKER_PACK_TRAY_ICON_CODE);
+            MATCHER.addURI(authority, "packs/" + stickerPack.getIdentifier() + "/" + stickerPack.getTrayImageFile(), STICKER_PACK_TRAY_ICON_CODE);
             for (Sticker sticker : stickerPack.getStickers()) {
-                MATCHER.addURI(authority, STICKERS_ASSET + "/" + stickerPack.getIdentifier() + "/" + sticker.getImageFileName(), STICKERS_ASSET_CODE);
+                MATCHER.addURI(authority, "packs/" + stickerPack.getIdentifier() + "/" + sticker.getImageFileName(), STICKERS_ASSET_CODE);
             }
         }
 
@@ -159,18 +153,42 @@ public class StickerContentProvider extends ContentProvider {
         }
     }
 
-    private synchronized void readContentFile(@NonNull Context context) {
-        try (InputStream contentsInputStream = context.getAssets().open(CONTENT_FILE_NAME)) {
-            stickerPackList = ContentFileParser.parseStickerPacks(contentsInputStream);
-        } catch (IOException | IllegalStateException e) {
-            throw new RuntimeException(CONTENT_FILE_NAME + " file has some issues: " + e.getMessage(), e);
-        }
-    }
+//    private synchronized void readContentFile(@NonNull Context context) {
+//        try (InputStream contentsInputStream = context.getAssets().open(CONTENT_FILE_NAME)) {
+//            stickerPackList = ContentFileParser.parseStickerPacks(contentsInputStream);
+//        } catch (IOException | IllegalStateException e) {
+//            throw new RuntimeException(CONTENT_FILE_NAME + " file has some issues: " + e.getMessage(), e);
+//        }
+//    }
 
     private List<StickerPack> getStickerPackList() {
         if (stickerPackList == null) {
-            readContentFile(Objects.requireNonNull(getContext()));
+            //readContentFile(Objects.requireNonNull(getContext()));
+            try {
+                stickerPackList = MyDatabase.selectAllStickerPacks(getContext());
+            } catch (StickerException ex) {
+                StickerExceptionHandler.handleException(ex, getContext());
+            }
         }
+
+//        for (StickerPack sp : stickerPackList) {
+//            try {
+//                MyDatabase.inserirPacote(sp, getContext());
+//            } catch (StickerException ex) {
+//                StickerExceptionHandler.handleException(ex, getContext());
+//            }
+//        }
+//
+//        for (StickerPack sp : stickerPackList) {
+//            for (Sticker s : sp.getStickers()) {
+//                try {
+//                    MyDatabase.inserirFigurinha(s, Integer.valueOf(sp.getIdentifier()), getContext());
+//                } catch (StickerException ex) {
+//                    StickerExceptionHandler.handleException(ex, getContext());
+//                }
+//            }
+//        }
+
         return stickerPackList;
     }
 
@@ -193,18 +211,16 @@ public class StickerContentProvider extends ContentProvider {
     private Cursor getStickerPackInfo(@NonNull Uri uri, @NonNull List<StickerPack> stickerPackList) {
         MatrixCursor cursor = new MatrixCursor(
                 new String[]{
-                        STICKER_PACK_IDENTIFIER_IN_QUERY,
-                        STICKER_PACK_NAME_IN_QUERY,
-                        STICKER_PACK_PUBLISHER_IN_QUERY,
-                        STICKER_PACK_ICON_IN_QUERY,
-                        ANDROID_APP_DOWNLOAD_LINK_IN_QUERY,
-                        IOS_APP_DOWNLOAD_LINK_IN_QUERY,
+                        IDENTIFIER,
+                        NAME,
+                        PUBLISHER,
+                        TRAY_IMAGE_FILE,
+                        IMAGE_DATA_VERSION,
+                        AVOID_CACHE,
                         PUBLISHER_EMAIL,
                         PUBLISHER_WEBSITE,
                         PRIVACY_POLICY_WEBSITE,
                         LICENSE_AGREENMENT_WEBSITE,
-                        IMAGE_DATA_VERSION,
-                        AVOID_CACHE,
                         ANIMATED_STICKER_PACK,
                 });
         for (StickerPack stickerPack : stickerPackList) {
@@ -213,14 +229,12 @@ public class StickerContentProvider extends ContentProvider {
             builder.add(stickerPack.getName());
             builder.add(stickerPack.getPublisher());
             builder.add(stickerPack.getTrayImageFile());
-            builder.add(stickerPack.getAndroidPlayStoreLink());
-            builder.add(stickerPack.getIosAppStoreLink());
+            builder.add(stickerPack.getImageDataVersion());
+            builder.add(stickerPack.isAvoidCache() ? 1 : 0);
             builder.add(stickerPack.getPublisherEmail());
             builder.add(stickerPack.getPublisherWebsite());
             builder.add(stickerPack.getPrivacyPolicyWebsite());
             builder.add(stickerPack.getLicenseAgreementWebsite());
-            builder.add(stickerPack.getImageDataVersion());
-            builder.add(stickerPack.isAvoidCache() ? 1 : 0);
             builder.add(stickerPack.isAnimatedStickerPack() ? 1 : 0);
         }
         cursor.setNotificationUri(Objects.requireNonNull(getContext()).getContentResolver(), uri);

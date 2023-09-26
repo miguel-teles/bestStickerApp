@@ -6,7 +6,9 @@ import android.os.Environment;
 import com.example.samplestickerapp.exception.StickerException;
 import com.example.samplestickerapp.exception.enums.StickerCriticalExceptionEnum;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.InputStreamReader;
 
 abstract public class Folders {
 
@@ -43,9 +45,31 @@ abstract public class Folders {
         }
     }
 
+    public static String getPackFolderPathByIdentifier(String identifier,Context context) throws StickerException {
+        if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
+
+            File externalDir = context.getExternalFilesDir(null);
+            File packs = new File(externalDir, DirectoryNames.PACKS);
+            if (packs.exists()) {
+
+                File stickerPack = new File(packs, identifier);
+                if (stickerPack.exists()) {
+                    return stickerPack.getPath();
+                } else {
+                    throw new StickerException(null, "getPacksFolderPath", StickerCriticalExceptionEnum.GET_PATH, "Pasta do pacote " + identifier + " não encontrada");
+                }
+
+            } else {
+                throw new StickerException(null, "getPacksFolderPath", StickerCriticalExceptionEnum.GET_PATH, "Pasta de pacotes não encontrada");
+            }
+
+        } else {
+            throw new StickerException(null, "getPacksFolderPath", StickerCriticalExceptionEnum.GET_PATH, "Erro ao buscar pasta de pacotes");
+        }
+    }
+
     public static void makeAllDirs(Context context) throws StickerException {
         if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
-            makeDirPacks(context);
             makeDirPacks(context);
             makeDirLogs(context);
             makeDirErrorsLogs(context);

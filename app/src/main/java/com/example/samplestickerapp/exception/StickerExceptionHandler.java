@@ -31,7 +31,7 @@ public abstract class StickerExceptionHandler {
         text.append(" - ");
         text.append(ex.getMethod());
 
-        int duration = isCritical != null && isCritical ? Toast.LENGTH_LONG : Toast.LENGTH_SHORT;
+        int duration = isCritical != null && isCritical || ex.getStickerDBExceptionEnum()!=null ? Toast.LENGTH_LONG : Toast.LENGTH_SHORT;
 
         Toast.makeText(context, text.toString(), duration).show();
     }

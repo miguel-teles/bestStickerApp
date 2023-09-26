@@ -24,24 +24,25 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 
-import static com.example.samplestickerapp.StickerContentProvider.ANDROID_APP_DOWNLOAD_LINK_IN_QUERY;
 import static com.example.samplestickerapp.StickerContentProvider.ANIMATED_STICKER_PACK;
 import static com.example.samplestickerapp.StickerContentProvider.AVOID_CACHE;
+import static com.example.samplestickerapp.StickerContentProvider.IDENTIFIER;
 import static com.example.samplestickerapp.StickerContentProvider.IMAGE_DATA_VERSION;
-import static com.example.samplestickerapp.StickerContentProvider.IOS_APP_DOWNLOAD_LINK_IN_QUERY;
 import static com.example.samplestickerapp.StickerContentProvider.LICENSE_AGREENMENT_WEBSITE;
+import static com.example.samplestickerapp.StickerContentProvider.NAME;
 import static com.example.samplestickerapp.StickerContentProvider.PRIVACY_POLICY_WEBSITE;
+import static com.example.samplestickerapp.StickerContentProvider.PUBLISHER;
 import static com.example.samplestickerapp.StickerContentProvider.PUBLISHER_EMAIL;
 import static com.example.samplestickerapp.StickerContentProvider.PUBLISHER_WEBSITE;
+import static com.example.samplestickerapp.StickerContentProvider.STICKERS;
 import static com.example.samplestickerapp.StickerContentProvider.STICKER_FILE_EMOJI_IN_QUERY;
 import static com.example.samplestickerapp.StickerContentProvider.STICKER_FILE_NAME_IN_QUERY;
-import static com.example.samplestickerapp.StickerContentProvider.STICKER_PACK_ICON_IN_QUERY;
-import static com.example.samplestickerapp.StickerContentProvider.STICKER_PACK_IDENTIFIER_IN_QUERY;
-import static com.example.samplestickerapp.StickerContentProvider.STICKER_PACK_NAME_IN_QUERY;
-import static com.example.samplestickerapp.StickerContentProvider.STICKER_PACK_PUBLISHER_IN_QUERY;
+import static com.example.samplestickerapp.StickerContentProvider.TRAY_IMAGE_FILE;
 
+import com.example.samplestickerapp.exception.StickerException;
 import com.example.samplestickerapp.model.Sticker;
 import com.example.samplestickerapp.model.StickerPack;
+import com.example.samplestickerapp.utils.Folders;
 import com.example.samplestickerapp.utils.Utils;
 
 class StickerPackLoader {
@@ -81,7 +82,7 @@ class StickerPackLoader {
         for (Sticker sticker : stickers) {
             final byte[] bytes;
             try {
-                bytes = fetchStickerAsset(stickerPack.getIdentifier(), sticker.getImageFileName(), context.getContentResolver());
+                bytes = fetchStickerFiles(stickerPack.getIdentifier(), sticker.getImageFileName(), context.getContentResolver());
                 if (bytes.length <= 0) {
                     throw new IllegalStateException("Asset file is empty, pack: " + stickerPack.getName() + ", sticker: " + sticker.getImageFileName());
                 }
@@ -99,12 +100,10 @@ class StickerPackLoader {
         ArrayList<StickerPack> stickerPackList = new ArrayList<>();
         cursor.moveToFirst();
         do {
-            final String identifier = cursor.getString(cursor.getColumnIndexOrThrow(STICKER_PACK_IDENTIFIER_IN_QUERY));
-            final String name = cursor.getString(cursor.getColumnIndexOrThrow(STICKER_PACK_NAME_IN_QUERY));
-            final String publisher = cursor.getString(cursor.getColumnIndexOrThrow(STICKER_PACK_PUBLISHER_IN_QUERY));
-            final String trayImage = cursor.getString(cursor.getColumnIndexOrThrow(STICKER_PACK_ICON_IN_QUERY));
-            final String androidPlayStoreLink = cursor.getString(cursor.getColumnIndexOrThrow(ANDROID_APP_DOWNLOAD_LINK_IN_QUERY));
-            final String iosAppLink = cursor.getString(cursor.getColumnIndexOrThrow(IOS_APP_DOWNLOAD_LINK_IN_QUERY));
+            final String identifier = cursor.getString(cursor.getColumnIndexOrThrow(IDENTIFIER));
+            final String name = cursor.getString(cursor.getColumnIndexOrThrow(NAME));
+            final String publisher = cursor.getString(cursor.getColumnIndexOrThrow(PUBLISHER));
+            final String trayImage = cursor.getString(cursor.getColumnIndexOrThrow(TRAY_IMAGE_FILE));
             final String publisherEmail = cursor.getString(cursor.getColumnIndexOrThrow(PUBLISHER_EMAIL));
             final String publisherWebsite = cursor.getString(cursor.getColumnIndexOrThrow(PUBLISHER_WEBSITE));
             final String privacyPolicyWebsite = cursor.getString(cursor.getColumnIndexOrThrow(PRIVACY_POLICY_WEBSITE));
@@ -112,9 +111,17 @@ class StickerPackLoader {
             final String imageDataVersion = cursor.getString(cursor.getColumnIndexOrThrow(IMAGE_DATA_VERSION));
             final boolean avoidCache = cursor.getShort(cursor.getColumnIndexOrThrow(AVOID_CACHE)) > 0;
             final boolean animatedStickerPack = cursor.getShort(cursor.getColumnIndexOrThrow(ANIMATED_STICKER_PACK)) > 0;
-            final StickerPack stickerPack = new StickerPack(identifier, name, publisher, trayImage, publisherEmail, publisherWebsite, privacyPolicyWebsite, licenseAgreementWebsite, imageDataVersion, avoidCache, animatedStickerPack);
-            stickerPack.setAndroidPlayStoreLink(androidPlayStoreLink);
-            stickerPack.setIosAppStoreLink(iosAppLink);
+            final StickerPack stickerPack = new StickerPack(identifier,
+                    name,
+                    publisher,
+                    trayImage,
+                    publisherEmail,
+                    publisherWebsite,
+                    privacyPolicyWebsite,
+                    licenseAgreementWebsite,
+                    imageDataVersion,
+                    avoidCache,
+                    animatedStickerPack);
             stickerPackList.add(stickerPack);
         } while (cursor.moveToNext());
         return stickerPackList;
@@ -145,8 +152,8 @@ class StickerPackLoader {
         return stickers;
     }
 
-    static byte[] fetchStickerAsset(@NonNull final String identifier, @NonNull final String name, ContentResolver contentResolver) throws IOException {
-        try (final InputStream inputStream = contentResolver.openInputStream(getStickerAssetUri(identifier, name));
+    static byte[] fetchStickerFiles(@NonNull final String identifier, @NonNull final String name, ContentResolver contentResolver) throws IOException {
+        try (final InputStream inputStream = contentResolver.openInputStream(getStickerUri(identifier, name));
              final ByteArrayOutputStream buffer = new ByteArrayOutputStream()) {
             if (inputStream == null) {
                 throw new IOException("cannot read sticker asset:" + identifier + "/" + name);
@@ -158,15 +165,17 @@ class StickerPackLoader {
                 buffer.write(data, 0, read);
             }
             return buffer.toByteArray();
+        } catch (IOException ex) {
+            throw ex;
         }
     }
 
     private static Uri getStickerListUri(String identifier) {
-        return new Uri.Builder().scheme(ContentResolver.SCHEME_CONTENT).authority(BuildConfig.CONTENT_PROVIDER_AUTHORITY).appendPath(StickerContentProvider.STICKERS).appendPath(identifier).build();
+        return new Uri.Builder().scheme(ContentResolver.SCHEME_CONTENT).authority(BuildConfig.CONTENT_PROVIDER_AUTHORITY).appendPath(STICKERS).appendPath(identifier).build();
     }
 
-    static Uri getStickerAssetUri(String identifier, String stickerName) {
-        return new Uri.Builder().scheme(ContentResolver.SCHEME_CONTENT).authority(BuildConfig.CONTENT_PROVIDER_AUTHORITY).appendPath(StickerContentProvider.STICKERS_ASSET).appendPath(identifier).appendPath(stickerName).build();
+    static Uri getStickerUri(String identifier, String stickerName) {
+        return new Uri.Builder().scheme(ContentResolver.SCHEME_CONTENT).authority(BuildConfig.CONTENT_PROVIDER_AUTHORITY).appendPath("packs").appendPath(identifier).appendPath(stickerName).build();
     }
 
     static Integer getNewIdentifier(Context context) {

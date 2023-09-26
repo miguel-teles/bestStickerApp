@@ -99,7 +99,7 @@ public class StickerPackValidator {
             throw new IllegalStateException("publisher email does not seem valid, email is: " + stickerPack.getPublisherEmail());
         }
         try {
-            final byte[] stickerAssetBytes = StickerPackLoader.fetchStickerAsset(stickerPack.getIdentifier(), stickerPack.getTrayImageFile(), context.getContentResolver());
+            final byte[] stickerAssetBytes = StickerPackLoader.fetchStickerFiles(stickerPack.getIdentifier(), stickerPack.getTrayImageFile(), context.getContentResolver());
             if (stickerAssetBytes.length > TRAY_IMAGE_FILE_SIZE_MAX_KB * KB_IN_BYTES) {
                 throw new IllegalStateException("tray image should be less than " + TRAY_IMAGE_FILE_SIZE_MAX_KB + " KB, tray image file: " + stickerPack.getTrayImageFile());
             }
@@ -137,7 +137,7 @@ public class StickerPackValidator {
 
     private static void validateStickerFile(@NonNull Context context, @NonNull String identifier, @NonNull final String fileName, final boolean animatedStickerPack) throws IllegalStateException {
         try {
-            final byte[] stickerInBytes = StickerPackLoader.fetchStickerAsset(identifier, fileName, context.getContentResolver());
+            final byte[] stickerInBytes = StickerPackLoader.fetchStickerFiles(identifier, fileName, context.getContentResolver());
             if (!animatedStickerPack && stickerInBytes.length > STATIC_STICKER_FILE_LIMIT_KB * KB_IN_BYTES) {
                 throw new IllegalStateException("static sticker should be less than " + STATIC_STICKER_FILE_LIMIT_KB + "KB, current file is " + stickerInBytes.length / KB_IN_BYTES + " KB, sticker pack identifier: " + identifier + ", filename: " + fileName);
             }

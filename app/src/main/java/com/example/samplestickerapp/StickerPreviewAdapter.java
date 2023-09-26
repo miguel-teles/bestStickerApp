@@ -8,6 +8,7 @@
 
 package com.example.samplestickerapp;
 
+import android.content.Context;
 import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -41,13 +42,16 @@ public class StickerPreviewAdapter extends RecyclerView.Adapter<StickerPreviewVi
     float expandedViewLeftX;
     float expandedViewTopY;
 
+    Context context;
+
     StickerPreviewAdapter(
             @NonNull final LayoutInflater layoutInflater,
             final int errorResource,
             final int cellSize,
             final int cellPadding,
             @NonNull final StickerPack stickerPack,
-            final SimpleDraweeView expandedStickerView) {
+            final SimpleDraweeView expandedStickerView,
+            Context context) {
         this.cellSize = cellSize;
         this.cellPadding = cellPadding;
         this.cellLimit = 0;
@@ -55,6 +59,7 @@ public class StickerPreviewAdapter extends RecyclerView.Adapter<StickerPreviewVi
         this.errorResource = errorResource;
         this.stickerPack = stickerPack;
         this.expandedStickerPreview = expandedStickerView;
+        this.context = context;
     }
 
     @NonNull
@@ -75,7 +80,7 @@ public class StickerPreviewAdapter extends RecyclerView.Adapter<StickerPreviewVi
     @Override
     public void onBindViewHolder(@NonNull final StickerPreviewViewHolder stickerPreviewViewHolder, final int i) {
         stickerPreviewViewHolder.stickerPreviewView.setImageResource(errorResource);
-        stickerPreviewViewHolder.stickerPreviewView.setImageURI(StickerPackLoader.getStickerAssetUri(stickerPack.getIdentifier(), stickerPack.getStickers().get(i).getImageFileName()));
+        stickerPreviewViewHolder.stickerPreviewView.setImageURI(StickerPackLoader.getStickerUri(stickerPack.getIdentifier(), stickerPack.getStickers().get(i).getImageFileName()));
         stickerPreviewViewHolder.stickerPreviewView.setOnClickListener(v -> expandPreview(i, stickerPreviewViewHolder.stickerPreviewView));
     }
 
@@ -170,7 +175,7 @@ public class StickerPreviewAdapter extends RecyclerView.Adapter<StickerPreviewVi
         if (expandedStickerPreview != null) {
             positionExpandedStickerPreview(position);
 
-            final Uri stickerAssetUri = StickerPackLoader.getStickerAssetUri(stickerPack.getIdentifier(), stickerPack.getStickers().get(position).getImageFileName());
+            final Uri stickerAssetUri = StickerPackLoader.getStickerUri(stickerPack.getIdentifier(), stickerPack.getStickers().get(position).getImageFileName());
             DraweeController controller = Fresco.newDraweeControllerBuilder()
                     .setUri(stickerAssetUri)
                     .setAutoPlayAnimations(true)

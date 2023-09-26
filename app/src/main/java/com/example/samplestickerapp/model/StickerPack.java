@@ -11,6 +11,8 @@ package com.example.samplestickerapp.model;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import androidx.annotation.NonNull;
+
 import java.util.List;
 
 public class StickerPack implements Parcelable {
@@ -31,6 +33,47 @@ public class StickerPack implements Parcelable {
     private long totalSize;
     private String androidPlayStoreLink;
     private boolean isWhitelisted;
+
+
+    /*
+    * "identifier": "1",
+      "name": "Cuppy",
+      "publisher": "Jane Doe",
+      "tray_image_file": "tray_Cuppy.png",
+      "image_data_version": "1",
+      "avoid_cache": false,
+      "publisher_email": "",
+      "publisher_website": "",
+      "privacy_policy_website": "",
+      "license_agreement_website": "",
+      "stickers":
+    * */
+
+    public StickerPack(@NonNull Integer identifier,
+                       @NonNull String name,
+                       @NonNull String publisher,
+                       @NonNull String trayImageFile,
+                       @NonNull Integer imageDataVersion,
+                       @NonNull Boolean avoidCache,
+                       String publisherEmail,
+                       String publisherWebsite,
+                       String privacyPolicyWebsite,
+                       String licenseAgreementWebsite,
+                       Boolean animatedStickerPack,
+                       List<Sticker> stickerList) {
+        this.identifier = identifier+"";
+        this.name = name;
+        this.publisher = publisher;
+        this.trayImageFile = trayImageFile;
+        this.imageDataVersion = imageDataVersion+"";
+        this.avoidCache = avoidCache;
+        this.publisherEmail = publisherEmail;
+        this.publisherWebsite = publisherWebsite;
+        this.licenseAgreementWebsite = licenseAgreementWebsite;
+        this.privacyPolicyWebsite = privacyPolicyWebsite;
+        this.animatedStickerPack = animatedStickerPack!=null && animatedStickerPack ? true : false;
+        this.stickers = stickerList;
+    }
 
     public StickerPack(String identifier, String name, String publisher, String trayImageFile, String publisherEmail, String publisherWebsite, String privacyPolicyWebsite, String licenseAgreementWebsite, String imageDataVersion, boolean avoidCache, boolean animatedStickerPack) {
         this.identifier = identifier;

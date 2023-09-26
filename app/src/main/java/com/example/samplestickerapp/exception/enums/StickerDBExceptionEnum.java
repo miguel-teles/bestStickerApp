@@ -6,7 +6,11 @@ public enum StickerDBExceptionEnum {
 
     INI("Erro ao inicializar banco e tabelas"),
 
-    CREATE_TBL("Erro ao criar tabela");
+    CREATE_TBL("Erro ao criar tabela"),
+
+    INSERT("Erro ao inserir dados na tabela"),
+
+    SELECT("Erro ao buscar valores");
 
     private String text;
 
