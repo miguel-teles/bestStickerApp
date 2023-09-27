@@ -14,29 +14,24 @@ import com.example.samplestickerapp.model.StickerPack;
 import com.example.samplestickerapp.utils.Utils;
 import com.google.gson.Gson;
 
-public class CreateNewStickerPack extends Activity {
+public class StickerCreatePack extends Activity {
 
-    public static final String EXTRA_STICKER_PACK_LIST_DATA = "sticker_pack_list";
-    private static final int STICKER_PREVIEW_DISPLAY_LIMIT = 5;
     private TextView btnAdicionarStickerPack;
     private EditText edtNomePacote;
     private ImageView stickerPackImageView;
-    private Gson gson;
 
     private Uri uriImagemStickerPack;
 
     @Override
     protected void onCreate(Bundle bundle) {
         super.onCreate(bundle);
-        setContentView(R.layout.activity_create_sticker_pack);
+        setContentView(R.layout.activity_sticker_create_pack);
 
         btnAdicionarStickerPack = findViewById(R.id.adicionarStickerPack);
         btnAdicionarStickerPack.setOnClickListener(btnAdicionarStickerPackOnClick());
-        edtNomePacote = findViewById(R.id.edtNomePacote);
+        edtNomePacote = findViewById(R.id.txtNomePacote);
         stickerPackImageView = findViewById(R.id.pacoteImageView);
         stickerPackImageView.setOnClickListener(pacoteImageViewOnClick());
-
-        gson = Utils.configuraGson();
     }
 
     public View.OnClickListener pacoteImageViewOnClick() {

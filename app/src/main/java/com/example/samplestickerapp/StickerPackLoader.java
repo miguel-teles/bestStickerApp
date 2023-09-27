@@ -175,7 +175,7 @@ class StickerPackLoader {
     }
 
     static Uri getStickerUri(String identifier, String stickerName) {
-        return new Uri.Builder().scheme(ContentResolver.SCHEME_CONTENT).authority(BuildConfig.CONTENT_PROVIDER_AUTHORITY).appendPath("packs").appendPath(identifier).appendPath(stickerName).build();
+        return new Uri.Builder().scheme(ContentResolver.SCHEME_CONTENT).authority(BuildConfig.CONTENT_PROVIDER_AUTHORITY).appendPath(StickerContentProvider.STICKERS_ASSET).appendPath(identifier).appendPath(stickerName).build();
     }
 
     static Integer getNewIdentifier(Context context) {

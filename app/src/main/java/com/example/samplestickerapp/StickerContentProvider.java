@@ -68,19 +68,19 @@ public class StickerContentProvider extends ContentProvider {
     private static final UriMatcher MATCHER = new UriMatcher(UriMatcher.NO_MATCH);
     private static final String METADATA = "metadata";
     private static final int METADATA_CODE = 1;
-
     private static final int METADATA_CODE_FOR_SINGLE_PACK = 2;
-
     static final String STICKERS = "stickers";
     private static final int STICKERS_CODE = 3;
-
-    static final String STICKER_PACKS_PATH = "files/packs";
+    static final String STICKERS_ASSET = "stickers_asset";
     private static final int STICKERS_ASSET_CODE = 4;
 
     private static final int STICKER_PACK_TRAY_ICON_CODE = 5;
 
     private List<StickerPack> stickerPackList;
 
+    /**
+     * NÃO MUDAR ESSES MATCHERS E NEM AS URIS SE NÃO O WHATSAPP NÃO CONSEGUE BUSCAR DESTE CONTENTPROVIDER
+     * **/
     @Override
     public boolean onCreate() {
 
@@ -90,18 +90,18 @@ public class StickerContentProvider extends ContentProvider {
         }
 
         //the call to get the metadata for the sticker packs.
-        MATCHER.addURI(authority, METADATA, METADATA_CODE);
+        MATCHER.addURI(authority, METADATA, METADATA_CODE); // this returns information about all the sticker packs in your app.
 
         //the call to get the metadata for single sticker pack. * represent the identifier
-        MATCHER.addURI(authority, METADATA + "/*", METADATA_CODE_FOR_SINGLE_PACK);
+        MATCHER.addURI(authority, METADATA + "/*", METADATA_CODE_FOR_SINGLE_PACK); //this returns information about a single pack.
 
         //gets the list of stickers for a sticker pack, * respresent the identifier.
-        MATCHER.addURI(authority, STICKERS + "/*", STICKERS_CODE);
+        MATCHER.addURI(authority, STICKERS + "/*", STICKERS_CODE); //this returns information about the  stickers in a pack.
 
         for (StickerPack stickerPack : getStickerPackList()) {
-            MATCHER.addURI(authority, "packs/" + stickerPack.getIdentifier() + "/" + stickerPack.getTrayImageFile(), STICKER_PACK_TRAY_ICON_CODE);
+            MATCHER.addURI(authority, STICKERS_ASSET + "/" + stickerPack.getIdentifier() + "/" + stickerPack.getTrayImageFile(), STICKER_PACK_TRAY_ICON_CODE); //this returns the binary information of the sticker: `AssetFileDescriptor`, which points to the asset file for the sticker.
             for (Sticker sticker : stickerPack.getStickers()) {
-                MATCHER.addURI(authority, "packs/" + stickerPack.getIdentifier() + "/" + sticker.getImageFileName(), STICKERS_ASSET_CODE);
+                MATCHER.addURI(authority, STICKERS_ASSET + "/" + stickerPack.getIdentifier() + "/" + sticker.getImageFileName(), STICKERS_ASSET_CODE);
             }
         }
 
@@ -153,42 +153,14 @@ public class StickerContentProvider extends ContentProvider {
         }
     }
 
-//    private synchronized void readContentFile(@NonNull Context context) {
-//        try (InputStream contentsInputStream = context.getAssets().open(CONTENT_FILE_NAME)) {
-//            stickerPackList = ContentFileParser.parseStickerPacks(contentsInputStream);
-//        } catch (IOException | IllegalStateException e) {
-//            throw new RuntimeException(CONTENT_FILE_NAME + " file has some issues: " + e.getMessage(), e);
-//        }
-//    }
-
     private List<StickerPack> getStickerPackList() {
         if (stickerPackList == null) {
-            //readContentFile(Objects.requireNonNull(getContext()));
             try {
                 stickerPackList = MyDatabase.selectAllStickerPacks(getContext());
             } catch (StickerException ex) {
                 StickerExceptionHandler.handleException(ex, getContext());
             }
         }
-
-//        for (StickerPack sp : stickerPackList) {
-//            try {
-//                MyDatabase.inserirPacote(sp, getContext());
-//            } catch (StickerException ex) {
-//                StickerExceptionHandler.handleException(ex, getContext());
-//            }
-//        }
-//
-//        for (StickerPack sp : stickerPackList) {
-//            for (Sticker s : sp.getStickers()) {
-//                try {
-//                    MyDatabase.inserirFigurinha(s, Integer.valueOf(sp.getIdentifier()), getContext());
-//                } catch (StickerException ex) {
-//                    StickerExceptionHandler.handleException(ex, getContext());
-//                }
-//            }
-//        }
-
         return stickerPackList;
     }
 

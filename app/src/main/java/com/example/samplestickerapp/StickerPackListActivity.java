@@ -104,7 +104,7 @@ public class StickerPackListActivity extends AddStickerPackActivity {
         return new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startActivity(new Intent(context, CreateNewStickerPack.class));
+                startActivity(new Intent(context, StickerCreatePack.class));
             }
         };
     }
