@@ -10,9 +10,15 @@ public enum StickerCriticalExceptionEnum {
 
     MKDIR_LOG_CRITICAL_ERRORS("Erro ao criar pasta de logs de erros críticos"),
 
-    MKDIR_PACKS("Erro ao criar pasta de packs"),
+    MKDIR_PACKS("Erro ao criar pasta de pacote(s)"),
 
-    GET_PATH("Erro ao encontrar local do arquivo");
+    GET_PATH("Erro ao encontrar local do arquivo"),
+
+    GET_FOLDER("Erro ao acessar pasta"),
+
+    CREATE_FOLDER_PACOTE("Erro ao criar pasta do pacote de figurinhas"),
+
+    COPY("Erro ao copiar arquivo ao destino novo");
 
     String txt;
 

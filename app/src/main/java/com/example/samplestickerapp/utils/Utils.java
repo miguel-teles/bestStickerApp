@@ -54,6 +54,10 @@ public class Utils {
         return maiorNmb;
     }
 
+    public static boolean isNothing(String str) {
+        return str==null || str.trim().isEmpty();
+    }
+
     public static void copyFile(String sourcePath, String destinationPath){
         FileInputStream inputStream=null;
         FileOutputStream outputStream=null;

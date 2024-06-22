@@ -35,8 +35,8 @@
     <TextView
         android:id="@+id/adicionarStickerPack"
         android:layout_width="match_parent"
-        android:layout_height="40dp"
-        android:background="@drawable/btn_green"
+        android:layout_height="50dp"
+        android:background="@color/gray"
         android:gravity="center"
         android:text="CLICK ME TO ADD A NEW PACK"
         android:textColor="@color/white"
@@ -44,22 +44,8 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
-    <com.google.android.material.textfield.TextInputEditText
-        android:id="@+id/txtNomePacote"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="30dp"
-        android:layout_marginLeft="30dp"
-        android:layout_marginTop="24dp"
-        android:layout_marginEnd="30dp"
-        android:layout_marginRight="30dp"
-        android:hint="Nome do pacote"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/pacoteImageView" />
-
-    <com.google.android.material.textfield.TextInputEditText
-        android:id="@+id/txtAutor"
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/txtInpLayAutor"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="30dp"
@@ -67,10 +53,18 @@
         android:layout_marginTop="16dp"
         android:layout_marginEnd="30dp"
         android:layout_marginRight="30dp"
-        android:hint="Autor (opcional)"
+        android:hint=""
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/txtNomePacote" />
+        app:layout_constraintTop_toBottomOf="@+id/txtInpLayNomePacote">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/txtInpEdtAutor"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Autor (opcional)"
+            android:background="@color/transparent"/>
+    </com.google.android.material.textfield.TextInputLayout>
 
     <CheckBox
         android:id="@+id/cbAnimado"
@@ -81,7 +75,28 @@
         android:layout_marginTop="16dp"
         android:text="CheckBox"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/txtAutor" />
+        app:layout_constraintTop_toBottomOf="@+id/txtInpLayAutor" />
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/txtInpLayNomePacote"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="30dp"
+        android:layout_marginLeft="30dp"
+        android:layout_marginTop="24dp"
+        android:layout_marginEnd="30dp"
+        android:layout_marginRight="30dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/pacoteImageView">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/txtInpEdtNomePacote"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/transparent"
+            android:hint="Nome do pacote" />
+    </com.google.android.material.textfield.TextInputLayout>
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

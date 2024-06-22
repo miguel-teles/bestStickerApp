@@ -5,10 +5,19 @@ import android.os.Environment;
 
 import com.example.samplestickerapp.exception.StickerException;
 import com.example.samplestickerapp.exception.enums.StickerCriticalExceptionEnum;
+import com.example.samplestickerapp.exception.enums.StickerExceptionEnum;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.InputStreamReader;
+import java.net.URI;
+import java.nio.channels.FileChannel;
+import java.nio.file.CopyOption;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 
 abstract public class Folders {
 
@@ -45,7 +54,7 @@ abstract public class Folders {
         }
     }
 
-    public static String getPackFolderPathByIdentifier(String identifier,Context context) throws StickerException {
+    public static String getPackFolderPathByIdentifier(String identifier, Context context) throws StickerException {
         if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
 
             File externalDir = context.getExternalFilesDir(null);
@@ -76,6 +85,30 @@ abstract public class Folders {
             makeDirCriticalErrorsLogs(context);
         } else {
             throw new StickerException(null, "makeAllDirs", StickerCriticalExceptionEnum.MKDIR_ROOT, null);
+        }
+    }
+
+    public static void makeDirPackIdentifier(String identifier, Context context) throws StickerException {
+        try {
+            if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
+
+                File externalDir = context.getExternalFilesDir(null);
+
+                File folderPacks = new File(externalDir, DirectoryNames.PACKS);
+                if (folderPacks.exists()) {
+                    File novoPacotePasta = new File(folderPacks, identifier);
+                    if (!novoPacotePasta.mkdir()){
+                        throw new StickerException(null, "makeDirPackIdentifier", StickerCriticalExceptionEnum.CREATE_FOLDER_PACOTE, null);
+                    }
+                } else {
+                    throw new StickerException(null, "makeDirPackIdentifier", StickerCriticalExceptionEnum.GET_FOLDER, "Pasta dos pacotes não existe!");
+                }
+
+            } else {
+                throw new StickerException(null, "makeDirPackIdentifier", StickerCriticalExceptionEnum.MKDIR_PACKS, null);
+            }
+        } catch (Exception ex) {
+            throw new StickerException(ex, "makeDirPackIdentifier", StickerCriticalExceptionEnum.MKDIR_PACKS, "Erro ao criar pasta do pacote " + identifier);
         }
     }
 
@@ -136,4 +169,46 @@ abstract public class Folders {
         }
     }
 
+    public static File copiaFotoParaPastaPacote(String identifier, String imgPath, Context context) throws StickerException {
+        try {
+            if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
+
+                File externalDir = context.getExternalFilesDir(null);
+
+                File folderPacks = new File(externalDir, DirectoryNames.PACKS);
+                if (folderPacks.exists()) {
+                    File pacotePasta = new File(folderPacks, identifier);
+                    if (pacotePasta.exists()){
+                        try {
+                            FileInputStream fileInputStream = new FileInputStream(imgPath);
+                            FileOutputStream fileOutputStream = new FileOutputStream(pacotePasta);
+
+                            FileChannel sourceChannel = fileInputStream.getChannel();
+                            FileChannel destinationChannel = fileOutputStream.getChannel();
+
+                            sourceChannel.transferFrom(destinationChannel, 0, sourceChannel.size());
+
+                            sourceChannel.close();
+                            destinationChannel.close();
+                            fileInputStream.close();
+                            fileInputStream.close();
+
+                            return new File(pacotePasta, new File(imgPath).getName());
+                        } catch (Exception ex) {
+                            throw new StickerException(ex, "copiaFotoParaPastaPacote", StickerCriticalExceptionEnum.COPY, "Erro ao copiar o arquivo da foto do pacote para a pasta dele");
+                        }
+                    } else {
+                        throw new StickerException(null, "copiaFotoParaPastaPacote", StickerCriticalExceptionEnum.GET_FOLDER, "Pasta do pacote " + identifier + " não existe!");
+                    }
+                } else {
+                    throw new StickerException(null, "copiaFotoParaPastaPacote", StickerCriticalExceptionEnum.GET_FOLDER, "Pasta dos pacotes não existe!");
+                }
+
+            } else {
+                throw new StickerException(null, "copiaFotoParaPastaPacote", StickerCriticalExceptionEnum.MKDIR_PACKS, null);
+            }
+        } catch (Exception ex) {
+            throw new StickerException(ex, "copiaFotoParaPastaPacote", StickerExceptionEnum.CSP, "Erro ao copiar foto do pacote para a pasta do pacote " + identifier);
+        }
+    }
 }

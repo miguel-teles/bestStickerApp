@@ -88,12 +88,10 @@ public class EntryActivity extends BaseActivity {
         protected Pair<String, ArrayList<StickerPack>> doInBackground(Void... voids) {
             ArrayList<StickerPack> stickerPackList;
             try {
+                System.out.println("doInBackground");
                 final Context context = contextWeakReference.get();
                 if (context != null) {
                     stickerPackList = StickerPackLoader.fetchStickerPacks(context);
-                    if (stickerPackList.size() == 0) {
-                        return new Pair<>("could not find any packs", null);
-                    }
                     for (StickerPack stickerPack : stickerPackList) {
                         StickerPackValidator.verifyStickerPackValidity(context, stickerPack);
                     }
@@ -109,7 +107,7 @@ public class EntryActivity extends BaseActivity {
 
         @Override
         protected void onPostExecute(Pair<String, ArrayList<StickerPack>> stringListPair) {
-
+            System.out.println("onPostExecute");
             final EntryActivity entryActivity = contextWeakReference.get();
             if (entryActivity != null) {
                 if (stringListPair.first != null) {

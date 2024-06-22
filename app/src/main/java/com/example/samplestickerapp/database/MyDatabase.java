@@ -8,6 +8,7 @@ import android.widget.ArrayAdapter;
 
 import com.example.samplestickerapp.exception.StickerException;
 import com.example.samplestickerapp.exception.StickerExceptionHandler;
+import com.example.samplestickerapp.exception.enums.StickerCriticalExceptionEnum;
 import com.example.samplestickerapp.exception.enums.StickerDBExceptionEnum;
 import com.example.samplestickerapp.model.Sticker;
 import com.example.samplestickerapp.model.StickerPack;
@@ -58,8 +59,8 @@ public class MyDatabase {
     private static void criaTabelaPacks(Context context) throws StickerException {
         try {
 
-//            String deleta = "DROP TABLE packs";
-//            getMyDB(context).execSQL(deleta); //TODO: tirar isso
+            String deleta = "DROP TABLE packs";
+            getMyDB(context).execSQL(deleta); //TODO: tirar isso
 
             String tbPack = "CREATE TABLE IF NOT EXISTS packs(" +
                     "identifier INTEGER PRIMARY KEY AUTOINCREMENT," +
@@ -112,16 +113,12 @@ public class MyDatabase {
 
     public static Long inserirPacote(StickerPack stickerPack, Context context) throws StickerException {
         try {
-
-            String delete = "DELETE FROM packs";
-            getMyDB(context).execSQL(delete);
-
             String insert = "INSERT INTO packs VALUES (null, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
             SQLiteStatement stmt = getMyDB(context).compileStatement(insert);
 
             stmt.bindString(1, stickerPack.getName());
             stmt.bindString(2, stickerPack.getPublisher());
-            stmt.bindString(3, stickerPack.getTrayImageFile());
+            stmt.bindString(3, stickerPack.getTrayImageFile() == null ? "" : stickerPack.getTrayImageFile());
             stmt.bindLong(4, Integer.parseInt(stickerPack.getImageDataVersion()));
             stmt.bindLong(5, stickerPack.isAvoidCache() ? 1 : 0);
             stmt.bindString(6, stickerPack.getPublisherEmail());
@@ -201,7 +198,7 @@ public class MyDatabase {
 
     private static List<Sticker> selectStickersFromPack(int packIdentifier, Context context) throws Exception {
         try {
-            String selectStickersQuery = "SELECT * FROM stickers";
+            String selectStickersQuery = "SELECT * FROM stickers WHERE packIdentifier=" + packIdentifier;
             Cursor cursor = getMyDB(context).rawQuery(selectStickersQuery, null);
 
             if (cursor != null) {
@@ -209,13 +206,12 @@ public class MyDatabase {
             }
 
             List<Sticker> stickersList = new ArrayList<>();
-
-            List<String> emojiList = new ArrayList<>();
-            for (String str : cursor.getString(1).split("|")) {
-                emojiList.add(str);
-            }
-
             while (!cursor.isAfterLast()) {
+                List<String> emojiList = new ArrayList<>();
+                for (String str : cursor.getString(1).split("|")) {
+                    emojiList.add(str);
+                }
+
                 stickersList.add(new Sticker(cursor.getString(2),
                         emojiList));
                 cursor.moveToNext();
@@ -230,10 +226,6 @@ public class MyDatabase {
 
     public static Long inserirFigurinha(Sticker sticker, Integer packIdentifier, Context context) throws StickerException {
         try {
-
-            String delete = "DELETE FROM stickers";
-            getMyDB(context).execSQL(delete);
-
             String insert = "INSERT INTO stickers VALUES (null, ?, ?, ?)";
             SQLiteStatement stmt = getMyDB(context).compileStatement(insert);
 
@@ -262,5 +254,62 @@ public class MyDatabase {
         } catch (Exception ex) {
             throw new StickerException(ex, "inserirPacote", StickerDBExceptionEnum.INSERT, ex.getMessage());
         }
+    }
+
+    public static Long updateStickerPack(String identifier, StickerPack stickerPack, Context context) throws StickerException {
+        try {
+
+            String updateQuery = "UPDATE packs SET name=?, publisher=?, trayImageFile=?, imageDataVersion=imageDataVersion+1 WHERE identifier=?";
+            SQLiteStatement stmt = getMyDB(context).compileStatement(updateQuery);
+
+            stmt.bindString(0, stickerPack.getName());
+            stmt.bindString(1, stickerPack.getPublisher());
+            stmt.bindString(2, stickerPack.getTrayImageFile());
+            stmt.bindString(3, identifier);
+
+            long result = (long) stmt.executeUpdateDelete();
+            if (result != -1) {
+                return result;
+            } else {
+                throw new StickerException(null, "updateStickerPack", StickerDBExceptionEnum.UPDATE, "Erro ao chamar o update");
+            }
+
+        } catch (StickerException ex) {
+            throw ex;
+        } catch (Exception ex) {
+            throw new StickerException(ex, "updateStickerPack", StickerDBExceptionEnum.UPDATE, "Erro ao atualizar dados do pacote " + identifier);
+        }
+    }
+
+    public static void deleteStickerPack(String identifier, Context context) throws StickerException {
+        SQLiteDatabase sqLiteDatabase = getMyDB(context);
+
+        try {
+            String deleteStickers = "DELETE FROM stickers WHERE packIdentifier=?";
+            SQLiteStatement stmt = sqLiteDatabase.compileStatement(deleteStickers);
+            stmt.bindString(0, identifier);
+            if (stmt.executeUpdateDelete() != -1) {
+                throw new StickerException(null, "deleteStickerPack", StickerDBExceptionEnum.DELETE, "Figurinhas não foram deletadas");
+            }
+
+        } catch (StickerException ex) {
+            throw ex;
+        } catch (Exception ex) {
+            throw new StickerException(ex, "deleteStickerPack", StickerDBExceptionEnum.DELETE, "Erro ao deletar figurinhas do pacote");
+        }
+
+        try {
+            String deleteStickers = "DELETE FROM packs WHERE identifier=?";
+            SQLiteStatement stmt = sqLiteDatabase.compileStatement(deleteStickers);
+            stmt.bindString(0, identifier);
+            if (stmt.executeUpdateDelete() != -1) {
+                throw new StickerException(null, "deleteStickerPack", StickerDBExceptionEnum.DELETE, "Pacote não foi deletado!");
+            }
+        } catch (StickerException ex) {
+            throw ex;
+        } catch (Exception ex) {
+            throw new StickerException(ex, "deleteStickerPack", StickerDBExceptionEnum.DELETE, "Erro ao deletar pacote");
+        }
+
     }
 }

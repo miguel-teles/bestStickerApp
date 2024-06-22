@@ -10,7 +10,11 @@ public enum StickerDBExceptionEnum {
 
     INSERT("Erro ao inserir dados na tabela"),
 
-    SELECT("Erro ao buscar valores");
+    SELECT("Erro ao buscar valores"),
+
+    UPDATE("Erro ao atualizar valores"),
+
+    DELETE("Erro ao deletar valores");
 
     private String text;
 

@@ -41,7 +41,7 @@
                 android:value="com.example.samplestickerapp.StickerPackDetailsActivity" />
         </activity>
 
-        <activity android:name="CreateNewStickerPack" />
+        <activity android:name=".StickerCreatePack" />
 
         <provider
             android:name=".StickerContentProvider"

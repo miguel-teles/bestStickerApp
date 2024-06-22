@@ -89,18 +89,18 @@ public class StickerPack implements Parcelable {
         this.animatedStickerPack = animatedStickerPack;
     }
 
-    public StickerPack(String identifier, String name, String publisher, String trayImageFile, String imageDataVersion, boolean avoidCache) {
+    public StickerPack(String identifier, String name, String publisher, String trayImageFile, String imageDataVersion, boolean animatedStickerPack) {
         this.identifier = identifier;
         this.name = name;
         this.publisher = publisher;
         this.trayImageFile = trayImageFile;
         this.imageDataVersion = imageDataVersion;
-        this.avoidCache = avoidCache;
+        this.avoidCache = false;
         this.publisherEmail = "";
         this.publisherWebsite = "";
         this.privacyPolicyWebsite = "";
         this.licenseAgreementWebsite = "";
-        this.animatedStickerPack = false;
+        this.animatedStickerPack = animatedStickerPack;
     }
 
     public void setIsWhitelisted(boolean isWhitelisted) {
@@ -254,6 +254,7 @@ public class StickerPack implements Parcelable {
     public void setWhitelisted(boolean whitelisted) {
         isWhitelisted = whitelisted;
     }
+
 
 
 }

@@ -105,6 +105,8 @@ public class StickerContentProvider extends ContentProvider {
             }
         }
 
+        System.out.println("sai do content provider");
+
         return true;
     }
 

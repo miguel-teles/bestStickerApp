@@ -65,9 +65,6 @@ class StickerPackLoader {
                 identifierSet.add(stickerPack.getIdentifier());
             }
         }
-        if (stickerPackList.isEmpty()) {
-            throw new IllegalStateException("There should be at least one sticker pack in the app");
-        }
         for (StickerPack stickerPack : stickerPackList) {
             final List<Sticker> stickers = getStickersForPack(context, stickerPack);
             stickerPack.setStickers(stickers);
@@ -99,7 +96,7 @@ class StickerPackLoader {
     private static ArrayList<StickerPack> fetchFromContentProvider(Cursor cursor) {
         ArrayList<StickerPack> stickerPackList = new ArrayList<>();
         cursor.moveToFirst();
-        do {
+        while (!cursor.isAfterLast()) {
             final String identifier = cursor.getString(cursor.getColumnIndexOrThrow(IDENTIFIER));
             final String name = cursor.getString(cursor.getColumnIndexOrThrow(NAME));
             final String publisher = cursor.getString(cursor.getColumnIndexOrThrow(PUBLISHER));
@@ -123,7 +120,8 @@ class StickerPackLoader {
                     avoidCache,
                     animatedStickerPack);
             stickerPackList.add(stickerPack);
-        } while (cursor.moveToNext());
+            cursor.moveToNext();
+        }
         return stickerPackList;
     }
 
@@ -176,20 +174,5 @@ class StickerPackLoader {
 
     static Uri getStickerUri(String identifier, String stickerName) {
         return new Uri.Builder().scheme(ContentResolver.SCHEME_CONTENT).authority(BuildConfig.CONTENT_PROVIDER_AUTHORITY).appendPath(StickerContentProvider.STICKERS_ASSET).appendPath(identifier).appendPath(stickerName).build();
-    }
-
-    static Integer getNewIdentifier(Context context) {
-        List<StickerPack> stickerPackList = fetchStickerPacks(context);
-
-        if (stickerPackList != null) {
-            List<Number> identifierList = new ArrayList<>();
-            for (StickerPack stp : stickerPackList) {
-                identifierList.add(Integer.parseInt(stp.getIdentifier()));
-            }
-            return Utils.encontraMaior(identifierList)+1;
-        } else {
-            return 1;
-        }
-
     }
 }

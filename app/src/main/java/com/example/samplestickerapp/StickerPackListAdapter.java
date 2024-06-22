@@ -36,7 +36,8 @@ public class StickerPackListAdapter extends RecyclerView.Adapter<StickerPackList
     private int maxNumberOfStickersInARow;
     private int minMarginBetweenImages;
 
-    StickerPackListAdapter(@NonNull List<StickerPack> stickerPacks, @NonNull OnAddButtonClickedListener onAddButtonClickedListener) {
+    StickerPackListAdapter(@NonNull List<StickerPack> stickerPacks,
+                           @NonNull OnAddButtonClickedListener onAddButtonClickedListener) {
         this.stickerPacks = stickerPacks;
         this.onAddButtonClickedListener = onAddButtonClickedListener;
     }
