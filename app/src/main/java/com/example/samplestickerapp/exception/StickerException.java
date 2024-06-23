@@ -16,10 +16,9 @@ public class StickerException extends Exception {
     private StickerCriticalExceptionEnum stickerCriticalExceptionEnum;
     private StickerDBExceptionEnum stickerDBExceptionEnum;
     private Date dtException;
-    private String method;
+    private String locationException;
 
     private StickerException(Exception ex,
-                             String method,
                              StickerExceptionEnum stickerExceptionEnum,
                              StickerCriticalExceptionEnum stickerCriticalExceptionEnum,
                              StickerDBExceptionEnum stickerDBExceptionEnum,
@@ -31,30 +30,33 @@ public class StickerException extends Exception {
         this.stickerDBExceptionEnum = stickerDBExceptionEnum;
         this.dtException = new Date();
         this.exception = ex;
-        this.method = method;
+        StackTraceElement stackTraceElement = null;
+        if (ex!=null) {
+            stackTraceElement = ex.getStackTrace()[0];
+        } else {
+            stackTraceElement = getStackTrace()[0];
+        }
+        this.locationException = stackTraceElement.getClassName() + "." + stackTraceElement.getMethodName() + ":" + stackTraceElement.getLineNumber();
     }
 
     //normal exception
     public StickerException(Exception ex,
-                            String method,
                             StickerExceptionEnum stickerExceptionEnum,
                             String msgError) {
-        this(ex, method, stickerExceptionEnum, null, null, msgError);
+        this(ex, stickerExceptionEnum, null, null, msgError);
     }
 
     //critical exception
     public StickerException(Exception ex,
-                            String method,
                             StickerCriticalExceptionEnum stickerCriticalExceptionEnum,
                             String msgError) {
-        this(ex, method, null, stickerCriticalExceptionEnum, null, msgError);
+        this(ex, null, stickerCriticalExceptionEnum, null, msgError);
     }
 
     public StickerException(Exception ex,
-                            String method,
                             StickerDBExceptionEnum stickerDBExceptionEnum,
                             String msgError) {
-        this(ex, method, null, null, stickerDBExceptionEnum, msgError);
+        this(ex, null, null, stickerDBExceptionEnum, msgError);
     }
 
     public Exception getException() {
@@ -77,10 +79,9 @@ public class StickerException extends Exception {
         return stickerCriticalExceptionEnum;
     }
 
-    public String getMethod() {
-        return method;
+    public String getLocationException() {
+        return locationException;
     }
-
 
     public StickerCriticalExceptionEnum getStickerCriticalExceptionEnum() {
         return stickerCriticalExceptionEnum;

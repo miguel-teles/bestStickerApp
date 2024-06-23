@@ -1,6 +1,7 @@
 package com.example.samplestickerapp.utils;
 
 import android.content.Context;
+import android.text.Editable;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
@@ -11,6 +12,8 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 public class Utils {
@@ -22,32 +25,32 @@ public class Utils {
         return new Gson(); //confirugrar aqui se precisar depois
     }
 
-    public static String readFile(Context context, String filePath){
-        String fileContent=null;
-        try (BufferedReader bf = new BufferedReader(new FileReader(new File(filePath)))){
+    public static String readFile(Context context, String filePath) {
+        String fileContent = null;
+        try (BufferedReader bf = new BufferedReader(new FileReader(new File(filePath)))) {
 
             StringBuilder stringBuilder = new StringBuilder();
             String line;
-            while ((line=bf.readLine())!=null){
+            while ((line = bf.readLine()) != null) {
                 stringBuilder.append(line);
             }
 
             fileContent = new String(stringBuilder);
-        } catch (IOException iob){
+        } catch (IOException iob) {
             Toast.makeText(context, "Erro ao buscar pasta de figurinhas", Toast.LENGTH_SHORT).show();
         }
         return fileContent;
     }
 
-    public static Integer encontraMaior(List<Number> numberList){
+    public static Integer encontraMaior(List<Number> numberList) {
         Integer maiorNmb = null;
-        for (Number nmb : numberList){
-            if (maiorNmb==null) {
+        for (Number nmb : numberList) {
+            if (maiorNmb == null) {
                 maiorNmb = nmb.intValue();
             } else {
                 int dbNmb = nmb.intValue();
-                if (dbNmb>maiorNmb){
-                    maiorNmb=dbNmb;
+                if (dbNmb > maiorNmb) {
+                    maiorNmb = dbNmb;
                 }
             }
         }
@@ -55,12 +58,16 @@ public class Utils {
     }
 
     public static boolean isNothing(String str) {
-        return str==null || str.trim().isEmpty();
+        return str == null || str.trim().isEmpty();
     }
 
-    public static void copyFile(String sourcePath, String destinationPath){
-        FileInputStream inputStream=null;
-        FileOutputStream outputStream=null;
+    public static boolean isNothing(Editable editable) {
+        return editable == null || editable.toString() == null || editable.toString().trim().isEmpty();
+    }
+
+    public static void copyFile(String sourcePath, String destinationPath) {
+        FileInputStream inputStream = null;
+        FileOutputStream outputStream = null;
         try {
             File sourceFile = new File(sourcePath);
             File destinationFile = new File(destinationPath);
@@ -89,5 +96,10 @@ public class Utils {
                 System.out.println("Failed to close the streams: " + e.getMessage());
             }
         }
+    }
+
+    public static String formatData(Date date, String format) {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(format);
+        return simpleDateFormat.format(date);
     }
 }

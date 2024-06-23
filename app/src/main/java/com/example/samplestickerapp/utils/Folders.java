@@ -1,7 +1,10 @@
 package com.example.samplestickerapp.utils;
 
 import android.content.Context;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Environment;
+import android.provider.MediaStore;
 
 import com.example.samplestickerapp.exception.StickerException;
 import com.example.samplestickerapp.exception.enums.StickerCriticalExceptionEnum;
@@ -11,6 +14,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URI;
 import java.nio.channels.FileChannel;
@@ -30,11 +34,11 @@ abstract public class Folders {
             if (logs.exists()) {
                 return logs.getPath();
             } else {
-                throw new StickerException(null, "getLogsFolderPath", StickerCriticalExceptionEnum.GET_PATH, "Pasta de logs não encontrada");
+                throw new StickerException(null, StickerCriticalExceptionEnum.GET_PATH, "Pasta de logs não encontrada");
             }
 
         } else {
-            throw new StickerException(null, "getLogsFolderPath", StickerCriticalExceptionEnum.GET_PATH, "Erro ao buscar pasta de logs");
+            throw new StickerException(null, StickerCriticalExceptionEnum.GET_PATH, "Erro ao buscar pasta de logs");
         }
     }
 
@@ -46,11 +50,11 @@ abstract public class Folders {
             if (packs.exists()) {
                 return packs.getPath();
             } else {
-                throw new StickerException(null, "getPacksFolderPath", StickerCriticalExceptionEnum.GET_PATH, "Pasta de pacotes não encontrada");
+                throw new StickerException(null, StickerCriticalExceptionEnum.GET_PATH, "Pasta de pacotes não encontrada");
             }
 
         } else {
-            throw new StickerException(null, "getPacksFolderPath", StickerCriticalExceptionEnum.GET_PATH, "Erro ao buscar pasta de pacotes");
+            throw new StickerException(null, StickerCriticalExceptionEnum.GET_PATH, "Erro ao buscar pasta de pacotes");
         }
     }
 
@@ -65,15 +69,15 @@ abstract public class Folders {
                 if (stickerPack.exists()) {
                     return stickerPack.getPath();
                 } else {
-                    throw new StickerException(null, "getPacksFolderPath", StickerCriticalExceptionEnum.GET_PATH, "Pasta do pacote " + identifier + " não encontrada");
+                    throw new StickerException(null, StickerCriticalExceptionEnum.GET_PATH, "Pasta do pacote " + identifier + " não encontrada");
                 }
 
             } else {
-                throw new StickerException(null, "getPacksFolderPath", StickerCriticalExceptionEnum.GET_PATH, "Pasta de pacotes não encontrada");
+                throw new StickerException(null, StickerCriticalExceptionEnum.GET_PATH, "Pasta de pacotes não encontrada");
             }
 
         } else {
-            throw new StickerException(null, "getPacksFolderPath", StickerCriticalExceptionEnum.GET_PATH, "Erro ao buscar pasta de pacotes");
+            throw new StickerException(null, StickerCriticalExceptionEnum.GET_PATH, "Erro ao buscar pasta de pacotes");
         }
     }
 
@@ -84,11 +88,11 @@ abstract public class Folders {
             makeDirErrorsLogs(context);
             makeDirCriticalErrorsLogs(context);
         } else {
-            throw new StickerException(null, "makeAllDirs", StickerCriticalExceptionEnum.MKDIR_ROOT, null);
+            throw new StickerException(null, StickerCriticalExceptionEnum.MKDIR_ROOT, null);
         }
     }
 
-    public static void makeDirPackIdentifier(String identifier, Context context) throws StickerException {
+    public static void makeDirPackIdentifier(String stickerPackFolderName, Context context) throws StickerException {
         try {
             if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
 
@@ -96,19 +100,19 @@ abstract public class Folders {
 
                 File folderPacks = new File(externalDir, DirectoryNames.PACKS);
                 if (folderPacks.exists()) {
-                    File novoPacotePasta = new File(folderPacks, identifier);
-                    if (!novoPacotePasta.mkdir()){
-                        throw new StickerException(null, "makeDirPackIdentifier", StickerCriticalExceptionEnum.CREATE_FOLDER_PACOTE, null);
+                    File novoPacotePasta = new File(folderPacks, stickerPackFolderName);
+                    if (!novoPacotePasta.mkdir()) {
+                        throw new StickerException(null, StickerCriticalExceptionEnum.CREATE_FOLDER_PACOTE, null);
                     }
                 } else {
-                    throw new StickerException(null, "makeDirPackIdentifier", StickerCriticalExceptionEnum.GET_FOLDER, "Pasta dos pacotes não existe!");
+                    throw new StickerException(null, StickerCriticalExceptionEnum.GET_FOLDER, "Pasta dos pacotes não existe!");
                 }
 
             } else {
-                throw new StickerException(null, "makeDirPackIdentifier", StickerCriticalExceptionEnum.MKDIR_PACKS, null);
+                throw new StickerException(null, StickerCriticalExceptionEnum.MKDIR_PACKS, null);
             }
         } catch (Exception ex) {
-            throw new StickerException(ex, "makeDirPackIdentifier", StickerCriticalExceptionEnum.MKDIR_PACKS, "Erro ao criar pasta do pacote " + identifier);
+            throw new StickerException(ex, StickerCriticalExceptionEnum.MKDIR_PACKS, "Erro ao criar pasta do pacote " + stickerPackFolderName);
         }
     }
 
@@ -122,7 +126,7 @@ abstract public class Folders {
             }
 
         } else {
-            throw new StickerException(null, "makeDirPacks", StickerCriticalExceptionEnum.MKDIR_PACKS, null);
+            throw new StickerException(null, StickerCriticalExceptionEnum.MKDIR_PACKS, null);
         }
     }
 
@@ -135,7 +139,7 @@ abstract public class Folders {
                 folderLogs.mkdir();
             }
         } else {
-            throw new StickerException(null, "makeDirLogs", StickerCriticalExceptionEnum.MKDIR_LOG, null);
+            throw new StickerException(null, StickerCriticalExceptionEnum.MKDIR_LOG, null);
         }
     }
 
@@ -149,7 +153,7 @@ abstract public class Folders {
                 path.mkdir();
             }
         } else {
-            throw new StickerException(null, "makeDirErrorsLogs", StickerCriticalExceptionEnum.MKDIR_LOG_ERRORS, null);
+            throw new StickerException(null, StickerCriticalExceptionEnum.MKDIR_LOG_ERRORS, null);
         }
     }
 
@@ -165,11 +169,31 @@ abstract public class Folders {
             }
 
         } else {
-            throw new StickerException(null, "makeDirErrorsLogs", StickerCriticalExceptionEnum.MKDIR_LOG_CRITICAL_ERRORS, null);
+            throw new StickerException(null, StickerCriticalExceptionEnum.MKDIR_LOG_CRITICAL_ERRORS, null);
         }
     }
 
-    public static File copiaFotoParaPastaPacote(String identifier, String imgPath, Context context) throws StickerException {
+    public static String getRealPathFromURI(Uri contentUri, Context context) {
+        String[] proj = {MediaStore.Images.Media.DATA};
+        Cursor cursor = context.getContentResolver().query(contentUri, proj, null, null, null);
+        int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+        cursor.moveToFirst();
+        String path = cursor.getString(column_index);
+        cursor.close();
+        return path;
+    }
+
+    public static String getFileExtension(File file) {
+        String fileName = file.getName();
+        return fileName.substring(fileName.lastIndexOf("."));
+    }
+
+    /**
+     * @param folderPack          The sticker pack folder where all the images are
+     * @param imgPath             The image being copied
+     * @param destinationFileName The file's name created
+     **/
+    public static File copiaFotoParaPastaPacote(String folderPack, String imgPath, String destinationFileName, Context context) throws StickerException {
         try {
             if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
 
@@ -177,38 +201,45 @@ abstract public class Folders {
 
                 File folderPacks = new File(externalDir, DirectoryNames.PACKS);
                 if (folderPacks.exists()) {
-                    File pacotePasta = new File(folderPacks, identifier);
-                    if (pacotePasta.exists()){
+                    File pacotePasta = new File(folderPacks, folderPack);
+                    if (pacotePasta.exists()) {
                         try {
-                            FileInputStream fileInputStream = new FileInputStream(imgPath);
-                            FileOutputStream fileOutputStream = new FileOutputStream(pacotePasta);
+                            File img = new File(imgPath);
+                            File packImg = new File( destinationFileName + getFileExtension(img));
+                            File absolutePackImg = new File(pacotePasta, packImg.getPath());
+                            absolutePackImg.setWritable(true);
+                            if (!absolutePackImg.createNewFile()) {
+                                throw new StickerException(null, StickerCriticalExceptionEnum.COPY, "Imagem não criada");
+                            }
+                            FileInputStream fileInputStream = new FileInputStream(img);
+                            FileOutputStream fileOutputStream = new FileOutputStream(absolutePackImg);
 
                             FileChannel sourceChannel = fileInputStream.getChannel();
                             FileChannel destinationChannel = fileOutputStream.getChannel();
 
-                            sourceChannel.transferFrom(destinationChannel, 0, sourceChannel.size());
+                            destinationChannel.transferFrom(sourceChannel, 0, sourceChannel.size());
 
                             sourceChannel.close();
                             destinationChannel.close();
                             fileInputStream.close();
                             fileInputStream.close();
 
-                            return new File(pacotePasta, new File(imgPath).getName());
+                            return packImg;
                         } catch (Exception ex) {
-                            throw new StickerException(ex, "copiaFotoParaPastaPacote", StickerCriticalExceptionEnum.COPY, "Erro ao copiar o arquivo da foto do pacote para a pasta dele");
+                            throw new StickerException(ex, StickerCriticalExceptionEnum.COPY, "Erro ao copiar o arquivo da foto do pacote para a pasta dele");
                         }
                     } else {
-                        throw new StickerException(null, "copiaFotoParaPastaPacote", StickerCriticalExceptionEnum.GET_FOLDER, "Pasta do pacote " + identifier + " não existe!");
+                        throw new StickerException(null, StickerCriticalExceptionEnum.GET_FOLDER, "Pasta do pacote " + folderPack + " não existe!");
                     }
                 } else {
-                    throw new StickerException(null, "copiaFotoParaPastaPacote", StickerCriticalExceptionEnum.GET_FOLDER, "Pasta dos pacotes não existe!");
+                    throw new StickerException(null, StickerCriticalExceptionEnum.GET_FOLDER, "Pasta dos pacotes não existe!");
                 }
 
             } else {
-                throw new StickerException(null, "copiaFotoParaPastaPacote", StickerCriticalExceptionEnum.MKDIR_PACKS, null);
+                throw new StickerException(null, StickerCriticalExceptionEnum.MKDIR_PACKS, null);
             }
         } catch (Exception ex) {
-            throw new StickerException(ex, "copiaFotoParaPastaPacote", StickerExceptionEnum.CSP, "Erro ao copiar foto do pacote para a pasta do pacote " + identifier);
+            throw new StickerException(ex, StickerExceptionEnum.CSP, "Erro ao copiar foto do pacote para a pasta do pacote " + folderPack);
         }
     }
 }

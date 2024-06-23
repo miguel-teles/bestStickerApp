@@ -5,37 +5,33 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.telephony.PhoneNumberFormattingTextWatcher;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.View;
 import android.widget.CheckBox;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
-
-import androidx.activity.OnBackPressedCallback;
 
 import com.example.samplestickerapp.database.MyDatabase;
 import com.example.samplestickerapp.exception.StickerException;
 import com.example.samplestickerapp.exception.StickerExceptionHandler;
+import com.example.samplestickerapp.exception.enums.StickerDBExceptionEnum;
 import com.example.samplestickerapp.exception.enums.StickerExceptionEnum;
 import com.example.samplestickerapp.model.StickerPack;
 import com.example.samplestickerapp.utils.Folders;
 import com.example.samplestickerapp.utils.Utils;
 import com.google.android.material.textfield.TextInputEditText;
-import com.google.android.material.textfield.TextInputLayout;
-import com.google.gson.Gson;
 
 import java.io.File;
+import java.util.Date;
 
-public class StickerCreatePack extends Activity {
+public class CreateStickerPackActivity extends Activity {
 
     private TextView btnAdicionarStickerPack;
     private TextInputEditText txtNomePacote, txtAutor;
     private ImageView stickerPackImageView;
     private Uri uriImagemStickerPack;
     private CheckBox cbAnimated;
+
+    private final String STICKER_PACK_IMAGE_NAME = "packImg";
 
     @Override
     protected void onCreate(Bundle bundle) {
@@ -60,27 +56,27 @@ public class StickerCreatePack extends Activity {
     }
 
     @Override
-    public void onBackPressed(){
-        verificaCamposObrigatorios();
-    }
-
-    private View.OnFocusChangeListener onFocusChangeListener() throws StickerException {
-
+    public void onBackPressed() {
         try {
-            return new View.OnFocusChangeListener() {
-
-                @Override
-                public void onFocusChange(View view, boolean b) {
-                   verificaCamposObrigatorios();
-                }
-            };
+            verificaCamposObrigatorios();
         } catch (Exception ex) {
-            throw new StickerException(ex, "onFocusChangeListener", StickerExceptionEnum.CSP, null);
+            StickerExceptionHandler.handleException(new StickerException(ex,
+                    StickerExceptionEnum.CSP,
+                    null), this);
         }
     }
 
+    private View.OnFocusChangeListener onFocusChangeListener() throws StickerException {
+        return new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View view, boolean b) {
+                verificaCamposObrigatorios();
+            }
+        };
+    }
+
     private void verificaCamposObrigatorios() {
-        if (!Utils.isNothing(txtNomePacote.getText().toString()) && stickerPackImageView.getTag().equals("modified")) {
+        if (!Utils.isNothing(txtNomePacote.getText()) && stickerPackImageView.getTag() != null && stickerPackImageView.getTag().equals("modified")) {
             btnAdicionarStickerPack.setEnabled(true);
             btnAdicionarStickerPack.setBackground(getResources().getDrawable(R.drawable.btn_green));
         }
@@ -107,6 +103,7 @@ public class StickerCreatePack extends Activity {
             uriImagemStickerPack = imageUri;
             stickerPackImageView.setTag("modified");
             stickerPackImageView.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+            verificaCamposObrigatorios();
         }
     }
 
@@ -122,47 +119,43 @@ public class StickerCreatePack extends Activity {
                     if (Utils.isNothing(publisher)) {
                         publisher = getResources().getString(R.string.defaultPublisher);
                     }
-                    String imgPath = uriImagemStickerPack.getPath();
                     String name = txtNomePacote.getText().toString();
-
-                    StickerPack stickerPack = new StickerPack(null,
-                            name,
-                            publisher,
-                            null,
-                            "1",
-                            cbAnimated.isChecked());
-
+                    String stickerPackFolderName = name + Utils.formatData(new Date(), "yyyy.MM.dd.HH.mm.ss");
+                    Long identifier = null;
                     try {
-                        Long identifier = MyDatabase.inserirPacote(stickerPack, context);
+                        Folders.makeDirPackIdentifier(stickerPackFolderName, context);
+                        File imgCopiada = Folders.copiaFotoParaPastaPacote(stickerPackFolderName,
+                                Folders.getRealPathFromURI(uriImagemStickerPack, context),
+                                STICKER_PACK_IMAGE_NAME,
+                                context);
+
+                        StickerPack stickerPack = new StickerPack(null,
+                                name,
+                                publisher,
+                                imgCopiada.getPath(),
+                                stickerPackFolderName,
+                                "1",
+                                cbAnimated.isChecked());
+
+                        identifier = MyDatabase.inserirPacote(stickerPack, context);
                         if (identifier != -1) {
-                            try {
-                                Folders.makeDirPackIdentifier(identifier.toString(), context);
-                                File imgCopiada = Folders.copiaFotoParaPastaPacote(identifier.toString(), imgPath, context);
-
-                                StickerPack stickerPackImgCerta = new StickerPack(identifier.toString(),
-                                        name,
-                                        publisher,
-                                        imgCopiada.getName(),
-                                        null,
-                                        cbAnimated.isChecked());
-
-                                //atualiza o banco pra colocar o novo nome da imagem!
-                                MyDatabase.updateStickerPack(identifier.toString(), stickerPackImgCerta, context);
-
-                                redirecionaStickerPackDetailsActivity(stickerPack);
-                            } catch (StickerException ex) {
-                                MyDatabase.deleteStickerPack(identifier.toString(), context);
-                                throw ex;
-                            }
+                            redirecionaStickerPackDetailsActivity(stickerPack);
+                        } else {
+                            throw new StickerException(null, StickerDBExceptionEnum.INSERT, "Erro ao salvar pacote no banco");
                         }
                     } catch (StickerException ex) {
+                        if (identifier != null) {
+                            try {
+                                MyDatabase.deleteStickerPack(identifier.toString(), context);
+                            } catch (Exception e) {}
+                        }
                         StickerExceptionHandler.handleException(ex, context);
                     }
                 }
 
             };
         } catch (Exception ex) {
-            throw new StickerException(ex, "btnAdicionarStickerPackOnClick", StickerExceptionEnum.CSP, null);
+            throw new StickerException(ex, StickerExceptionEnum.CSP, null);
         }
     }
 

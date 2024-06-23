@@ -26,6 +26,7 @@ import java.util.List;
 
 import static com.example.samplestickerapp.StickerContentProvider.ANIMATED_STICKER_PACK;
 import static com.example.samplestickerapp.StickerContentProvider.AVOID_CACHE;
+import static com.example.samplestickerapp.StickerContentProvider.FOLDER;
 import static com.example.samplestickerapp.StickerContentProvider.IDENTIFIER;
 import static com.example.samplestickerapp.StickerContentProvider.IMAGE_DATA_VERSION;
 import static com.example.samplestickerapp.StickerContentProvider.LICENSE_AGREENMENT_WEBSITE;
@@ -101,6 +102,7 @@ class StickerPackLoader {
             final String name = cursor.getString(cursor.getColumnIndexOrThrow(NAME));
             final String publisher = cursor.getString(cursor.getColumnIndexOrThrow(PUBLISHER));
             final String trayImage = cursor.getString(cursor.getColumnIndexOrThrow(TRAY_IMAGE_FILE));
+            final String folder = cursor.getString(cursor.getColumnIndexOrThrow(FOLDER));
             final String publisherEmail = cursor.getString(cursor.getColumnIndexOrThrow(PUBLISHER_EMAIL));
             final String publisherWebsite = cursor.getString(cursor.getColumnIndexOrThrow(PUBLISHER_WEBSITE));
             final String privacyPolicyWebsite = cursor.getString(cursor.getColumnIndexOrThrow(PRIVACY_POLICY_WEBSITE));
@@ -112,6 +114,7 @@ class StickerPackLoader {
                     name,
                     publisher,
                     trayImage,
+                    folder,
                     publisherEmail,
                     publisherWebsite,
                     privacyPolicyWebsite,
@@ -122,7 +125,8 @@ class StickerPackLoader {
             stickerPackList.add(stickerPack);
             cursor.moveToNext();
         }
-        return stickerPackList;
+
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   return stickerPackList;
     }
 
     @NonNull
@@ -150,11 +154,11 @@ class StickerPackLoader {
         return stickers;
     }
 
-    static byte[] fetchStickerFiles(@NonNull final String identifier, @NonNull final String name, ContentResolver contentResolver) throws IOException {
-        try (final InputStream inputStream = contentResolver.openInputStream(getStickerUri(identifier, name));
+    static byte[] fetchStickerFiles(@NonNull final String folder, @NonNull final String name, ContentResolver contentResolver) throws IOException {
+        try (final InputStream inputStream = contentResolver.openInputStream(getStickerUri(folder, name));
              final ByteArrayOutputStream buffer = new ByteArrayOutputStream()) {
             if (inputStream == null) {
-                throw new IOException("cannot read sticker asset:" + identifier + "/" + name);
+                throw new IOException("cannot read sticker asset:" + folder + "/" + name);
             }
             int read;
             byte[] data = new byte[16384];

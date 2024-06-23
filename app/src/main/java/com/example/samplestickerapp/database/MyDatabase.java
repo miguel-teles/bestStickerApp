@@ -34,7 +34,7 @@ public class MyDatabase {
         } catch (StickerException ste) {
             throw ste;
         } catch (Exception ex) {
-            throw new StickerException(ex, "inicializaBancoETabelas", StickerDBExceptionEnum.INI, null);
+            throw new StickerException(ex, StickerDBExceptionEnum.INI, null);
         }
     }
 
@@ -47,7 +47,7 @@ public class MyDatabase {
             SQLiteDatabase db = SQLiteDatabase.openOrCreateDatabase(dbFile, null);
             return db;
         } catch (Exception ex) {
-            throw new StickerException(ex, "criaBancoOuBusca", StickerDBExceptionEnum.CREATE_OR_OPEN, "");
+            throw new StickerException(ex, StickerDBExceptionEnum.CREATE_OR_OPEN, "");
         }
     }
 
@@ -59,14 +59,15 @@ public class MyDatabase {
     private static void criaTabelaPacks(Context context) throws StickerException {
         try {
 
-            String deleta = "DROP TABLE packs";
-            getMyDB(context).execSQL(deleta); //TODO: tirar isso
+//            String deleta = "DROP TABLE packs";
+//            getMyDB(context).execSQL(deleta); //TODO: tirar isso
 
             String tbPack = "CREATE TABLE IF NOT EXISTS packs(" +
                     "identifier INTEGER PRIMARY KEY AUTOINCREMENT," +
                     "name TEXT NOT NULL," +
                     "publisher TEXT NOT NULL," +
                     "trayImageFile TEXT NOT NULL," +
+                    "folder TEXT NOT NULL," +
                     "imageDataVersion INTEGER NOT NULL," +
                     "avoidCache INTEGER NOT NULL," +
                     "publisherEmail TEXT," +
@@ -80,7 +81,7 @@ public class MyDatabase {
         } catch (StickerException ste) {
             throw ste;
         } catch (Exception ex) {
-            throw new StickerException(ex, "criaTabelaPacks", StickerDBExceptionEnum.CREATE_TBL, "Tabela Packs não foi criada com sucesso - " + ex.getMessage());
+            throw new StickerException(ex, StickerDBExceptionEnum.CREATE_TBL, "Tabela Packs não foi criada com sucesso - " + ex.getMessage());
         }
     }
 
@@ -98,7 +99,7 @@ public class MyDatabase {
         } catch (StickerException ste) {
             throw ste;
         } catch (Exception ex) {
-            throw new StickerException(ex, "criaTabelaSticker", StickerDBExceptionEnum.CREATE_TBL, "Tabela Sticker não foi criada com sucesso");
+            throw new StickerException(ex, StickerDBExceptionEnum.CREATE_TBL, "Tabela Sticker não foi criada com sucesso");
         }
     }
 
@@ -113,31 +114,32 @@ public class MyDatabase {
 
     public static Long inserirPacote(StickerPack stickerPack, Context context) throws StickerException {
         try {
-            String insert = "INSERT INTO packs VALUES (null, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            String insert = "INSERT INTO packs VALUES (null, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
             SQLiteStatement stmt = getMyDB(context).compileStatement(insert);
 
             stmt.bindString(1, stickerPack.getName());
             stmt.bindString(2, stickerPack.getPublisher());
             stmt.bindString(3, stickerPack.getTrayImageFile() == null ? "" : stickerPack.getTrayImageFile());
-            stmt.bindLong(4, Integer.parseInt(stickerPack.getImageDataVersion()));
-            stmt.bindLong(5, stickerPack.isAvoidCache() ? 1 : 0);
-            stmt.bindString(6, stickerPack.getPublisherEmail());
-            stmt.bindString(7, stickerPack.getPublisherWebsite());
-            stmt.bindString(8, stickerPack.getPrivacyPolicyWebsite());
-            stmt.bindString(9, stickerPack.getLicenseAgreementWebsite());
-            stmt.bindLong(10, stickerPack.isAnimatedStickerPack() ? 1 : 0);
+            stmt.bindString(4, stickerPack.getFolder());
+            stmt.bindLong(5, Integer.parseInt(stickerPack.getImageDataVersion()));
+            stmt.bindLong(6, stickerPack.isAvoidCache() ? 1 : 0);
+            stmt.bindString(7, stickerPack.getPublisherEmail());
+            stmt.bindString(8, stickerPack.getPublisherWebsite());
+            stmt.bindString(9, stickerPack.getPrivacyPolicyWebsite());
+            stmt.bindString(10, stickerPack.getLicenseAgreementWebsite());
+            stmt.bindLong(11, stickerPack.isAnimatedStickerPack() ? 1 : 0);
 
             long result = stmt.executeInsert();
             if (result != -1) {
                 return result;
             } else {
-                throw new StickerException(null, "inserirPacote", StickerDBExceptionEnum.INSERT, "Erro ao inserir dado, retorno -1");
+                throw new StickerException(null, StickerDBExceptionEnum.INSERT, "Erro ao inserir dado, retorno -1");
             }
 
         } catch (StickerException ex) {
             throw ex;
         } catch (Exception ex) {
-            throw new StickerException(ex, "inserirPacote", StickerDBExceptionEnum.INSERT, ex.getMessage());
+            throw new StickerException(ex, StickerDBExceptionEnum.INSERT, ex.getMessage());
         }
     }
 
@@ -174,13 +176,14 @@ public class MyDatabase {
                         meuCursor.getString(1), //name
                         meuCursor.getString(2), //publisher
                         meuCursor.getString(3), //trayImageFile
-                        meuCursor.getInt(4) == 0 ? null : Integer.valueOf(meuCursor.getInt(4)), //imageDataVersion
-                        meuCursor.getInt(5) == 1 ? true : false, //avoidCache
-                        meuCursor.getString(6), //publisher_email
-                        meuCursor.getString(7), //publisher_website
-                        meuCursor.getString(8), //privacy_policy_website
-                        meuCursor.getString(9),
-                        meuCursor.getInt(10) == 1 ? true : false,
+                        meuCursor.getString(4), //folder
+                        meuCursor.getInt(5) == 0 ? null : Integer.valueOf(meuCursor.getInt(4)), //imageDataVersion
+                        meuCursor.getInt(6) == 1 ? true : false, //avoidCache
+                        meuCursor.getString(7), //publisher_email
+                        meuCursor.getString(8), //publisher_website
+                        meuCursor.getString(9), //privacy_policy_website
+                        meuCursor.getString(10),
+                        meuCursor.getInt(11) == 1 ? true : false,
                         selectStickersFromPack(meuCursor.getInt(0), context)); //license_agreement_website
 
                 stickerPackList.add(stickerPack);
@@ -192,7 +195,7 @@ public class MyDatabase {
         } catch (StickerException ex) {
             throw ex;
         } catch (Exception ex) {
-            throw new StickerException(ex, "selectAllStickerPacks", StickerDBExceptionEnum.SELECT, "Erro ao buscar todos os stickerPacks. " + ex.getMessage());
+            throw new StickerException(ex, StickerDBExceptionEnum.SELECT, "Erro ao buscar todos os stickerPacks. " + ex.getMessage());
         }
     }
 
@@ -220,7 +223,7 @@ public class MyDatabase {
             return stickersList;
 
         } catch (Exception ex) {
-            throw new StickerException(ex, "selectStickersFromPack", StickerDBExceptionEnum.SELECT, "Erro ao selecionar stickers do pacote " + packIdentifier + ". " + ex.getMessage());
+            throw new StickerException(ex, StickerDBExceptionEnum.SELECT, "Erro ao selecionar stickers do pacote " + packIdentifier + ". " + ex.getMessage());
         }
     }
 
@@ -246,13 +249,13 @@ public class MyDatabase {
             if (result != -1) {
                 return result;
             } else {
-                throw new StickerException(null, "inserirPacote", StickerDBExceptionEnum.INSERT, "Erro ao inserir dado, retorno -1");
+                throw new StickerException(null, StickerDBExceptionEnum.INSERT, "Erro ao inserir dado, retorno -1");
             }
 
         } catch (StickerException ex) {
             throw ex;
         } catch (Exception ex) {
-            throw new StickerException(ex, "inserirPacote", StickerDBExceptionEnum.INSERT, ex.getMessage());
+            throw new StickerException(ex, StickerDBExceptionEnum.INSERT, ex.getMessage());
         }
     }
 
@@ -271,13 +274,13 @@ public class MyDatabase {
             if (result != -1) {
                 return result;
             } else {
-                throw new StickerException(null, "updateStickerPack", StickerDBExceptionEnum.UPDATE, "Erro ao chamar o update");
+                throw new StickerException(null, StickerDBExceptionEnum.UPDATE, "Erro ao chamar o update");
             }
 
         } catch (StickerException ex) {
             throw ex;
         } catch (Exception ex) {
-            throw new StickerException(ex, "updateStickerPack", StickerDBExceptionEnum.UPDATE, "Erro ao atualizar dados do pacote " + identifier);
+            throw new StickerException(ex, StickerDBExceptionEnum.UPDATE, "Erro ao atualizar dados do pacote " + identifier);
         }
     }
 
@@ -289,13 +292,13 @@ public class MyDatabase {
             SQLiteStatement stmt = sqLiteDatabase.compileStatement(deleteStickers);
             stmt.bindString(0, identifier);
             if (stmt.executeUpdateDelete() != -1) {
-                throw new StickerException(null, "deleteStickerPack", StickerDBExceptionEnum.DELETE, "Figurinhas não foram deletadas");
+                throw new StickerException(null, StickerDBExceptionEnum.DELETE, "Figurinhas não foram deletadas");
             }
 
         } catch (StickerException ex) {
             throw ex;
         } catch (Exception ex) {
-            throw new StickerException(ex, "deleteStickerPack", StickerDBExceptionEnum.DELETE, "Erro ao deletar figurinhas do pacote");
+            throw new StickerException(ex, StickerDBExceptionEnum.DELETE, "Erro ao deletar figurinhas do pacote");
         }
 
         try {
@@ -303,12 +306,12 @@ public class MyDatabase {
             SQLiteStatement stmt = sqLiteDatabase.compileStatement(deleteStickers);
             stmt.bindString(0, identifier);
             if (stmt.executeUpdateDelete() != -1) {
-                throw new StickerException(null, "deleteStickerPack", StickerDBExceptionEnum.DELETE, "Pacote não foi deletado!");
+                throw new StickerException(null, StickerDBExceptionEnum.DELETE, "Pacote não foi deletado!");
             }
         } catch (StickerException ex) {
             throw ex;
         } catch (Exception ex) {
-            throw new StickerException(ex, "deleteStickerPack", StickerDBExceptionEnum.DELETE, "Erro ao deletar pacote");
+            throw new StickerException(ex, StickerDBExceptionEnum.DELETE, "Erro ao deletar pacote");
         }
 
     }

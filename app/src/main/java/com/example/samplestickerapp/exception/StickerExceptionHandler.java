@@ -9,7 +9,7 @@ public abstract class StickerExceptionHandler {
         Boolean isCritical = null;
 
         if (ex != null) {
-            ex.printStackTrace();
+            ex.getException().printStackTrace();
         }
 
         StringBuilder text = new StringBuilder();
@@ -29,9 +29,9 @@ public abstract class StickerExceptionHandler {
         }
 
         text.append(" - ");
-        text.append(ex.getMethod());
+        text.append(ex.getLocationException());
 
-        int duration = isCritical != null && isCritical || ex.getStickerDBExceptionEnum()!=null ? Toast.LENGTH_LONG : Toast.LENGTH_SHORT;
+        int duration = isCritical != null && isCritical || ex.getStickerDBExceptionEnum() != null ? Toast.LENGTH_LONG : Toast.LENGTH_SHORT;
 
         Toast.makeText(context, text.toString(), duration).show();
     }

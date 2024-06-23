@@ -99,7 +99,7 @@ public class StickerPackValidator {
             throw new IllegalStateException("publisher email does not seem valid, email is: " + stickerPack.getPublisherEmail());
         }
         try {
-            final byte[] stickerAssetBytes = StickerPackLoader.fetchStickerFiles(stickerPack.getIdentifier(), stickerPack.getTrayImageFile(), context.getContentResolver());
+            final byte[] stickerAssetBytes = StickerPackLoader.fetchStickerFiles(stickerPack.getFolder(), stickerPack.getTrayImageFile(), context.getContentResolver());
             if (stickerAssetBytes.length > TRAY_IMAGE_FILE_SIZE_MAX_KB * KB_IN_BYTES) {
                 throw new IllegalStateException("tray image should be less than " + TRAY_IMAGE_FILE_SIZE_MAX_KB + " KB, tray image file: " + stickerPack.getTrayImageFile());
             }

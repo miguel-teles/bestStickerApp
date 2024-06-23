@@ -62,8 +62,9 @@
             android:id="@+id/txtInpEdtAutor"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:background="@color/transparent"
             android:hint="Autor (opcional)"
-            android:background="@color/transparent"/>
+            android:singleLine="true" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <CheckBox
@@ -95,7 +96,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@color/transparent"
-            android:hint="Nome do pacote" />
+            android:hint="Nome do pacote"
+            android:maxLines="1"
+            android:singleLine="true" />
     </com.google.android.material.textfield.TextInputLayout>
 
 

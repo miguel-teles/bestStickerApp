@@ -48,6 +48,7 @@ public class StickerContentProvider extends ContentProvider {
     public static final String NAME = "name";
     public static final String PUBLISHER = "publisher";
     public static final String TRAY_IMAGE_FILE = "trayImageFile";
+    public static final String FOLDER = "folder";
     public static final String PUBLISHER_EMAIL = "publisherEmail";
     public static final String PUBLISHER_WEBSITE = "publisherWebsite";
     public static final String PRIVACY_POLICY_WEBSITE = "privacePolicyWebsite";
@@ -99,9 +100,9 @@ public class StickerContentProvider extends ContentProvider {
         MATCHER.addURI(authority, STICKERS + "/*", STICKERS_CODE); //this returns information about the  stickers in a pack.
 
         for (StickerPack stickerPack : getStickerPackList()) {
-            MATCHER.addURI(authority, STICKERS_ASSET + "/" + stickerPack.getIdentifier() + "/" + stickerPack.getTrayImageFile(), STICKER_PACK_TRAY_ICON_CODE); //this returns the binary information of the sticker: `AssetFileDescriptor`, which points to the asset file for the sticker.
+            MATCHER.addURI(authority, STICKERS_ASSET + "/" + stickerPack.getFolder() + "/" + stickerPack.getTrayImageFile(), STICKER_PACK_TRAY_ICON_CODE); //this returns the binary information of the sticker: `AssetFileDescriptor`, which points to the asset file for the sticker.
             for (Sticker sticker : stickerPack.getStickers()) {
-                MATCHER.addURI(authority, STICKERS_ASSET + "/" + stickerPack.getIdentifier() + "/" + sticker.getImageFileName(), STICKERS_ASSET_CODE);
+                MATCHER.addURI(authority, STICKERS_ASSET + "/" + stickerPack.getFolder() + "/" + sticker.getImageFileName(), STICKERS_ASSET_CODE);
             }
         }
 
@@ -189,6 +190,7 @@ public class StickerContentProvider extends ContentProvider {
                         NAME,
                         PUBLISHER,
                         TRAY_IMAGE_FILE,
+                        FOLDER,
                         IMAGE_DATA_VERSION,
                         AVOID_CACHE,
                         PUBLISHER_EMAIL,
@@ -203,6 +205,7 @@ public class StickerContentProvider extends ContentProvider {
             builder.add(stickerPack.getName());
             builder.add(stickerPack.getPublisher());
             builder.add(stickerPack.getTrayImageFile());
+            builder.add(stickerPack.getFolder());
             builder.add(stickerPack.getImageDataVersion());
             builder.add(stickerPack.isAvoidCache() ? 1 : 0);
             builder.add(stickerPack.getPublisherEmail());
