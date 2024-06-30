@@ -18,8 +18,11 @@ import android.webkit.URLUtil;
 
 import androidx.annotation.NonNull;
 
+import com.example.samplestickerapp.exception.StickerException;
+import com.example.samplestickerapp.exception.StickerExceptionHandler;
 import com.example.samplestickerapp.model.Sticker;
 import com.example.samplestickerapp.model.StickerPack;
+import com.example.samplestickerapp.utils.Utils;
 import com.facebook.animated.webp.WebPImage;
 import com.facebook.imagepipeline.common.ImageDecodeOptions;
 
@@ -99,7 +102,7 @@ public class StickerPackValidator {
             throw new IllegalStateException("publisher email does not seem valid, email is: " + stickerPack.getPublisherEmail());
         }
         try {
-            final byte[] stickerAssetBytes = StickerPackLoader.fetchStickerFiles(stickerPack.getFolder(), stickerPack.getTrayImageFile(), context.getContentResolver());
+            final byte[] stickerAssetBytes = StickerPackLoader.fetchStickerAsset(stickerPack.getIdentifier(), stickerPack.getTrayImageFile(), context.getContentResolver());
             if (stickerAssetBytes.length > TRAY_IMAGE_FILE_SIZE_MAX_KB * KB_IN_BYTES) {
                 throw new IllegalStateException("tray image should be less than " + TRAY_IMAGE_FILE_SIZE_MAX_KB + " KB, tray image file: " + stickerPack.getTrayImageFile());
             }
@@ -114,7 +117,7 @@ public class StickerPackValidator {
             throw new IllegalStateException("Cannot open tray image, " + stickerPack.getTrayImageFile(), e);
         }
         final List<Sticker> stickers = stickerPack.getStickers();
-        if (stickers.size() < STICKER_SIZE_MIN || stickers.size() > STICKER_SIZE_MAX) {
+        if ((stickers.size() < STICKER_SIZE_MIN || stickers.size() > STICKER_SIZE_MAX) && Utils.tpAmbiente.equals("P")) {
             throw new IllegalStateException("sticker pack sticker count should be between 3 to 30 inclusive, it currently has " + stickers.size() + ", sticker pack identifier: " + stickerPack.getIdentifier());
         }
         for (final Sticker sticker : stickers) {
@@ -137,7 +140,7 @@ public class StickerPackValidator {
 
     private static void validateStickerFile(@NonNull Context context, @NonNull String identifier, @NonNull final String fileName, final boolean animatedStickerPack) throws IllegalStateException {
         try {
-            final byte[] stickerInBytes = StickerPackLoader.fetchStickerFiles(identifier, fileName, context.getContentResolver());
+            final byte[] stickerInBytes = StickerPackLoader.fetchStickerAsset(identifier, fileName, context.getContentResolver());
             if (!animatedStickerPack && stickerInBytes.length > STATIC_STICKER_FILE_LIMIT_KB * KB_IN_BYTES) {
                 throw new IllegalStateException("static sticker should be less than " + STATIC_STICKER_FILE_LIMIT_KB + "KB, current file is " + stickerInBytes.length / KB_IN_BYTES + " KB, sticker pack identifier: " + identifier + ", filename: " + fileName);
             }

@@ -2,29 +2,29 @@ package com.example.samplestickerapp.utils;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Picture;
 import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
 
 import com.example.samplestickerapp.exception.StickerException;
 import com.example.samplestickerapp.exception.enums.StickerCriticalExceptionEnum;
+import com.example.samplestickerapp.exception.enums.StickerDBExceptionEnum;
 import com.example.samplestickerapp.exception.enums.StickerExceptionEnum;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.URI;
 import java.nio.channels.FileChannel;
-import java.nio.file.CopyOption;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 
 abstract public class Folders {
 
+    public static final int TRAY_IMAGE_MAX_FILE_SIZE = 50; //50KB
+    public static final int STICKER_IMAGE_MAX_FILE_SIZE = 100; //50KB
+    public static final int TRAY_IMAGE_SIZE = 96; //96pxs
+    public static final int STICKER_IMAGE_SIZE = 512; //512pxs
 
     public static String getLogsFolderPath(Context context) throws StickerException {
         if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
@@ -58,18 +58,18 @@ abstract public class Folders {
         }
     }
 
-    public static String getPackFolderPathByIdentifier(String identifier, Context context) throws StickerException {
+    public static File getPackFolderByFolderName(String folderName, Context context) throws StickerException {
         if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
 
             File externalDir = context.getExternalFilesDir(null);
             File packs = new File(externalDir, DirectoryNames.PACKS);
             if (packs.exists()) {
 
-                File stickerPack = new File(packs, identifier);
+                File stickerPack = new File(packs, folderName);
                 if (stickerPack.exists()) {
-                    return stickerPack.getPath();
+                    return stickerPack;
                 } else {
-                    throw new StickerException(null, StickerCriticalExceptionEnum.GET_PATH, "Pasta do pacote " + identifier + " não encontrada");
+                    throw new StickerException(null, StickerCriticalExceptionEnum.GET_PATH, "Pasta do pacote " + folderName + " não encontrada");
                 }
 
             } else {
@@ -183,9 +183,13 @@ abstract public class Folders {
         return path;
     }
 
-    public static String getFileExtension(File file) {
+    public static String getFileExtension(File file, boolean withDot) {
         String fileName = file.getName();
-        return fileName.substring(fileName.lastIndexOf("."));
+        String result = fileName.substring(fileName.lastIndexOf("."));
+        if (!withDot) {
+            result = result.replace(".", "");
+        }
+        return result;
     }
 
     /**
@@ -193,7 +197,12 @@ abstract public class Folders {
      * @param imgPath             The image being copied
      * @param destinationFileName The file's name created
      **/
-    public static File copiaFotoParaPastaPacote(String folderPack, String imgPath, String destinationFileName, Context context) throws StickerException {
+    public static File copiaFotoParaPastaPacote(String folderPack,
+                                                String imgPath,
+                                                String destinationFileName,
+                                                int imgSize,
+                                                int fileSize,
+                                                Context context) throws StickerException {
         try {
             if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
 
@@ -205,7 +214,7 @@ abstract public class Folders {
                     if (pacotePasta.exists()) {
                         try {
                             File img = new File(imgPath);
-                            File packImg = new File( destinationFileName + getFileExtension(img));
+                            File packImg = new File( destinationFileName + getFileExtension(img, true));
                             File absolutePackImg = new File(pacotePasta, packImg.getPath());
                             absolutePackImg.setWritable(true);
                             if (!absolutePackImg.createNewFile()) {
@@ -218,11 +227,12 @@ abstract public class Folders {
                             FileChannel destinationChannel = fileOutputStream.getChannel();
 
                             destinationChannel.transferFrom(sourceChannel, 0, sourceChannel.size());
-
                             sourceChannel.close();
                             destinationChannel.close();
                             fileInputStream.close();
                             fileInputStream.close();
+
+                            resizeImage(absolutePackImg, imgSize, fileSize);
 
                             return packImg;
                         } catch (Exception ex) {
@@ -240,6 +250,21 @@ abstract public class Folders {
             }
         } catch (Exception ex) {
             throw new StickerException(ex, StickerExceptionEnum.CSP, "Erro ao copiar foto do pacote para a pasta do pacote " + folderPack);
+        }
+    }
+
+    private static void resizeImage(File packImg,
+                                    int imgSize,
+                                    int fileSize) throws StickerException {
+        try {
+            Bitmap bitmap = BitmapFactory.decodeFile(packImg.getAbsolutePath());
+            Bitmap resizedBitmap = Bitmap.createScaledBitmap(bitmap, imgSize, imgSize, false);
+            FileOutputStream out = new FileOutputStream(packImg);
+            resizedBitmap.compress(Bitmap.CompressFormat.JPEG, 90, out);
+            out.flush();
+            out.close();
+        } catch (Exception ex) {
+            throw new StickerException(ex, StickerCriticalExceptionEnum.RESIZE, "Imagem: " + packImg.getName());
         }
     }
 }

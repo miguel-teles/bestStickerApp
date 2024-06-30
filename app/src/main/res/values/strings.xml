@@ -8,7 +8,8 @@
     <!-- Text to be shown on the button that user can click to add the sticker pack to WhatsApp -->
     <string name="add_to_whatsapp">Add to WhatsApp</string>
     <!-- Content Description for the plus button shown on sticker pack list, that allows user to add sticker pack to WhatsApp -->
-    <string name="add_button_content_description">Add sticker pack to WhatsApp</string>
+    <string name="add_button_content_description">Add sticker to pack</string>
+    <string name="edit_button_content_description" translatable="false">Edit sticker pack</string>
     <!-- Title of the sticker pack list activity page in case the app contains multiple sticker packs, the singular string will be used when there is only one pack in the app -->
     <plurals name="title_activity_sticker_packs_list">
         <item quantity="one">Sticker Pack</item>

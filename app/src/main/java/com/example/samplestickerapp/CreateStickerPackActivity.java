@@ -127,6 +127,8 @@ public class CreateStickerPackActivity extends Activity {
                         File imgCopiada = Folders.copiaFotoParaPastaPacote(stickerPackFolderName,
                                 Folders.getRealPathFromURI(uriImagemStickerPack, context),
                                 STICKER_PACK_IMAGE_NAME,
+                                Folders.TRAY_IMAGE_SIZE,
+                                Folders.TRAY_IMAGE_MAX_FILE_SIZE,
                                 context);
 
                         StickerPack stickerPack = new StickerPack(null,

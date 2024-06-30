@@ -22,7 +22,7 @@ public enum StickerDBExceptionEnum {
         this.text = text;
     }
 
-    public String getText() {
+    public String toString() {
         return text;
     }
 }

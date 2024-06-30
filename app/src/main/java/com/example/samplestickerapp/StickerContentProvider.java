@@ -11,15 +11,12 @@ package com.example.samplestickerapp;
 import android.content.ContentProvider;
 import android.content.ContentResolver;
 import android.content.ContentValues;
-import android.content.Context;
 import android.content.UriMatcher;
-import android.content.res.AssetFileDescriptor;
-import android.content.res.AssetManager;
 import android.database.Cursor;
 import android.database.MatrixCursor;
 import android.net.Uri;
+import android.os.ParcelFileDescriptor;
 import android.text.TextUtils;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -27,13 +24,14 @@ import androidx.annotation.Nullable;
 import com.example.samplestickerapp.database.MyDatabase;
 import com.example.samplestickerapp.exception.StickerException;
 import com.example.samplestickerapp.exception.StickerExceptionHandler;
+import com.example.samplestickerapp.exception.enums.StickerCriticalExceptionEnum;
 import com.example.samplestickerapp.model.Sticker;
 import com.example.samplestickerapp.model.StickerPack;
-import com.example.samplestickerapp.utils.ContentFileParser;
 import com.example.samplestickerapp.utils.Folders;
 
+import java.io.File;
+import java.io.FileDescriptor;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -62,6 +60,7 @@ public class StickerContentProvider extends ContentProvider {
 
 
     public static final Uri AUTHORITY_URI = new Uri.Builder().scheme(ContentResolver.SCHEME_CONTENT).authority(BuildConfig.CONTENT_PROVIDER_AUTHORITY).appendPath(StickerContentProvider.METADATA).build();
+    private static String ABSOLUTE_FOLDER = null;
 
     /**
      * Do not change the values in the UriMatcher because otherwise, WhatsApp will not be able to fetch the stickers from the ContentProvider.
@@ -71,8 +70,9 @@ public class StickerContentProvider extends ContentProvider {
     private static final int METADATA_CODE = 1;
     private static final int METADATA_CODE_FOR_SINGLE_PACK = 2;
     static final String STICKERS = "stickers";
-    private static final int STICKERS_CODE = 3;
     static final String STICKERS_ASSET = "stickers_asset";
+    private static final int STICKERS_CODE = 3;
+    static final String PACKS = "packs";
     private static final int STICKERS_ASSET_CODE = 4;
 
     private static final int STICKER_PACK_TRAY_ICON_CODE = 5;
@@ -90,25 +90,30 @@ public class StickerContentProvider extends ContentProvider {
             throw new IllegalStateException("your authority (" + authority + ") for the content provider should start with your package name: " + getContext().getPackageName());
         }
 
-        //the call to get the metadata for the sticker packs.
-        MATCHER.addURI(authority, METADATA, METADATA_CODE); // this returns information about all the sticker packs in your app.
+        try {
+            ABSOLUTE_FOLDER = Folders.getPacksFolderPath(this.getContext());
+            //the call to get the metadata for the sticker packs.
+            MATCHER.addURI(authority, METADATA, METADATA_CODE); // this returns information about all the sticker packs in your app.
 
-        //the call to get the metadata for single sticker pack. * represent the identifier
-        MATCHER.addURI(authority, METADATA + "/*", METADATA_CODE_FOR_SINGLE_PACK); //this returns information about a single pack.
+            //the call to get the metadata for single sticker pack. * represent the identifier
+            MATCHER.addURI(authority, METADATA + "/*", METADATA_CODE_FOR_SINGLE_PACK); //this returns information about a single pack.
 
-        //gets the list of stickers for a sticker pack, * respresent the identifier.
-        MATCHER.addURI(authority, STICKERS + "/*", STICKERS_CODE); //this returns information about the  stickers in a pack.
-
-        for (StickerPack stickerPack : getStickerPackList()) {
-            MATCHER.addURI(authority, STICKERS_ASSET + "/" + stickerPack.getFolder() + "/" + stickerPack.getTrayImageFile(), STICKER_PACK_TRAY_ICON_CODE); //this returns the binary information of the sticker: `AssetFileDescriptor`, which points to the asset file for the sticker.
-            for (Sticker sticker : stickerPack.getStickers()) {
-                MATCHER.addURI(authority, STICKERS_ASSET + "/" + stickerPack.getFolder() + "/" + sticker.getImageFileName(), STICKERS_ASSET_CODE);
+            //gets the list of stickers for a sticker pack, * respresent the identifier.
+            MATCHER.addURI(authority, STICKERS + "/*", STICKERS_CODE); //this returns information about the  stickers in a pack.
+            for (StickerPack stickerPack : getStickerPackList()) {
+                MATCHER.addURI(authority, STICKERS_ASSET + "/" + stickerPack.getIdentifier() + "/" + stickerPack.getTrayImageFile(), STICKER_PACK_TRAY_ICON_CODE); //this returns the binary information of the sticker: `AssetFileDescriptor`, which points to the asset file for the sticker.
+                for (Sticker sticker : stickerPack.getStickers()) {
+                    MATCHER.addURI(authority, STICKERS_ASSET + "/" + stickerPack.getIdentifier() + "/" + sticker.getImageFileName(), STICKERS_ASSET_CODE);
+                }
             }
+
+            System.out.println("sai do content provider");
+
+            return true;
+        } catch (StickerException ex) {
+            StickerExceptionHandler.handleException(ex, this.getContext());
+            return false;
         }
-
-        System.out.println("sai do content provider");
-
-        return true;
     }
 
     @Override
@@ -126,12 +131,16 @@ public class StickerContentProvider extends ContentProvider {
         }
     }
 
-    @Nullable
+
     @Override
-    public AssetFileDescriptor openAssetFile(@NonNull Uri uri, @NonNull String mode) {
+    public ParcelFileDescriptor openFile(@NonNull Uri uri, @NonNull String mode) {
         final int matchCode = MATCHER.match(uri);
         if (matchCode == STICKERS_ASSET_CODE || matchCode == STICKER_PACK_TRAY_ICON_CODE) {
-            return getImageAsset(uri);
+            try {
+                return getImageAsset(uri);
+            } catch (StickerException ex) {
+                throw new RuntimeException(ex);
+            }
         }
         return null;
     }
@@ -233,8 +242,7 @@ public class StickerContentProvider extends ContentProvider {
         return cursor;
     }
 
-    private AssetFileDescriptor getImageAsset(Uri uri) throws IllegalArgumentException {
-        AssetManager am = Objects.requireNonNull(getContext()).getAssets();
+    private ParcelFileDescriptor getImageAsset(Uri uri) throws IllegalArgumentException, StickerException {
         final List<String> pathSegments = uri.getPathSegments();
         if (pathSegments.size() != 3) {
             throw new IllegalArgumentException("path segments should be 3, uri is: " + uri);
@@ -251,11 +259,11 @@ public class StickerContentProvider extends ContentProvider {
         for (StickerPack stickerPack : getStickerPackList()) {
             if (identifier.equals(stickerPack.getIdentifier())) {
                 if (fileName.equals(stickerPack.getTrayImageFile())) {
-                    return fetchFile(uri, am, fileName, identifier);
+                    return fetchFile(fileName, stickerPack.getFolder());
                 } else {
                     for (Sticker sticker : stickerPack.getStickers()) {
                         if (fileName.equals(sticker.getImageFileName())) {
-                            return fetchFile(uri, am, fileName, identifier);
+                            return fetchFile(fileName, stickerPack.getFolder());
                         }
                     }
                 }
@@ -264,12 +272,11 @@ public class StickerContentProvider extends ContentProvider {
         return null;
     }
 
-    private AssetFileDescriptor fetchFile(@NonNull Uri uri, @NonNull AssetManager am, @NonNull String fileName, @NonNull String identifier) {
+    private ParcelFileDescriptor fetchFile(@NonNull String fileName, @NonNull String folder) throws StickerException {
         try {
-            return am.openFd(identifier + "/" + fileName);
+            return ParcelFileDescriptor.open(new File(Folders.getPackFolderByFolderName(folder, getContext()), fileName), ParcelFileDescriptor.MODE_READ_ONLY);
         } catch (IOException e) {
-            Log.e(Objects.requireNonNull(getContext()).getPackageName(), "IOException when getting asset file, uri:" + uri, e);
-            return null;
+            throw new StickerException(e, StickerCriticalExceptionEnum.GET_FILE, "Erro ao abrir arquivo " + folder + "/"+ fileName);
         }
     }
 
@@ -288,5 +295,9 @@ public class StickerContentProvider extends ContentProvider {
     public int update(@NonNull Uri uri, ContentValues values, String selection,
                       String[] selectionArgs) {
         throw new UnsupportedOperationException("Not supported");
+    }
+
+    public static String getAbsoluteFolder() {
+        return ABSOLUTE_FOLDER;
     }
 }

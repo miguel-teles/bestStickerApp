@@ -40,11 +40,9 @@ import static com.example.samplestickerapp.StickerContentProvider.STICKER_FILE_E
 import static com.example.samplestickerapp.StickerContentProvider.STICKER_FILE_NAME_IN_QUERY;
 import static com.example.samplestickerapp.StickerContentProvider.TRAY_IMAGE_FILE;
 
-import com.example.samplestickerapp.exception.StickerException;
 import com.example.samplestickerapp.model.Sticker;
 import com.example.samplestickerapp.model.StickerPack;
 import com.example.samplestickerapp.utils.Folders;
-import com.example.samplestickerapp.utils.Utils;
 
 class StickerPackLoader {
 
@@ -76,11 +74,11 @@ class StickerPackLoader {
 
     @NonNull
     private static List<Sticker> getStickersForPack(Context context, StickerPack stickerPack) {
-        final List<Sticker> stickers = fetchFromContentProviderForStickers(stickerPack.getIdentifier(), context.getContentResolver());
+        final List<Sticker> stickers = fetchFromContentProviderForStickers(stickerPack.getFolder(), context.getContentResolver());
         for (Sticker sticker : stickers) {
             final byte[] bytes;
             try {
-                bytes = fetchStickerFiles(stickerPack.getIdentifier(), sticker.getImageFileName(), context.getContentResolver());
+                bytes = fetchStickerAsset(stickerPack.getIdentifier(), sticker.getImageFileName(), context.getContentResolver());
                 if (bytes.length <= 0) {
                     throw new IllegalStateException("Asset file is empty, pack: " + stickerPack.getName() + ", sticker: " + sticker.getImageFileName());
                 }
@@ -130,8 +128,8 @@ class StickerPackLoader {
     }
 
     @NonNull
-    private static List<Sticker> fetchFromContentProviderForStickers(String identifier, ContentResolver contentResolver) {
-        Uri uri = getStickerListUri(identifier);
+    private static List<Sticker> fetchFromContentProviderForStickers(String folder, ContentResolver contentResolver) {
+        Uri uri = getStickerListUri(folder);
 
         final String[] projection = {STICKER_FILE_NAME_IN_QUERY, STICKER_FILE_EMOJI_IN_QUERY};
         final Cursor cursor = contentResolver.query(uri, projection, null, null, null);
@@ -154,11 +152,15 @@ class StickerPackLoader {
         return stickers;
     }
 
-    static byte[] fetchStickerFiles(@NonNull final String folder, @NonNull final String name, ContentResolver contentResolver) throws IOException {
-        try (final InputStream inputStream = contentResolver.openInputStream(getStickerUri(folder, name));
+    /**
+     * Busca um asset da pasta (imagem da figurinha ou da capa do sticker pack)
+     * **/
+    static byte[] fetchStickerAsset(@NonNull final String identifier, @NonNull final String stickerImageFileName, ContentResolver contentResolver) throws IOException {
+        //o contentResolver.openInputStream vai pro método openAssetFile do contentProvider
+        try (final InputStream inputStream = contentResolver.openInputStream(getStickerAssetUri(identifier, stickerImageFileName));
              final ByteArrayOutputStream buffer = new ByteArrayOutputStream()) {
             if (inputStream == null) {
-                throw new IOException("cannot read sticker asset:" + folder + "/" + name);
+                throw new IOException("cannot read sticker asset id: " + identifier + "; name: " + stickerImageFileName);
             }
             int read;
             byte[] data = new byte[16384];
@@ -176,7 +178,7 @@ class StickerPackLoader {
         return new Uri.Builder().scheme(ContentResolver.SCHEME_CONTENT).authority(BuildConfig.CONTENT_PROVIDER_AUTHORITY).appendPath(STICKERS).appendPath(identifier).build();
     }
 
-    static Uri getStickerUri(String identifier, String stickerName) {
-        return new Uri.Builder().scheme(ContentResolver.SCHEME_CONTENT).authority(BuildConfig.CONTENT_PROVIDER_AUTHORITY).appendPath(StickerContentProvider.STICKERS_ASSET).appendPath(identifier).appendPath(stickerName).build();
+    static Uri getStickerAssetUri(String identifier, String imageName) {
+        return new Uri.Builder().scheme(ContentResolver.SCHEME_CONTENT).authority(BuildConfig.CONTENT_PROVIDER_AUTHORITY).appendPath(StickerContentProvider.STICKERS_ASSET).appendPath(identifier).appendPath(imageName).build();
     }
 }

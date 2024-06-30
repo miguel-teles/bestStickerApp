@@ -200,6 +200,7 @@ public class StickerPack implements Parcelable {
         dest.writeString(name);
         dest.writeString(publisher);
         dest.writeString(trayImageFile);
+        dest.writeString(folder);
         dest.writeString(publisherEmail);
         dest.writeString(publisherWebsite);
         dest.writeString(privacyPolicyWebsite);

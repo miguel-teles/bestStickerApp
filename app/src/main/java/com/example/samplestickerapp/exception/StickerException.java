@@ -12,6 +12,7 @@ public class StickerException extends Exception {
 
     private Exception exception;
     private String msgErro;
+    private String dsErro;
     private StickerExceptionEnum stickerExceptionEnum;
     private StickerCriticalExceptionEnum stickerCriticalExceptionEnum;
     private StickerDBExceptionEnum stickerDBExceptionEnum;
@@ -32,6 +33,7 @@ public class StickerException extends Exception {
         this.exception = ex;
         StackTraceElement stackTraceElement = null;
         if (ex!=null) {
+            ex.printStackTrace();
             stackTraceElement = ex.getStackTrace()[0];
         } else {
             stackTraceElement = getStackTrace()[0];
@@ -90,4 +92,5 @@ public class StickerException extends Exception {
     public StickerDBExceptionEnum getStickerDBExceptionEnum() {
         return stickerDBExceptionEnum;
     }
+
 }

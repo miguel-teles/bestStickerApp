@@ -15,10 +15,12 @@ public enum StickerCriticalExceptionEnum {
     GET_PATH("Erro ao encontrar local do arquivo"),
 
     GET_FOLDER("Erro ao acessar pasta"),
+    GET_FILE("Erro ao abrir arquivo"),
 
     CREATE_FOLDER_PACOTE("Erro ao criar pasta do pacote de figurinhas"),
 
-    COPY("Erro ao copiar arquivo ao destino novo");
+    COPY("Erro ao copiar arquivo ao destino novo"),
+    RESIZE("Erro ao mudar tamanho da imagem");
 
     String txt;
 
