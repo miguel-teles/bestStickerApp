@@ -4,15 +4,12 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteStatement;
-import android.widget.ArrayAdapter;
 
+import com.example.samplestickerapp.StickerPackLoader;
 import com.example.samplestickerapp.exception.StickerException;
-import com.example.samplestickerapp.exception.StickerExceptionHandler;
-import com.example.samplestickerapp.exception.enums.StickerCriticalExceptionEnum;
 import com.example.samplestickerapp.exception.enums.StickerDBExceptionEnum;
 import com.example.samplestickerapp.model.Sticker;
 import com.example.samplestickerapp.model.StickerPack;
-import com.example.samplestickerapp.utils.Folders;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -66,7 +63,8 @@ public class MyDatabase {
                     "identifier INTEGER PRIMARY KEY AUTOINCREMENT," +
                     "name TEXT NOT NULL," +
                     "publisher TEXT NOT NULL," +
-                    "trayImageFile TEXT NOT NULL," +
+                    "originalTrayImageFile TEXT NOT NULL," +
+                    "resizedTrayImageFile TEXT NOT NULL," +
                     "folder TEXT NOT NULL," +
                     "imageDataVersion INTEGER NOT NULL," +
                     "avoidCache INTEGER NOT NULL," +
@@ -114,23 +112,29 @@ public class MyDatabase {
 
     public static Long inserirPacote(StickerPack stickerPack, Context context) throws StickerException {
         try {
-            String insert = "INSERT INTO packs VALUES (null, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            String insert = "INSERT INTO packs VALUES (null, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
             SQLiteStatement stmt = getMyDB(context).compileStatement(insert);
 
             stmt.bindString(1, stickerPack.getName());
             stmt.bindString(2, stickerPack.getPublisher());
-            stmt.bindString(3, stickerPack.getTrayImageFile() == null ? "" : stickerPack.getTrayImageFile());
-            stmt.bindString(4, stickerPack.getFolder());
-            stmt.bindLong(5, Integer.parseInt(stickerPack.getImageDataVersion()));
-            stmt.bindLong(6, stickerPack.isAvoidCache() ? 1 : 0);
-            stmt.bindString(7, stickerPack.getPublisherEmail());
-            stmt.bindString(8, stickerPack.getPublisherWebsite());
-            stmt.bindString(9, stickerPack.getPrivacyPolicyWebsite());
-            stmt.bindString(10, stickerPack.getLicenseAgreementWebsite());
-            stmt.bindLong(11, stickerPack.isAnimatedStickerPack() ? 1 : 0);
+            stmt.bindString(3, stickerPack.getOriginalTrayImageFile());
+            stmt.bindString(4, stickerPack.getResizedTrayImageFile());
+            stmt.bindString(5, stickerPack.getFolder());
+            stmt.bindLong(6, Integer.parseInt(stickerPack.getImageDataVersion()));
+            stmt.bindLong(7, stickerPack.isAvoidCache() ? 1 : 0);
+            stmt.bindString(8, stickerPack.getPublisherEmail());
+            stmt.bindString(9, stickerPack.getPublisherWebsite());
+            stmt.bindString(10, stickerPack.getPrivacyPolicyWebsite());
+            stmt.bindString(11, stickerPack.getLicenseAgreementWebsite());
+            stmt.bindLong(12, stickerPack.isAnimatedStickerPack() ? 1 : 0);
 
             long result = stmt.executeInsert();
             if (result != -1) {
+                Cursor cursor = getMyDB(context).rawQuery("select last_insert_rowid()", null);
+                cursor.moveToFirst();
+                stickerPack.setIdentifier(cursor.getString(0));
+
+                context.getContentResolver().insert(StickerPackLoader.getStickerPackInsertUri(), stickerPack.toContentValues());
                 return result;
             } else {
                 throw new StickerException(null, StickerDBExceptionEnum.INSERT, "Erro ao inserir dado, retorno -1");
@@ -175,16 +179,17 @@ public class MyDatabase {
                 StickerPack stickerPack = new StickerPack(meuCursor.getInt(0), //identifier
                         meuCursor.getString(1), //name
                         meuCursor.getString(2), //publisher
-                        meuCursor.getString(3), //trayImageFile
-                        meuCursor.getString(4), //folder
-                        meuCursor.getInt(5) == 0 ? null : Integer.valueOf(meuCursor.getInt(4)), //imageDataVersion
-                        meuCursor.getInt(6) == 1 ? true : false, //avoidCache
-                        meuCursor.getString(7), //publisher_email
-                        meuCursor.getString(8), //publisher_website
-                        meuCursor.getString(9), //privacy_policy_website
-                        meuCursor.getString(10),
-                        meuCursor.getInt(11) == 1 ? true : false,
-                        selectStickersFromPack(meuCursor.getInt(0), context)); //license_agreement_website
+                        meuCursor.getString(3), //originalTrayImageFile
+                        meuCursor.getString(4), //resizedTrayImageFile
+                        meuCursor.getString(5), //folder
+                        meuCursor.getInt(6) == 0 ? null : Integer.valueOf(meuCursor.getInt(4)), //imageDataVersion
+                        meuCursor.getInt(7) == 1 ? true : false, //avoidCache
+                        meuCursor.getString(8), //publisher_email
+                        meuCursor.getString(9), //publisher_website
+                        meuCursor.getString(10), //privacy_policy_website
+                        meuCursor.getString(11), //license_agreement_website
+                        meuCursor.getInt(12) == 1 ? true : false,//animated
+                        selectStickersFromPack(meuCursor.getInt(0), context));
 
                 stickerPackList.add(stickerPack);
                 meuCursor.moveToNext();
@@ -267,7 +272,7 @@ public class MyDatabase {
 
             stmt.bindString(0, stickerPack.getName());
             stmt.bindString(1, stickerPack.getPublisher());
-            stmt.bindString(2, stickerPack.getTrayImageFile());
+            stmt.bindString(2, stickerPack.getOriginalTrayImageFile());
             stmt.bindString(3, identifier);
 
             long result = (long) stmt.executeUpdateDelete();

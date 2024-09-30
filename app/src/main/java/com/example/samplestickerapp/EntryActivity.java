@@ -24,6 +24,7 @@ import com.example.samplestickerapp.exception.StickerException;
 import com.example.samplestickerapp.exception.StickerExceptionHandler;
 import com.example.samplestickerapp.model.StickerPack;
 import com.example.samplestickerapp.utils.Folders;
+import com.example.samplestickerapp.utils.Utils;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -40,7 +41,7 @@ public class EntryActivity extends BaseActivity {
         if (getSupportActionBar() != null) {
             getSupportActionBar().hide();
         }
-
+        Utils.setContext(getBaseContext());
         try {
             Folders.makeAllDirs(this);
             MyDatabase.inicializaBancoETabelas(this);

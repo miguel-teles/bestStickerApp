@@ -72,7 +72,8 @@ public class ContentFileParser {
         String identifier = null;
         String name = null;
         String publisher = null;
-        String trayImageFile = null;
+        String originalTrayImageFile = null;
+        String resizedTrayImageFile = null;
         String folder = null;
         String publisherEmail = null;
         String publisherWebsite = null;
@@ -94,8 +95,11 @@ public class ContentFileParser {
                 case "publisher":
                     publisher = reader.nextString();
                     break;
-                case "tray_image_file":
-                    trayImageFile = reader.nextString();
+                case "original_tray_image_file":
+                    originalTrayImageFile = reader.nextString();
+                    break;
+                case "resized_tray_imagem_file":
+                    resizedTrayImageFile = reader.nextString();
                     break;
                 case "folder":
                     folder = reader.nextName();
@@ -137,8 +141,11 @@ public class ContentFileParser {
         if (TextUtils.isEmpty(publisher)) {
             throw new IllegalStateException("publisher cannot be empty");
         }
-        if (TextUtils.isEmpty(trayImageFile)) {
-            throw new IllegalStateException("tray_image_file cannot be empty");
+        if (TextUtils.isEmpty(originalTrayImageFile)) {
+            throw new IllegalStateException("original_tray_image_file cannot be empty");
+        }
+        if (TextUtils.isEmpty(resizedTrayImageFile)) {
+            throw new IllegalStateException("resized_tray_image_file cannot be empty");
         }
         if (TextUtils.isEmpty(folder)) {
             throw new IllegalStateException("folder cannot be empty");
@@ -153,7 +160,19 @@ public class ContentFileParser {
             throw new IllegalStateException("image_data_version should not be empty");
         }
         reader.endObject();
-        final StickerPack stickerPack = new StickerPack(identifier, name, publisher, trayImageFile, folder, publisherEmail, publisherWebsite, privacyPolicyWebsite, licenseAgreementWebsite, imageDataVersion, avoidCache, animatedStickerPack);
+        final StickerPack stickerPack = new StickerPack(identifier,
+                name,
+                publisher,
+                originalTrayImageFile,
+                resizedTrayImageFile,
+                folder,
+                publisherEmail,
+                publisherWebsite,
+                privacyPolicyWebsite,
+                licenseAgreementWebsite,
+                imageDataVersion,
+                avoidCache,
+                animatedStickerPack);
         stickerPack.setStickers(stickerList);
         return stickerPack;
     }

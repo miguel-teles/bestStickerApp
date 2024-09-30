@@ -1,35 +1,39 @@
 package com.example.samplestickerapp.exception.enums;
 
+import com.example.samplestickerapp.R;
+import com.example.samplestickerapp.utils.Utils;
+
 public enum StickerCriticalExceptionEnum {
 
-    MKDIR_ROOT("Erro ao criar pasta dos arquivos do aplicativo"),
+    MKDIR_ROOT(R.string.MKDIR_ROOT),
 
-    MKDIR_LOG("Erro ao criar pasta de logs"),
+    MKDIR_LOG(R.string.MKDIR_LOG),
 
-    MKDIR_LOG_ERRORS("Erro ao criar pasta de logs de erro"),
+    MKDIR_LOG_ERRORS(R.string.MKDIR_LOG_ERRORS),
 
-    MKDIR_LOG_CRITICAL_ERRORS("Erro ao criar pasta de logs de erros críticos"),
+    MKDIR_LOG_CRITICAL_ERRORS(R.string.MKDIR_LOG_CRITICAL_ERRORS),
 
-    MKDIR_PACKS("Erro ao criar pasta de pacote(s)"),
+    MKDIR_PACKS(R.string.MKDIR_PACKS),
 
-    GET_PATH("Erro ao encontrar local do arquivo"),
+    GET_PATH(R.string.GET_PATH),
 
-    GET_FOLDER("Erro ao acessar pasta"),
-    GET_FILE("Erro ao abrir arquivo"),
+    GET_FOLDER(R.string.GET_FOLDER),
+    GET_FILE(R.string.GET_FILE),
 
-    CREATE_FOLDER_PACOTE("Erro ao criar pasta do pacote de figurinhas"),
+    CREATE_FOLDER_PACOTE(R.string.CREATE_FOLDER_PACOTE),
 
-    COPY("Erro ao copiar arquivo ao destino novo"),
-    RESIZE("Erro ao mudar tamanho da imagem");
+    COPY(R.string.COPY),
+    RESIZE(R.string.RESIZE),
+    DELETE_FOLDER(R.string.DELETE_FOLDER);
 
-    String txt;
+    int mResourceId;
 
-    StickerCriticalExceptionEnum(String s) {
-        this.txt = s;
+    StickerCriticalExceptionEnum(int id) {
+        this.mResourceId = id;
     }
 
     public String toString(){
-        return txt;
+        return Utils.getContext().getString(mResourceId);
     }
 
 }

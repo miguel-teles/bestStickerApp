@@ -87,10 +87,10 @@ public class StickerPackDetailsActivity extends AddStickerPackActivity {
         }
         packNameTextView.setText(stickerPack.getName());
         packPublisherTextView.setText(stickerPack.getPublisher());
-        packTrayIcon.setImageURI(StickerPackLoader.getStickerAssetUri(stickerPack.getIdentifier(), stickerPack.getTrayImageFile()));
+        packTrayIcon.setImageURI(StickerPackLoader.getStickerAssetUri(stickerPack.getIdentifier(), stickerPack.getResizedTrayImageFile()));
         packSizeTextView.setText(Formatter.formatShortFileSize(this, stickerPack.getTotalSize()));
         btnAddToWhatsapp.setOnClickListener(v -> addStickerPackToWhatsApp(stickerPack.getIdentifier(), stickerPack.getName()));
-//        btnEditStickerPack.setOnClickListener(btn -> editStickerPack(stickerPack));
+        btnEditStickerPack.setOnClickListener(btn -> editStickerPack(stickerPack));
 //        btnAddNewSticker.setOnClickListener(btn -> addNewSticker(stickerPack));
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(showUpButton);
@@ -99,8 +99,14 @@ public class StickerPackDetailsActivity extends AddStickerPackActivity {
         findViewById(R.id.sticker_pack_animation_indicator).setVisibility(stickerPack.isAnimatedStickerPack() ? View.VISIBLE : View.GONE);
     }
 
+    private void editStickerPack(StickerPack stickerPack) {
+        Intent intent = new Intent(this, StickerPackFormActivity.class);
+        intent.putExtra(StickerPackFormActivity.STICKER_PACK, stickerPack);
+        startActivity(intent);
+    }
+
     private void launchInfoActivity(String publisherWebsite, String publisherEmail, String privacyPolicyWebsite, String licenseAgreementWebsite, String trayIconUriString) {
-        Intent intent = new Intent(StickerPackDetailsActivity.this, StickerPackInfoActivity.class);
+        Intent intent = new Intent(this, StickerPackInfoActivity.class);
         intent.putExtra(StickerPackDetailsActivity.EXTRA_STICKER_PACK_ID, stickerPack.getIdentifier());
         intent.putExtra(StickerPackDetailsActivity.EXTRA_STICKER_PACK_WEBSITE, publisherWebsite);
         intent.putExtra(StickerPackDetailsActivity.EXTRA_STICKER_PACK_EMAIL, publisherEmail);
@@ -119,7 +125,7 @@ public class StickerPackDetailsActivity extends AddStickerPackActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.action_info && stickerPack != null) {
-            Uri trayIconUri = StickerPackLoader.getStickerAssetUri(stickerPack.getIdentifier(), stickerPack.getTrayImageFile());
+            Uri trayIconUri = StickerPackLoader.getStickerAssetUri(stickerPack.getIdentifier(), stickerPack.getOriginalTrayImageFile());
             launchInfoActivity(stickerPack.getPublisherWebsite(), stickerPack.getPublisherEmail(), stickerPack.getPrivacyPolicyWebsite(), stickerPack.getLicenseAgreementWebsite(), trayIconUri.toString());
             return true;
         }

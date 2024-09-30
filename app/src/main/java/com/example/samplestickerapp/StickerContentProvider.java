@@ -30,7 +30,6 @@ import com.example.samplestickerapp.model.StickerPack;
 import com.example.samplestickerapp.utils.Folders;
 
 import java.io.File;
-import java.io.FileDescriptor;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -45,7 +44,8 @@ public class StickerContentProvider extends ContentProvider {
     public static final String IDENTIFIER = "identifier";
     public static final String NAME = "name";
     public static final String PUBLISHER = "publisher";
-    public static final String TRAY_IMAGE_FILE = "trayImageFile";
+    public static final String ORIGINAL_TRAY_IMAGE_FILE = "originalTrayImageFile";
+    public static final String RESIZED_TRAY_IMAGE_FILE = "resizedTrayImageFile";
     public static final String FOLDER = "folder";
     public static final String PUBLISHER_EMAIL = "publisherEmail";
     public static final String PUBLISHER_WEBSITE = "publisherWebsite";
@@ -67,53 +67,60 @@ public class StickerContentProvider extends ContentProvider {
      */
     private static final UriMatcher MATCHER = new UriMatcher(UriMatcher.NO_MATCH);
     private static final String METADATA = "metadata";
+    static final String METHODS_ADD = "methods_add";
     private static final int METADATA_CODE = 1;
     private static final int METADATA_CODE_FOR_SINGLE_PACK = 2;
     static final String STICKERS = "stickers";
     static final String STICKERS_ASSET = "stickers_asset";
+
+    static String AUTHORITY = null;
     private static final int STICKERS_CODE = 3;
-    static final String PACKS = "packs";
+    static final String PACK = "pack";
     private static final int STICKERS_ASSET_CODE = 4;
 
     private static final int STICKER_PACK_TRAY_ICON_CODE = 5;
+    private static final int STICKER_ADD_NEW_STICKER_PACK = 6;
+    private static final int STICKER_ADD_NEW_STICKER = 7;
 
     private List<StickerPack> stickerPackList;
 
     /**
      * NÃO MUDAR ESSES MATCHERS E NEM AS URIS SE NÃO O WHATSAPP NÃO CONSEGUE BUSCAR DESTE CONTENTPROVIDER
-     * **/
+     **/
     @Override
     public boolean onCreate() {
 
-        final String authority = BuildConfig.CONTENT_PROVIDER_AUTHORITY;
-        if (!authority.startsWith(Objects.requireNonNull(getContext()).getPackageName())) {
-            throw new IllegalStateException("your authority (" + authority + ") for the content provider should start with your package name: " + getContext().getPackageName());
+        AUTHORITY = BuildConfig.CONTENT_PROVIDER_AUTHORITY;
+        if (!AUTHORITY.startsWith(Objects.requireNonNull(getContext()).getPackageName())) {
+            throw new IllegalStateException("your authority (" + AUTHORITY + ") for the content provider should start with your package name: " + getContext().getPackageName());
         }
+        //the call to get the metadata for the sticker packs.
+        MATCHER.addURI(AUTHORITY, METADATA, METADATA_CODE); // this returns information about all the sticker packs in your app.
 
-        try {
-            ABSOLUTE_FOLDER = Folders.getPacksFolderPath(this.getContext());
-            //the call to get the metadata for the sticker packs.
-            MATCHER.addURI(authority, METADATA, METADATA_CODE); // this returns information about all the sticker packs in your app.
+        //the call to get the metadata for single sticker pack. * represent the identifier
+        MATCHER.addURI(AUTHORITY, METADATA + "/*", METADATA_CODE_FOR_SINGLE_PACK); //this returns information about a single pack.
 
-            //the call to get the metadata for single sticker pack. * represent the identifier
-            MATCHER.addURI(authority, METADATA + "/*", METADATA_CODE_FOR_SINGLE_PACK); //this returns information about a single pack.
+        MATCHER.addURI(AUTHORITY, METHODS_ADD + "/" + PACK, STICKER_ADD_NEW_STICKER_PACK);
+        MATCHER.addURI(AUTHORITY, METHODS_ADD + "/" + STICKERS, STICKER_ADD_NEW_STICKER);
 
-            //gets the list of stickers for a sticker pack, * respresent the identifier.
-            MATCHER.addURI(authority, STICKERS + "/*", STICKERS_CODE); //this returns information about the  stickers in a pack.
-            for (StickerPack stickerPack : getStickerPackList()) {
-                MATCHER.addURI(authority, STICKERS_ASSET + "/" + stickerPack.getIdentifier() + "/" + stickerPack.getTrayImageFile(), STICKER_PACK_TRAY_ICON_CODE); //this returns the binary information of the sticker: `AssetFileDescriptor`, which points to the asset file for the sticker.
-                for (Sticker sticker : stickerPack.getStickers()) {
-                    MATCHER.addURI(authority, STICKERS_ASSET + "/" + stickerPack.getIdentifier() + "/" + sticker.getImageFileName(), STICKERS_ASSET_CODE);
-                }
+        //gets the list of stickers for a sticker pack, * respresent the identifier.
+        MATCHER.addURI(AUTHORITY, STICKERS + "/*", STICKERS_CODE); //this returns information about the  stickers in a pack.
+        for (StickerPack stickerPack : getStickerPackList()) {
+            insertStickerPackUri(AUTHORITY, stickerPack);
+            for (Sticker sticker : stickerPack.getStickers()) {
+                insertStickerUri(AUTHORITY, sticker, stickerPack);
             }
-
-            System.out.println("sai do content provider");
-
-            return true;
-        } catch (StickerException ex) {
-            StickerExceptionHandler.handleException(ex, this.getContext());
-            return false;
         }
+        return true;
+    }
+
+    private void insertStickerPackUri(String authority, StickerPack stickerPack) {
+        MATCHER.addURI(authority, STICKERS_ASSET + "/" + stickerPack.getIdentifier() + "/" + stickerPack.getResizedTrayImageFile(), STICKER_PACK_TRAY_ICON_CODE); //this returns the binary information of the sticker: `AssetFileDescriptor`, which points to the asset file for the sticker.
+        MATCHER.addURI(authority, STICKERS_ASSET + "/" + stickerPack.getIdentifier() + "/" + stickerPack.getOriginalTrayImageFile(), STICKER_PACK_TRAY_ICON_CODE); //this returns the binary information of the sticker: `AssetFileDescriptor`, which points to the asset file for the sticker.
+    }
+
+    private void insertStickerUri(String authority, Sticker sticker, StickerPack stickerPack) {
+        MATCHER.addURI(authority, STICKERS_ASSET + "/" + stickerPack.getIdentifier() + "/" + sticker.getImageFileName(), STICKERS_ASSET_CODE);
     }
 
     @Override
@@ -198,7 +205,8 @@ public class StickerContentProvider extends ContentProvider {
                         IDENTIFIER,
                         NAME,
                         PUBLISHER,
-                        TRAY_IMAGE_FILE,
+                        ORIGINAL_TRAY_IMAGE_FILE,
+                        RESIZED_TRAY_IMAGE_FILE,
                         FOLDER,
                         IMAGE_DATA_VERSION,
                         AVOID_CACHE,
@@ -213,7 +221,8 @@ public class StickerContentProvider extends ContentProvider {
             builder.add(stickerPack.getIdentifier());
             builder.add(stickerPack.getName());
             builder.add(stickerPack.getPublisher());
-            builder.add(stickerPack.getTrayImageFile());
+            builder.add(stickerPack.getOriginalTrayImageFile());
+            builder.add(stickerPack.getResizedTrayImageFile());
             builder.add(stickerPack.getFolder());
             builder.add(stickerPack.getImageDataVersion());
             builder.add(stickerPack.isAvoidCache() ? 1 : 0);
@@ -258,7 +267,7 @@ public class StickerContentProvider extends ContentProvider {
         //making sure the file that is trying to be fetched is in the list of stickers.
         for (StickerPack stickerPack : getStickerPackList()) {
             if (identifier.equals(stickerPack.getIdentifier())) {
-                if (fileName.equals(stickerPack.getTrayImageFile())) {
+                if (fileName.equals(stickerPack.getResizedTrayImageFile()) || fileName.equals(stickerPack.getOriginalTrayImageFile())) {
                     return fetchFile(fileName, stickerPack.getFolder());
                 } else {
                     for (Sticker sticker : stickerPack.getStickers()) {
@@ -276,7 +285,7 @@ public class StickerContentProvider extends ContentProvider {
         try {
             return ParcelFileDescriptor.open(new File(Folders.getPackFolderByFolderName(folder, getContext()), fileName), ParcelFileDescriptor.MODE_READ_ONLY);
         } catch (IOException e) {
-            throw new StickerException(e, StickerCriticalExceptionEnum.GET_FILE, "Erro ao abrir arquivo " + folder + "/"+ fileName);
+            throw new StickerException(e, StickerCriticalExceptionEnum.GET_FILE, "Erro ao abrir arquivo " + folder + "/" + fileName);
         }
     }
 
@@ -288,7 +297,15 @@ public class StickerContentProvider extends ContentProvider {
 
     @Override
     public Uri insert(@NonNull Uri uri, ContentValues values) {
-        throw new UnsupportedOperationException("Not supported");
+        int method = MATCHER.match(uri);
+        switch (method) {
+            case STICKER_ADD_NEW_STICKER_PACK:
+                StickerPack stickerPack = StickerPack.fromContentValues(values);
+                insertStickerPackUri(AUTHORITY, stickerPack);
+                return uri;
+            default:
+                throw new UnsupportedOperationException("Método não esperado / não implementado");
+        }
     }
 
     @Override

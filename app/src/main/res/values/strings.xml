@@ -45,4 +45,17 @@
     <string name="sticker_pack_details_tap_to_preview" tools:ignore="MissingTranslation">Tap to preview sticker</string>
 
     <string name="defaultPublisher" translatable="false">Aplicativo de figurinhas - Miguel Teles</string>
+
+    <string name="MKDIR_ROOT" translatable="false">Erro ao criar pasta dos arquivos do aplicativo</string>
+    <string name="MKDIR_LOG" translatable="false">Erro ao criar pasta de logs</string>
+    <string name="MKDIR_LOG_ERRORS" translatable="false">Erro ao criar pasta de logs de erro</string>
+    <string name="MKDIR_LOG_CRITICAL_ERRORS" translatable="false">Erro ao criar pasta de logs de erros críticos</string>
+    <string name="MKDIR_PACKS" translatable="false">Erro ao criar pasta de pacote(s)</string>
+    <string name="GET_PATH" translatable="false">Erro ao encontrar local do arquivo</string>
+    <string name="GET_FOLDER" translatable="false">Erro ao acessar pasta</string>
+    <string name="GET_FILE" translatable="false">Erro ao abrir arquivo</string>
+    <string name="CREATE_FOLDER_PACOTE" translatable="false">Erro ao criar pasta do pacote de figurinhas</string>
+    <string name="COPY" translatable="false">Erro ao copiar arquivo ao destino novo</string>
+    <string name="RESIZE" translatable="false">Erro ao mudar tamanho da imagem</string>
+    <string name="DELETE_FOLDER" translatable="false">Erro ao apagar pasta</string>
 </resources>

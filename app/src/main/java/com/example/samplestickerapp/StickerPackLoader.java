@@ -35,16 +35,16 @@ import static com.example.samplestickerapp.StickerContentProvider.PRIVACY_POLICY
 import static com.example.samplestickerapp.StickerContentProvider.PUBLISHER;
 import static com.example.samplestickerapp.StickerContentProvider.PUBLISHER_EMAIL;
 import static com.example.samplestickerapp.StickerContentProvider.PUBLISHER_WEBSITE;
+import static com.example.samplestickerapp.StickerContentProvider.RESIZED_TRAY_IMAGE_FILE;
 import static com.example.samplestickerapp.StickerContentProvider.STICKERS;
 import static com.example.samplestickerapp.StickerContentProvider.STICKER_FILE_EMOJI_IN_QUERY;
 import static com.example.samplestickerapp.StickerContentProvider.STICKER_FILE_NAME_IN_QUERY;
-import static com.example.samplestickerapp.StickerContentProvider.TRAY_IMAGE_FILE;
+import static com.example.samplestickerapp.StickerContentProvider.ORIGINAL_TRAY_IMAGE_FILE;
 
 import com.example.samplestickerapp.model.Sticker;
 import com.example.samplestickerapp.model.StickerPack;
-import com.example.samplestickerapp.utils.Folders;
 
-class StickerPackLoader {
+public class StickerPackLoader {
 
     /**
      * Get the list of sticker packs for the sticker content provider
@@ -99,7 +99,8 @@ class StickerPackLoader {
             final String identifier = cursor.getString(cursor.getColumnIndexOrThrow(IDENTIFIER));
             final String name = cursor.getString(cursor.getColumnIndexOrThrow(NAME));
             final String publisher = cursor.getString(cursor.getColumnIndexOrThrow(PUBLISHER));
-            final String trayImage = cursor.getString(cursor.getColumnIndexOrThrow(TRAY_IMAGE_FILE));
+            final String originalTrayImage = cursor.getString(cursor.getColumnIndexOrThrow(ORIGINAL_TRAY_IMAGE_FILE));
+            final String resizedTrayImage = cursor.getString(cursor.getColumnIndex(RESIZED_TRAY_IMAGE_FILE));
             final String folder = cursor.getString(cursor.getColumnIndexOrThrow(FOLDER));
             final String publisherEmail = cursor.getString(cursor.getColumnIndexOrThrow(PUBLISHER_EMAIL));
             final String publisherWebsite = cursor.getString(cursor.getColumnIndexOrThrow(PUBLISHER_WEBSITE));
@@ -111,7 +112,8 @@ class StickerPackLoader {
             final StickerPack stickerPack = new StickerPack(identifier,
                     name,
                     publisher,
-                    trayImage,
+                    originalTrayImage,
+                    resizedTrayImage,
                     folder,
                     publisherEmail,
                     publisherWebsite,
@@ -180,5 +182,9 @@ class StickerPackLoader {
 
     static Uri getStickerAssetUri(String identifier, String imageName) {
         return new Uri.Builder().scheme(ContentResolver.SCHEME_CONTENT).authority(BuildConfig.CONTENT_PROVIDER_AUTHORITY).appendPath(StickerContentProvider.STICKERS_ASSET).appendPath(identifier).appendPath(imageName).build();
+    }
+
+    public static Uri getStickerPackInsertUri() {
+        return new Uri.Builder().scheme(ContentResolver.SCHEME_CONTENT).authority(BuildConfig.CONTENT_PROVIDER_AUTHORITY).appendPath(StickerContentProvider.METHODS_ADD).appendPath(StickerContentProvider.PACK).build();
     }
 }

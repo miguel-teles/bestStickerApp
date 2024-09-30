@@ -18,8 +18,6 @@ import android.webkit.URLUtil;
 
 import androidx.annotation.NonNull;
 
-import com.example.samplestickerapp.exception.StickerException;
-import com.example.samplestickerapp.exception.StickerExceptionHandler;
 import com.example.samplestickerapp.model.Sticker;
 import com.example.samplestickerapp.model.StickerPack;
 import com.example.samplestickerapp.utils.Utils;
@@ -74,7 +72,7 @@ public class StickerPackValidator {
         if (stickerPack.getName().length() > CHAR_COUNT_MAX) {
             throw new IllegalStateException("sticker pack name cannot exceed " + CHAR_COUNT_MAX + " characters, sticker pack identifier: " + stickerPack.getIdentifier());
         }
-        if (TextUtils.isEmpty(stickerPack.getTrayImageFile())) {
+        if (TextUtils.isEmpty(stickerPack.getOriginalTrayImageFile())) {
             throw new IllegalStateException("sticker pack tray id is empty, sticker pack identifier:" + stickerPack.getIdentifier());
         }
         if (!TextUtils.isEmpty(stickerPack.getAndroidPlayStoreLink()) && !isValidWebsiteUrl(stickerPack.getAndroidPlayStoreLink())) {
@@ -102,19 +100,19 @@ public class StickerPackValidator {
             throw new IllegalStateException("publisher email does not seem valid, email is: " + stickerPack.getPublisherEmail());
         }
         try {
-            final byte[] stickerAssetBytes = StickerPackLoader.fetchStickerAsset(stickerPack.getIdentifier(), stickerPack.getTrayImageFile(), context.getContentResolver());
+            final byte[] stickerAssetBytes = StickerPackLoader.fetchStickerAsset(stickerPack.getIdentifier(), stickerPack.getResizedTrayImageFile(), context.getContentResolver());
             if (stickerAssetBytes.length > TRAY_IMAGE_FILE_SIZE_MAX_KB * KB_IN_BYTES) {
-                throw new IllegalStateException("tray image should be less than " + TRAY_IMAGE_FILE_SIZE_MAX_KB + " KB, tray image file: " + stickerPack.getTrayImageFile());
+                throw new IllegalStateException("tray image should be less than " + TRAY_IMAGE_FILE_SIZE_MAX_KB + " KB, tray image file: " + stickerPack.getOriginalTrayImageFile());
             }
             Bitmap bitmap = BitmapFactory.decodeByteArray(stickerAssetBytes, 0, stickerAssetBytes.length);
             if (bitmap.getHeight() > TRAY_IMAGE_DIMENSION_MAX || bitmap.getHeight() < TRAY_IMAGE_DIMENSION_MIN) {
-                throw new IllegalStateException("tray image height should between " + TRAY_IMAGE_DIMENSION_MIN + " and " + TRAY_IMAGE_DIMENSION_MAX + " pixels, current tray image height is " + bitmap.getHeight() + ", tray image file: " + stickerPack.getTrayImageFile());
+                throw new IllegalStateException("tray image height should between " + TRAY_IMAGE_DIMENSION_MIN + " and " + TRAY_IMAGE_DIMENSION_MAX + " pixels, current tray image height is " + bitmap.getHeight() + ", tray image file: " + stickerPack.getOriginalTrayImageFile());
             }
             if (bitmap.getWidth() > TRAY_IMAGE_DIMENSION_MAX || bitmap.getWidth() < TRAY_IMAGE_DIMENSION_MIN) {
-                throw new IllegalStateException("tray image width should be between " + TRAY_IMAGE_DIMENSION_MIN + " and " + TRAY_IMAGE_DIMENSION_MAX + " pixels, current tray image width is " + bitmap.getWidth() + ", tray image file: " + stickerPack.getTrayImageFile());
+                throw new IllegalStateException("tray image width should be between " + TRAY_IMAGE_DIMENSION_MIN + " and " + TRAY_IMAGE_DIMENSION_MAX + " pixels, current tray image width is " + bitmap.getWidth() + ", tray image file: " + stickerPack.getOriginalTrayImageFile());
             }
         } catch (IOException e) {
-            throw new IllegalStateException("Cannot open tray image, " + stickerPack.getTrayImageFile(), e);
+            throw new IllegalStateException("Cannot open tray image, " + stickerPack.getOriginalTrayImageFile(), e);
         }
         final List<Sticker> stickers = stickerPack.getStickers();
         if ((stickers.size() < STICKER_SIZE_MIN || stickers.size() > STICKER_SIZE_MAX) && Utils.tpAmbiente.equals("P")) {

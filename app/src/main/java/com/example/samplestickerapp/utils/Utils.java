@@ -21,6 +21,8 @@ public class Utils {
     public static int PICK_IMAGE_REQUEST_CODE = 1;
     public static String tpAmbiente = "H";
 
+    private static Context context;
+
 
     public static Integer encontraMaior(List<Number> numberList) {
         Integer maiorNmb = null;
@@ -81,5 +83,15 @@ public class Utils {
     public static String formatData(Date date, String format) {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat(format);
         return simpleDateFormat.format(date);
+    }
+
+    public static Context getContext() {
+        return context;
+    }
+
+    public static void setContext(Context context) {
+        if (Utils.context == null) {
+            Utils.context = context;
+        }
     }
 }

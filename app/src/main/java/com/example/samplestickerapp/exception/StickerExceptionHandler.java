@@ -1,6 +1,8 @@
 package com.example.samplestickerapp.exception;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.widget.Toast;
 
 public abstract class StickerExceptionHandler {
@@ -30,10 +32,12 @@ public abstract class StickerExceptionHandler {
 
         text.append(" - ");
         text.append(ex.getLocationException());
-
-        int duration = isCritical != null && isCritical || ex.getStickerDBExceptionEnum() != null ? Toast.LENGTH_LONG : Toast.LENGTH_SHORT;
-
-        Toast.makeText(context, text.toString(), duration).show();
+        System.out.println(ex.getLocationException());
+        new AlertDialog.Builder(context)
+                .setTitle("Erro :(")
+                .setMessage(text)
+                .setIcon(android.R.drawable.ic_dialog_alert)
+                .show();
     }
 
     public static String returnExceptionType(Exception ex) {
