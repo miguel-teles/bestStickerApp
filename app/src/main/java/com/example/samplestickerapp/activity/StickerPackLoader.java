@@ -6,10 +6,11 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-package com.example.samplestickerapp;
+package com.example.samplestickerapp.activity;
 
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.text.TextUtils;
@@ -24,23 +25,24 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 
-import static com.example.samplestickerapp.StickerContentProvider.ANIMATED_STICKER_PACK;
-import static com.example.samplestickerapp.StickerContentProvider.AVOID_CACHE;
-import static com.example.samplestickerapp.StickerContentProvider.FOLDER;
-import static com.example.samplestickerapp.StickerContentProvider.IDENTIFIER;
-import static com.example.samplestickerapp.StickerContentProvider.IMAGE_DATA_VERSION;
-import static com.example.samplestickerapp.StickerContentProvider.LICENSE_AGREENMENT_WEBSITE;
-import static com.example.samplestickerapp.StickerContentProvider.NAME;
-import static com.example.samplestickerapp.StickerContentProvider.PRIVACY_POLICY_WEBSITE;
-import static com.example.samplestickerapp.StickerContentProvider.PUBLISHER;
-import static com.example.samplestickerapp.StickerContentProvider.PUBLISHER_EMAIL;
-import static com.example.samplestickerapp.StickerContentProvider.PUBLISHER_WEBSITE;
-import static com.example.samplestickerapp.StickerContentProvider.RESIZED_TRAY_IMAGE_FILE;
-import static com.example.samplestickerapp.StickerContentProvider.STICKERS;
-import static com.example.samplestickerapp.StickerContentProvider.STICKER_FILE_EMOJI_IN_QUERY;
-import static com.example.samplestickerapp.StickerContentProvider.STICKER_FILE_NAME_IN_QUERY;
-import static com.example.samplestickerapp.StickerContentProvider.ORIGINAL_TRAY_IMAGE_FILE;
+import static com.example.samplestickerapp.activity.StickerContentProvider.ANIMATED_STICKER_PACK;
+import static com.example.samplestickerapp.activity.StickerContentProvider.AVOID_CACHE;
+import static com.example.samplestickerapp.activity.StickerContentProvider.FOLDER;
+import static com.example.samplestickerapp.activity.StickerContentProvider.IDENTIFIER;
+import static com.example.samplestickerapp.activity.StickerContentProvider.IMAGE_DATA_VERSION;
+import static com.example.samplestickerapp.activity.StickerContentProvider.LICENSE_AGREENMENT_WEBSITE;
+import static com.example.samplestickerapp.activity.StickerContentProvider.NAME;
+import static com.example.samplestickerapp.activity.StickerContentProvider.PRIVACY_POLICY_WEBSITE;
+import static com.example.samplestickerapp.activity.StickerContentProvider.PUBLISHER;
+import static com.example.samplestickerapp.activity.StickerContentProvider.PUBLISHER_EMAIL;
+import static com.example.samplestickerapp.activity.StickerContentProvider.PUBLISHER_WEBSITE;
+import static com.example.samplestickerapp.activity.StickerContentProvider.RESIZED_TRAY_IMAGE_FILE;
+import static com.example.samplestickerapp.activity.StickerContentProvider.STICKERS;
+import static com.example.samplestickerapp.activity.StickerContentProvider.STICKER_FILE_EMOJI_IN_QUERY;
+import static com.example.samplestickerapp.activity.StickerContentProvider.STICKER_FILE_NAME_IN_QUERY;
+import static com.example.samplestickerapp.activity.StickerContentProvider.ORIGINAL_TRAY_IMAGE_FILE;
 
+import com.example.samplestickerapp.BuildConfig;
 import com.example.samplestickerapp.model.Sticker;
 import com.example.samplestickerapp.model.StickerPack;
 
@@ -61,7 +63,7 @@ public class StickerPackLoader {
             if (identifierSet.contains(stickerPack.getIdentifier())) {
                 throw new IllegalStateException("sticker pack identifiers should be unique, there are more than one pack with identifier:" + stickerPack.getIdentifier());
             } else {
-                identifierSet.add(stickerPack.getIdentifier());
+                identifierSet.add(stickerPack.getIdentifier().toString());
             }
         }
         for (StickerPack stickerPack : stickerPackList) {
@@ -78,7 +80,7 @@ public class StickerPackLoader {
         for (Sticker sticker : stickers) {
             final byte[] bytes;
             try {
-                bytes = fetchStickerAsset(stickerPack.getIdentifier(), sticker.getImageFileName(), context.getContentResolver());
+                bytes = fetchStickerAsset(stickerPack.getIdentifier().toString(), sticker.getImageFileName(), context.getContentResolver());
                 if (bytes.length <= 0) {
                     throw new IllegalStateException("Asset file is empty, pack: " + stickerPack.getName() + ", sticker: " + sticker.getImageFileName());
                 }
@@ -96,7 +98,7 @@ public class StickerPackLoader {
         ArrayList<StickerPack> stickerPackList = new ArrayList<>();
         cursor.moveToFirst();
         while (!cursor.isAfterLast()) {
-            final String identifier = cursor.getString(cursor.getColumnIndexOrThrow(IDENTIFIER));
+            final int identifier = cursor.getInt(cursor.getColumnIndexOrThrow(IDENTIFIER));
             final String name = cursor.getString(cursor.getColumnIndexOrThrow(NAME));
             final String publisher = cursor.getString(cursor.getColumnIndexOrThrow(PUBLISHER));
             final String originalTrayImage = cursor.getString(cursor.getColumnIndexOrThrow(ORIGINAL_TRAY_IMAGE_FILE));
@@ -145,7 +147,7 @@ public class StickerPackLoader {
                 if (!TextUtils.isEmpty(emojisConcatenated)) {
                     emojis = Arrays.asList(emojisConcatenated.split(","));
                 }
-                stickers.add(new Sticker(name, emojis));
+                stickers.add(new Sticker(name, emojis, null));
             } while (cursor.moveToNext());
         }
         if (cursor != null) {

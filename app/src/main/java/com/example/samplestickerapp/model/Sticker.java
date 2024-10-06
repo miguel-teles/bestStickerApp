@@ -14,13 +14,17 @@ import android.os.Parcelable;
 import java.util.List;
 
 public class Sticker implements Parcelable {
+    public final static String NM_TABELA = "stickers";
+    private Integer identifier; //PK
+    private Integer packIdentifier; //FK
     private final String imageFileName;
     private final List<String> emojis;
     private long size;
 
-    public Sticker(String imageFileName, List<String> emojis) {
+    public Sticker(String imageFileName, List<String> emojis, Integer packIdentifier) {
         this.imageFileName = imageFileName;
         this.emojis = emojis;
+        this.packIdentifier = packIdentifier;
     }
 
     private Sticker(Parcel in) {
@@ -67,5 +71,21 @@ public class Sticker implements Parcelable {
 
     public long getSize() {
         return size;
+    }
+
+    public Integer getIdentifier() {
+        return identifier;
+    }
+
+    public void setIdentifier(Integer identifier) {
+        this.identifier = identifier;
+    }
+
+    public Integer getPackIdentifier() {
+        return packIdentifier;
+    }
+
+    public void setPackIdentifier(Integer packIdentifier) {
+        this.packIdentifier = packIdentifier;
     }
 }

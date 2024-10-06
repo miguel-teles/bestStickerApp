@@ -13,7 +13,7 @@ import android.util.JsonReader;
 
 import androidx.annotation.NonNull;
 
-import com.example.samplestickerapp.StickerPackValidator;
+import com.example.samplestickerapp.activity.StickerPackValidator;
 import com.example.samplestickerapp.model.Sticker;
 import com.example.samplestickerapp.model.StickerPack;
 

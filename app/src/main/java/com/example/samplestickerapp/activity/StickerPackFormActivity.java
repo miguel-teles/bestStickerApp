@@ -1,4 +1,4 @@
-package com.example.samplestickerapp;
+package com.example.samplestickerapp.activity;
 
 import android.app.Activity;
 import android.content.Context;
@@ -11,9 +11,9 @@ import android.view.View;
 import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.example.samplestickerapp.database.MyDatabase;
+import com.example.samplestickerapp.R;
+import com.example.samplestickerapp.repository.MyDatabase;
 import com.example.samplestickerapp.exception.StickerException;
 import com.example.samplestickerapp.exception.StickerExceptionHandler;
 import com.example.samplestickerapp.exception.enums.StickerDBExceptionEnum;
@@ -80,7 +80,7 @@ public class StickerPackFormActivity extends Activity {
             this.stickerPack = (StickerPack) intent.getExtras().get(STICKER_PACK);
             txtNomePacote.setText(stickerPack.getName());
             txtAutor.setText(stickerPack.getPublisher());
-            stickerPackImageView.setImageURI(StickerPackLoader.getStickerAssetUri(stickerPack.getIdentifier(), stickerPack.getOriginalTrayImageFile()));
+            stickerPackImageView.setImageURI(StickerPackLoader.getStickerAssetUri(stickerPack.getIdentifier().toString(), stickerPack.getOriginalTrayImageFile()));
             stickerPackImageView.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
             stickerPackImageView.setTag("modified");
             cbAnimated.setActivated(false);
@@ -178,7 +178,6 @@ public class StickerPackFormActivity extends Activity {
         }
         String name = txtNomePacote.getText().toString();
         String stickerPackFolderName = name + Utils.formatData(new Date(), "yyyy.MM.dd.HH.mm.ss");
-        Long identifier = null;
         File stickerPackFolder = null;
         try {
             stickerPackFolder = Folders.makeDirPackIdentifier(stickerPackFolderName, view.getContext());
@@ -196,16 +195,16 @@ public class StickerPackFormActivity extends Activity {
                     stickerPackFolderName,
                     "1",
                     cbAnimated.isChecked());
-            MyDatabase.inserirPacote(stickerPack, view.getContext());
+            MyDatabase.getStickerPackRepository().save(stickerPack, view.getContext());
             if (stickerPack.getIdentifier() != null) {
                 redirecionaStickerPackDetailsActivity(stickerPack);
             } else {
                 throw new StickerException(null, StickerDBExceptionEnum.INSERT, "Erro ao salvar pacote no banco");
             }
         } catch (StickerException ex) {
-            if (identifier != null) {
+            if (stickerPack.getIdentifier() != null) {
                 try {
-                    MyDatabase.deleteStickerPack(identifier.toString(), view.getContext());
+                    MyDatabase.getStickerPackRepository().remove(stickerPack.getIdentifier(), view.getContext());
                 } catch (Exception e) {
                 }
             }

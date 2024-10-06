@@ -6,7 +6,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-package com.example.samplestickerapp;
+package com.example.samplestickerapp.activity;
 
 import android.content.Context;
 import android.content.Intent;
@@ -19,6 +19,7 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.samplestickerapp.R;
 import com.example.samplestickerapp.model.StickerPack;
 
 import java.lang.ref.WeakReference;
@@ -83,7 +84,7 @@ public class StickerPackListActivity extends AddStickerPackActivity {
     }
 
 
-    private final StickerPackListAdapter.OnAddButtonClickedListener onAddButtonClickedListener = pack -> addStickerPackToWhatsApp(pack.getIdentifier(), pack.getName());
+    private final StickerPackListAdapter.OnAddButtonClickedListener onAddButtonClickedListener = pack -> addStickerPackToWhatsApp(pack.getIdentifier().toString(), pack.getName());
 
 
     private void recalculateColumnCount() {
@@ -124,7 +125,7 @@ public class StickerPackListActivity extends AddStickerPackActivity {
                 return Arrays.asList(stickerPackArray);
             }
             for (StickerPack stickerPack : stickerPackArray) {
-                stickerPack.setIsWhitelisted(WhitelistCheck.isWhitelisted(stickerPackListActivity, stickerPack.getIdentifier()));
+                stickerPack.setIsWhitelisted(WhitelistCheck.isWhitelisted(stickerPackListActivity, stickerPack.getIdentifier().toString()));
             }
             return Arrays.asList(stickerPackArray);
         }

@@ -6,7 +6,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-package com.example.samplestickerapp;
+package com.example.samplestickerapp.activity;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -53,13 +53,13 @@ public class StickerPackValidator {
      * Checks whether a sticker pack contains valid data
      */
     static void verifyStickerPackValidity(@NonNull Context context, @NonNull StickerPack stickerPack) throws IllegalStateException {
-        if (TextUtils.isEmpty(stickerPack.getIdentifier())) {
+        if (TextUtils.isEmpty(stickerPack.getIdentifier().toString())) {
             throw new IllegalStateException("sticker pack identifier is empty");
         }
-        if (stickerPack.getIdentifier().length() > CHAR_COUNT_MAX) {
+        if (stickerPack.getIdentifier().toString().length() > CHAR_COUNT_MAX) {
             throw new IllegalStateException("sticker pack identifier cannot exceed " + CHAR_COUNT_MAX + " characters");
         }
-        checkStringValidity(stickerPack.getIdentifier());
+        checkStringValidity(stickerPack.getIdentifier().toString());
         if (TextUtils.isEmpty(stickerPack.getPublisher())) {
             throw new IllegalStateException("sticker pack publisher is empty, sticker pack identifier: " + stickerPack.getIdentifier());
         }
@@ -100,7 +100,7 @@ public class StickerPackValidator {
             throw new IllegalStateException("publisher email does not seem valid, email is: " + stickerPack.getPublisherEmail());
         }
         try {
-            final byte[] stickerAssetBytes = StickerPackLoader.fetchStickerAsset(stickerPack.getIdentifier(), stickerPack.getResizedTrayImageFile(), context.getContentResolver());
+            final byte[] stickerAssetBytes = StickerPackLoader.fetchStickerAsset(stickerPack.getIdentifier().toString(), stickerPack.getResizedTrayImageFile(), context.getContentResolver());
             if (stickerAssetBytes.length > TRAY_IMAGE_FILE_SIZE_MAX_KB * KB_IN_BYTES) {
                 throw new IllegalStateException("tray image should be less than " + TRAY_IMAGE_FILE_SIZE_MAX_KB + " KB, tray image file: " + stickerPack.getOriginalTrayImageFile());
             }
@@ -119,7 +119,7 @@ public class StickerPackValidator {
             throw new IllegalStateException("sticker pack sticker count should be between 3 to 30 inclusive, it currently has " + stickers.size() + ", sticker pack identifier: " + stickerPack.getIdentifier());
         }
         for (final Sticker sticker : stickers) {
-            validateSticker(context, stickerPack.getIdentifier(), sticker, stickerPack.isAnimatedStickerPack());
+            validateSticker(context, stickerPack.getIdentifier().toString(), sticker, stickerPack.isAnimatedStickerPack());
         }
     }
 

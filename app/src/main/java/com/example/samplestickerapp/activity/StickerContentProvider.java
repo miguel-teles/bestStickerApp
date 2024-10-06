@@ -6,7 +6,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-package com.example.samplestickerapp;
+package com.example.samplestickerapp.activity;
 
 import android.content.ContentProvider;
 import android.content.ContentResolver;
@@ -21,7 +21,8 @@ import android.text.TextUtils;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.example.samplestickerapp.database.MyDatabase;
+import com.example.samplestickerapp.BuildConfig;
+import com.example.samplestickerapp.repository.MyDatabase;
 import com.example.samplestickerapp.exception.StickerException;
 import com.example.samplestickerapp.exception.StickerExceptionHandler;
 import com.example.samplestickerapp.exception.enums.StickerCriticalExceptionEnum;
@@ -175,7 +176,7 @@ public class StickerContentProvider extends ContentProvider {
     private List<StickerPack> getStickerPackList() {
         if (stickerPackList == null) {
             try {
-                stickerPackList = MyDatabase.selectAllStickerPacks(getContext());
+                stickerPackList = MyDatabase.getStickerPackRepository().findAll(getContext());
             } catch (StickerException ex) {
                 StickerExceptionHandler.handleException(ex, getContext());
             }

@@ -19,6 +19,7 @@ import java.util.List;
 
 public class StickerPack implements Parcelable {
 
+    public static final String NM_TABELA = "packs";
     private static final String IDENTIFIER = "identifier";
     private static final String NAME = "name";
     private static final String PUBLISHER = "publisher";
@@ -33,7 +34,7 @@ public class StickerPack implements Parcelable {
     private static final String AVOID_CACHE = "avoidCache";
     private static final String ANIMATED_STICKER_PACK = "animatedStickerPack";
 
-    private String identifier;
+    private Integer identifier;
     private final String name;
     private final String publisher;
     private final String originalTrayImageFile;
@@ -81,7 +82,7 @@ public class StickerPack implements Parcelable {
                        String licenseAgreementWebsite,
                        Boolean animatedStickerPack,
                        List<Sticker> stickerList) {
-        this.identifier = identifier+"";
+        this.identifier = identifier;
         this.name = name;
         this.publisher = publisher;
         this.originalTrayImageFile = originalTrayImageFile;
@@ -97,7 +98,7 @@ public class StickerPack implements Parcelable {
         this.stickers = stickerList;
     }
 
-    public StickerPack(String identifier,
+    public StickerPack(Integer identifier,
                        String name,
                        String publisher,
                        String originalTrayImageFile,
@@ -125,7 +126,7 @@ public class StickerPack implements Parcelable {
         this.animatedStickerPack = animatedStickerPack;
     }
 
-    public StickerPack(String identifier,
+    public StickerPack(Integer identifier,
                        String name,
                        String publisher,
                        String originalTrayImageFile,
@@ -192,7 +193,7 @@ public class StickerPack implements Parcelable {
     }
 
     private StickerPack(Parcel in) {
-        identifier = in.readString();
+        identifier = in.readInt();
         name = in.readString();
         publisher = in.readString();
         originalTrayImageFile = in.readString();
@@ -258,7 +259,7 @@ public class StickerPack implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(identifier);
+        dest.writeInt(identifier);
         dest.writeString(name);
         dest.writeString(publisher);
         dest.writeString(originalTrayImageFile);
@@ -278,7 +279,7 @@ public class StickerPack implements Parcelable {
         dest.writeByte((byte) (animatedStickerPack ? 1 : 0));
     }
 
-    public String getIdentifier() {
+    public Integer getIdentifier() {
         return identifier;
     }
 
@@ -350,7 +351,7 @@ public class StickerPack implements Parcelable {
         return resizedTrayImageFile;
     }
 
-    public void setIdentifier(String identifier) {
+    public void setIdentifier(Integer identifier) {
         if (this.identifier == null) {
             this.identifier = identifier;
         }

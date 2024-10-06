@@ -6,7 +6,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-package com.example.samplestickerapp;
+package com.example.samplestickerapp.activity;
 
 import android.content.Intent;
 import android.net.Uri;
@@ -24,6 +24,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.samplestickerapp.R;
 import com.example.samplestickerapp.model.StickerPack;
 import com.facebook.drawee.view.SimpleDraweeView;
 
@@ -87,9 +88,9 @@ public class StickerPackDetailsActivity extends AddStickerPackActivity {
         }
         packNameTextView.setText(stickerPack.getName());
         packPublisherTextView.setText(stickerPack.getPublisher());
-        packTrayIcon.setImageURI(StickerPackLoader.getStickerAssetUri(stickerPack.getIdentifier(), stickerPack.getResizedTrayImageFile()));
+        packTrayIcon.setImageURI(StickerPackLoader.getStickerAssetUri(stickerPack.getIdentifier().toString(), stickerPack.getResizedTrayImageFile()));
         packSizeTextView.setText(Formatter.formatShortFileSize(this, stickerPack.getTotalSize()));
-        btnAddToWhatsapp.setOnClickListener(v -> addStickerPackToWhatsApp(stickerPack.getIdentifier(), stickerPack.getName()));
+        btnAddToWhatsapp.setOnClickListener(v -> addStickerPackToWhatsApp(stickerPack.getIdentifier().toString(), stickerPack.getName()));
         btnEditStickerPack.setOnClickListener(btn -> editStickerPack(stickerPack));
 //        btnAddNewSticker.setOnClickListener(btn -> addNewSticker(stickerPack));
         if (getSupportActionBar() != null) {
@@ -125,7 +126,7 @@ public class StickerPackDetailsActivity extends AddStickerPackActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.action_info && stickerPack != null) {
-            Uri trayIconUri = StickerPackLoader.getStickerAssetUri(stickerPack.getIdentifier(), stickerPack.getOriginalTrayImageFile());
+            Uri trayIconUri = StickerPackLoader.getStickerAssetUri(stickerPack.getIdentifier().toString(), stickerPack.getOriginalTrayImageFile());
             launchInfoActivity(stickerPack.getPublisherWebsite(), stickerPack.getPublisherEmail(), stickerPack.getPrivacyPolicyWebsite(), stickerPack.getLicenseAgreementWebsite(), trayIconUri.toString());
             return true;
         }
@@ -212,7 +213,7 @@ public class StickerPackDetailsActivity extends AddStickerPackActivity {
             if (stickerPackDetailsActivity == null) {
                 return false;
             }
-            return WhitelistCheck.isWhitelisted(stickerPackDetailsActivity, stickerPack.getIdentifier());
+            return WhitelistCheck.isWhitelisted(stickerPackDetailsActivity, stickerPack.getIdentifier().toString());
         }
 
         @Override

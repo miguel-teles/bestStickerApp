@@ -6,7 +6,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-package com.example.samplestickerapp;
+package com.example.samplestickerapp.activity;
 
 import android.content.Context;
 import android.content.Intent;
@@ -19,7 +19,8 @@ import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 
-import com.example.samplestickerapp.database.MyDatabase;
+import com.example.samplestickerapp.R;
+import com.example.samplestickerapp.repository.MyDatabase;
 import com.example.samplestickerapp.exception.StickerException;
 import com.example.samplestickerapp.exception.StickerExceptionHandler;
 import com.example.samplestickerapp.model.StickerPack;
