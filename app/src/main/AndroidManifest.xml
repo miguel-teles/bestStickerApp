@@ -7,7 +7,7 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     
     <application
-        android:name=".activity.StickerApplication"
+        android:name=".view.StickerApplication"
         android:allowBackup="false"
         android:fullBackupContent="false"
         android:icon="@mipmap/ic_launcher"
@@ -16,35 +16,35 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
-        <activity android:name=".activity.EntryActivity">
+        <activity android:name=".view.EntryActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".activity.StickerPackListActivity" />
+        <activity android:name=".view.StickerPackListActivity" />
         <activity
-            android:name=".activity.StickerPackDetailsActivity"
-            android:parentActivityName=".activity.StickerPackListActivity"
+            android:name=".view.StickerPackDetailsActivity"
+            android:parentActivityName=".view.StickerPackListActivity"
             tools:ignore="UnusedAttribute">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.example.samplestickerapp.activity.StickerPackListActivity" />
+                android:value="com.example.samplestickerapp.view.StickerPackListActivity" />
         </activity>
         <activity
-            android:name=".activity.StickerPackInfoActivity"
+            android:name=".view.StickerPackInfoActivity"
             android:label="@string/title_activity_sticker_pack_info"
-            android:parentActivityName=".activity.StickerPackDetailsActivity"
+            android:parentActivityName=".view.StickerPackDetailsActivity"
             tools:ignore="UnusedAttribute">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.example.samplestickerapp.activity.StickerPackDetailsActivity" />
+                android:value="com.example.samplestickerapp.view.StickerPackDetailsActivity" />
         </activity>
 
-        <activity android:name=".activity.StickerPackFormActivity" />
+        <activity android:name=".view.StickerPackFormActivity" />
 
         <provider
-            android:name=".activity.StickerContentProvider"
+            android:name=".view.StickerContentProvider"
             android:authorities="${contentProviderAuthority}"
             android:enabled="true"
             android:exported="true"

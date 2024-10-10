@@ -6,7 +6,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-package com.example.samplestickerapp.activity;
+package com.example.samplestickerapp.view;
 
 import android.content.ContentProvider;
 import android.content.ContentResolver;
@@ -28,6 +28,8 @@ import com.example.samplestickerapp.exception.StickerExceptionHandler;
 import com.example.samplestickerapp.exception.enums.StickerCriticalExceptionEnum;
 import com.example.samplestickerapp.model.Sticker;
 import com.example.samplestickerapp.model.StickerPack;
+import com.example.samplestickerapp.repository.implementations.StickerPackRepository;
+import com.example.samplestickerapp.repository.implementations.StickerRepository;
 import com.example.samplestickerapp.utils.Folders;
 
 import java.io.File;
@@ -85,11 +87,22 @@ public class StickerContentProvider extends ContentProvider {
 
     private List<StickerPack> stickerPackList;
 
+    private StickerRepository stickerRepository;
+    private StickerPackRepository stickerPackRepository;
+
     /**
      * NÃO MUDAR ESSES MATCHERS E NEM AS URIS SE NÃO O WHATSAPP NÃO CONSEGUE BUSCAR DESTE CONTENTPROVIDER
      **/
     @Override
     public boolean onCreate() {
+
+        try {
+            stickerRepository = new StickerRepository(MyDatabase.getInstance(getContext()).getMyDB());
+            stickerPackRepository = new StickerPackRepository(MyDatabase.getInstance(getContext()).getMyDB());
+        } catch (StickerException ex) {
+            StickerExceptionHandler.handleException(ex, getContext());
+            return false;
+        }
 
         AUTHORITY = BuildConfig.CONTENT_PROVIDER_AUTHORITY;
         if (!AUTHORITY.startsWith(Objects.requireNonNull(getContext()).getPackageName())) {
@@ -176,7 +189,7 @@ public class StickerContentProvider extends ContentProvider {
     private List<StickerPack> getStickerPackList() {
         if (stickerPackList == null) {
             try {
-                stickerPackList = MyDatabase.getStickerPackRepository().findAll(getContext());
+                stickerPackList = stickerPackRepository.findAll(getContext());
             } catch (StickerException ex) {
                 StickerExceptionHandler.handleException(ex, getContext());
             }
@@ -258,9 +271,9 @@ public class StickerContentProvider extends ContentProvider {
             throw new IllegalArgumentException("path segments should be 3, uri is: " + uri);
         }
         String fileName = pathSegments.get(pathSegments.size() - 1);
-        final String identifier = pathSegments.get(pathSegments.size() - 2);
-        if (TextUtils.isEmpty(identifier)) {
-            throw new IllegalArgumentException("identifier is empty, uri: " + uri);
+        final Integer identifier = Integer.parseInt(pathSegments.get(pathSegments.size() - 2));
+        if (identifier == null) {
+            throw new IllegalArgumentException("identifier is null, uri: " + uri);
         }
         if (TextUtils.isEmpty(fileName)) {
             throw new IllegalArgumentException("file name is empty, uri: " + uri);

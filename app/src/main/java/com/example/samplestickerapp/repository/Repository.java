@@ -4,19 +4,17 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 
 import com.example.samplestickerapp.exception.StickerException;
+import com.example.samplestickerapp.repository.interfaces.RepositoryInterface;
 
-public abstract class Repository<T> implements RepositoryInterface<T>{
+public abstract class Repository<T> implements RepositoryInterface<T> {
 
-    protected String SALVAR;
-    protected String CONSULTAR_BY_ID;
+    protected String FIND_BY_ID;
     protected String DELETAR_BY_ID;
+    protected String FIND_ALL;
 
     public Repository(String nmTabela) {
-        CONSULTAR_BY_ID = String.format(RepositoryInterface.FIND_BY_ID, nmTabela);
         DELETAR_BY_ID = String.format(RepositoryInterface.DELETE_BY_ID, nmTabela);
-    }
-
-    SQLiteDatabase getMyDB(Context context) throws StickerException {
-        return MyDatabase.getMyDB(context);
+        FIND_BY_ID = String.format(RepositoryInterface.FIND_BY_ID, nmTabela);
+        FIND_ALL = String.format(RepositoryInterface.FIND_ALL, nmTabela);
     }
 }

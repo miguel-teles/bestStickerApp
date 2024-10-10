@@ -1,4 +1,4 @@
-package com.example.samplestickerapp.repository;
+package com.example.samplestickerapp.repository.interfaces;
 
 import android.content.Context;
 

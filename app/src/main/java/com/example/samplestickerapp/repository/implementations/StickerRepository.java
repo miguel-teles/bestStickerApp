@@ -1,4 +1,4 @@
-package com.example.samplestickerapp.repository;
+package com.example.samplestickerapp.repository.implementations;
 
 import android.content.Context;
 import android.database.Cursor;
@@ -8,6 +8,7 @@ import android.database.sqlite.SQLiteStatement;
 import com.example.samplestickerapp.exception.StickerException;
 import com.example.samplestickerapp.exception.enums.StickerDBExceptionEnum;
 import com.example.samplestickerapp.model.Sticker;
+import com.example.samplestickerapp.repository.Repository;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,15 +16,19 @@ import java.util.List;
 public class StickerRepository extends Repository<Sticker> {
 
     private String SAVE = "INSERT INTO stickers VALUES (null, ?, ?, ?)";
+    private String FIND_ALL_BY_PACKIDENTIFIER = "SELECT * FROM stickers WHERE packIdentifier=%d";
 
-    public StickerRepository() {
+    private SQLiteDatabase sqLiteDatabase;
+
+    public StickerRepository(SQLiteDatabase sqLiteDatabase) {
         super(Sticker.NM_TABELA);
+        this.sqLiteDatabase = sqLiteDatabase;
     }
 
     @Override
     public Sticker save(Sticker sticker, Context context) throws StickerException {
         try {
-            SQLiteStatement stmt = getMyDB(context).compileStatement(SAVE);
+            SQLiteStatement stmt = sqLiteDatabase.compileStatement(SAVE);
 
             /*
             *  "id INTEGER PRIMARY KEY AUTOINCREMENT," +
@@ -40,7 +45,7 @@ public class StickerRepository extends Repository<Sticker> {
 
             long result = stmt.executeInsert();
             if (result != -1) {
-                Cursor cursor = getMyDB(context).rawQuery("select last_insert_rowid()", null);
+                Cursor cursor = sqLiteDatabase.rawQuery("select last_insert_rowid()", null);
                 cursor.moveToFirst();
                 sticker.setIdentifier(cursor.getInt(0));
 
@@ -67,8 +72,6 @@ public class StickerRepository extends Repository<Sticker> {
     }
 
     public Integer removeByPackIdentifier(Integer packIdentifier, Context context) throws StickerException {
-        SQLiteDatabase sqLiteDatabase = getMyDB(context);
-
         try {
             String deleteStickers = "DELETE FROM stickers WHERE packIdentifier=?";
             SQLiteStatement stmt = sqLiteDatabase.compileStatement(deleteStickers);
@@ -101,8 +104,8 @@ public class StickerRepository extends Repository<Sticker> {
 
     public List<Sticker> findByPackIdentifier(int packIdentifier, Context context) throws Exception {
         try {
-            String selectStickersQuery = "SELECT * FROM stickers WHERE packIdentifier=" + packIdentifier;
-            Cursor cursor = getMyDB(context).rawQuery(selectStickersQuery, null);
+            String selectStickersQuery = String.format(FIND_ALL_BY_PACKIDENTIFIER, packIdentifier);
+            Cursor cursor = sqLiteDatabase.rawQuery(selectStickersQuery, null);
 
             if (cursor != null) {
                 cursor.moveToFirst();

@@ -6,7 +6,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-package com.example.samplestickerapp.activity;
+package com.example.samplestickerapp.view;
 
 import android.content.Context;
 import android.content.Intent;
@@ -45,7 +45,7 @@ public class EntryActivity extends BaseActivity {
         Utils.setContext(getBaseContext());
         try {
             Folders.makeAllDirs(this);
-            MyDatabase.inicializaBancoETabelas(this);
+            MyDatabase.getInstance(getApplicationContext());
         } catch (StickerException ex) {
             StickerExceptionHandler.handleException(ex, this);
         }

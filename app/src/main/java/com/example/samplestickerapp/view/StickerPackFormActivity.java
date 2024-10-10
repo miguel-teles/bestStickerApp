@@ -1,4 +1,4 @@
-package com.example.samplestickerapp.activity;
+package com.example.samplestickerapp.view;
 
 import android.app.Activity;
 import android.content.Context;
@@ -12,7 +12,14 @@ import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.lifecycle.ViewModelStoreOwner;
+
 import com.example.samplestickerapp.R;
+import com.example.samplestickerapp.exception.StickerDataBaseException;
+import com.example.samplestickerapp.modelView.StickerPackViewModel;
+import com.example.samplestickerapp.modelView.factory.StickerPackViewModelFactory;
 import com.example.samplestickerapp.repository.MyDatabase;
 import com.example.samplestickerapp.exception.StickerException;
 import com.example.samplestickerapp.exception.StickerExceptionHandler;
@@ -26,7 +33,7 @@ import com.google.android.material.textfield.TextInputEditText;
 import java.io.File;
 import java.util.Date;
 
-public class StickerPackFormActivity extends Activity {
+public class StickerPackFormActivity extends AppCompatActivity {
 
     private StickerPack stickerPack;
     private TextView btnAdicionarStickerPack;
@@ -34,7 +41,9 @@ public class StickerPackFormActivity extends Activity {
     private ImageView stickerPackImageView;
     private Uri uriImagemStickerPack;
     private CheckBox cbAnimated;
-    private final String STICKER_PACK_IMAGE_NAME = "packImg";
+
+    private StickerPackViewModel stickerPackViewModel;
+
     public static final String STICKER_PACK = "stickerpack";
 
     @Override
@@ -50,27 +59,12 @@ public class StickerPackFormActivity extends Activity {
         cbAnimated = findViewById(R.id.cbAnimado);
         cbAnimated.setActivated(true);
 
-        stickerPackImageView.setOnClickListener(pacoteImageViewOnClick());
         try {
-            btnAdicionarStickerPack.setOnClickListener(btnSalvarStickerPackOnClick());
-            stickerPackImageView.setOnFocusChangeListener(onFocusChangeListener());
-            txtNomePacote.setOnFocusChangeListener(onFocusChangeListener());
-            txtNomePacote.addTextChangedListener(new TextWatcher() {
-                @Override
-                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            setaOnClickListeners();
 
-                }
+            stickerPackViewModel = new ViewModelProvider(this,
+                    new StickerPackViewModelFactory(getApplicationContext())).get(StickerPackViewModel.class);
 
-                @Override
-                public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-                }
-
-                @Override
-                public void afterTextChanged(Editable s) {
-                    verificaCamposObrigatorios();
-                }
-            });
         } catch (StickerException ex) {
             StickerExceptionHandler.handleException(ex, this);
         }
@@ -87,6 +81,31 @@ public class StickerPackFormActivity extends Activity {
         }
 
         verificaCamposObrigatorios();
+    }
+
+    private void setaOnClickListeners() throws StickerException {
+        stickerPackImageView.setOnClickListener(pacoteImageViewOnClick());
+
+        btnAdicionarStickerPack.setOnClickListener(btnSalvarStickerPackOnClick());
+        stickerPackImageView.setOnFocusChangeListener(onFocusChangeListener());
+        txtNomePacote.setOnFocusChangeListener(onFocusChangeListener());
+        txtNomePacote.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                verificaCamposObrigatorios();
+            }
+        });
+
     }
 
 //    @Override
@@ -163,57 +182,19 @@ public class StickerPackFormActivity extends Activity {
             @Override
             public void onClick(View view) {
                 if (stickerPack == null) {
-                    createStickerPack(view);
+                    StickerPack stickerPack = stickerPackViewModel.createStickerPack(txtAutor.getText().toString(),
+                            txtNomePacote.getText().toString(),
+                            uriImagemStickerPack,
+                            cbAnimated.isChecked(),
+                            getApplicationContext());
+                    if (stickerPack != null) {
+                        redirecionaStickerPackDetailsActivity(stickerPack);
+                    }
                 } else {
                     updateStickerPack(view);
                 }
             }
         };
-    }
-
-    private void createStickerPack(View view) {
-        String publisher = txtAutor.getText().toString();
-        if (Utils.isNothing(publisher)) {
-            publisher = getResources().getString(R.string.defaultPublisher);
-        }
-        String name = txtNomePacote.getText().toString();
-        String stickerPackFolderName = name + Utils.formatData(new Date(), "yyyy.MM.dd.HH.mm.ss");
-        File stickerPackFolder = null;
-        try {
-            stickerPackFolder = Folders.makeDirPackIdentifier(stickerPackFolderName, view.getContext());
-            File[] imgsCopiada = Folders.copiaFotoParaPastaPacote(stickerPackFolderName,
-                    Folders.getRealPathFromURI(uriImagemStickerPack, view.getContext()),
-                    STICKER_PACK_IMAGE_NAME,
-                    Folders.TRAY_IMAGE_SIZE,
-                    Folders.TRAY_IMAGE_MAX_FILE_SIZE,
-                    view.getContext());
-            StickerPack stickerPack = new StickerPack(null,
-                    name,
-                    publisher,
-                    imgsCopiada[0].getPath(),
-                    imgsCopiada[1].getPath(),
-                    stickerPackFolderName,
-                    "1",
-                    cbAnimated.isChecked());
-            MyDatabase.getStickerPackRepository().save(stickerPack, view.getContext());
-            if (stickerPack.getIdentifier() != null) {
-                redirecionaStickerPackDetailsActivity(stickerPack);
-            } else {
-                throw new StickerException(null, StickerDBExceptionEnum.INSERT, "Erro ao salvar pacote no banco");
-            }
-        } catch (StickerException ex) {
-            if (stickerPack.getIdentifier() != null) {
-                try {
-                    MyDatabase.getStickerPackRepository().remove(stickerPack.getIdentifier(), view.getContext());
-                } catch (Exception e) {
-                }
-            }
-            try {
-                Folders.deleteStickerPackFolder(stickerPackFolder, view.getContext());
-            } catch (Exception e) {
-            }
-            StickerExceptionHandler.handleException(ex, view.getContext());
-        }
     }
 
     private void redirecionaStickerPackDetailsActivity(StickerPack stickerPack) {

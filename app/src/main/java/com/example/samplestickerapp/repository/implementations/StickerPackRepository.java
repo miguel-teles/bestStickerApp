@@ -1,15 +1,16 @@
-package com.example.samplestickerapp.repository;
+package com.example.samplestickerapp.repository.implementations;
 
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteStatement;
 
-import com.example.samplestickerapp.activity.StickerPackLoader;
+import com.example.samplestickerapp.repository.MyDatabase;
+import com.example.samplestickerapp.view.StickerPackLoader;
 import com.example.samplestickerapp.exception.StickerException;
 import com.example.samplestickerapp.exception.enums.StickerDBExceptionEnum;
-import com.example.samplestickerapp.model.Sticker;
 import com.example.samplestickerapp.model.StickerPack;
+import com.example.samplestickerapp.repository.Repository;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,15 +22,18 @@ public class StickerPackRepository extends Repository<StickerPack> {
 
     public StickerRepository stickerRepository;
 
-    public StickerPackRepository() {
+    private SQLiteDatabase sqLiteDatabase;
+
+    public StickerPackRepository(SQLiteDatabase sqLiteDatabase) {
         super(StickerPack.NM_TABELA);
-        stickerRepository = new StickerRepository();
+        this.sqLiteDatabase = sqLiteDatabase;
+        stickerRepository = new StickerRepository(sqLiteDatabase);
     }
 
     @Override
     public StickerPack save(StickerPack stickerPack, Context context) throws StickerException {
         try {
-            SQLiteStatement stmt = getMyDB(context).compileStatement(PERSIST);
+            SQLiteStatement stmt = sqLiteDatabase.compileStatement(PERSIST);
 
             stmt.bindString(1, stickerPack.getName());
             stmt.bindString(2, stickerPack.getPublisher());
@@ -46,7 +50,7 @@ public class StickerPackRepository extends Repository<StickerPack> {
 
             long result = stmt.executeInsert();
             if (result != -1) {
-                Cursor cursor = getMyDB(context).rawQuery("select last_insert_rowid()", null);
+                Cursor cursor = sqLiteDatabase.rawQuery("select last_insert_rowid()", null);
                 cursor.moveToFirst();
                 stickerPack.setIdentifier(cursor.getInt(0));
 
@@ -66,7 +70,7 @@ public class StickerPackRepository extends Repository<StickerPack> {
     @Override
     public StickerPack update(StickerPack stickerPack, Context context) throws StickerException {
         try {
-            SQLiteStatement stmt = getMyDB(context).compileStatement(UPDATE);
+            SQLiteStatement stmt = sqLiteDatabase.compileStatement(UPDATE);
 
             stmt.bindString(0, stickerPack.getName());
             stmt.bindString(1, stickerPack.getPublisher());
@@ -93,8 +97,6 @@ public class StickerPackRepository extends Repository<StickerPack> {
 
     @Override
     public Integer remove(Integer identifier, Context context) throws StickerException {
-        SQLiteDatabase sqLiteDatabase = getMyDB(context);
-
         try {
             stickerRepository.removeByPackIdentifier(identifier, context);
 
@@ -121,7 +123,7 @@ public class StickerPackRepository extends Repository<StickerPack> {
     public List<StickerPack> findAll(Context context) throws StickerException {
         try {
             List<StickerPack> stickerPackList = new ArrayList<>();
-            Cursor meuCursor = getMyDB(context).rawQuery(FIND_ALL, null);
+            Cursor meuCursor = sqLiteDatabase.rawQuery(FIND_ALL, null);
 
             if (meuCursor != null)
                 meuCursor.moveToFirst();

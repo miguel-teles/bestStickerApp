@@ -6,7 +6,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-package com.example.samplestickerapp.activity;
+package com.example.samplestickerapp.view;
 
 import android.content.Intent;
 import android.net.Uri;

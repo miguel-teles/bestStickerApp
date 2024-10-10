@@ -1,59 +1,65 @@
 package com.example.samplestickerapp.repository;
 
 import android.content.Context;
-import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteStatement;
+import android.database.sqlite.SQLiteOpenHelper;
 
-import com.example.samplestickerapp.activity.StickerPackLoader;
+import com.example.samplestickerapp.exception.StickerDataBaseException;
 import com.example.samplestickerapp.exception.StickerException;
 import com.example.samplestickerapp.exception.enums.StickerDBExceptionEnum;
-import com.example.samplestickerapp.model.Sticker;
-import com.example.samplestickerapp.model.StickerPack;
+import com.example.samplestickerapp.repository.implementations.StickerPackRepository;
+import com.example.samplestickerapp.repository.implementations.StickerRepository;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
 
-public class MyDatabase {
+public class MyDatabase extends SQLiteOpenHelper {
 
-    private static SQLiteDatabase myDB;
-    private static File dbFile;
-    private static StickerPackRepository stickerPackRepository = new StickerPackRepository();
-    private static StickerRepository stickerRepository = new StickerRepository();
+    private static MyDatabase instance;
+    private SQLiteDatabase myDB;
+    private File dbFile;
     final private static String dbName = "stickersDB.db";
 
-    public static void inicializaBancoETabelas(Context context) throws StickerException {
-        try {
-            myDB = criaBancoOuBusca(context);
-            criaTabelas(context);
+    private MyDatabase(Context context) {
+        super(context, dbName, null, 1);
+        myDB = getWritableDatabase();
+    }
 
-        } catch (StickerException ste) {
-            throw ste;
-        } catch (Exception ex) {
-            throw new StickerException(ex, StickerDBExceptionEnum.INI, null);
+    @Override
+    public void onCreate(SQLiteDatabase db) {
+        try {
+            myDB = db;
+            criaTabelas(db);
+        } catch (StickerException e) {
+            throw new StickerDataBaseException(e);
         }
     }
 
-    public static SQLiteDatabase criaBancoOuBusca(Context c) throws StickerException {
-        try {
-            dbFile = c.getDatabasePath(dbName);
-            if (!dbFile.getParentFile().exists()) {
-                dbFile.getParentFile().mkdir();
-            }
-            SQLiteDatabase db = SQLiteDatabase.openOrCreateDatabase(dbFile, null);
-            return db;
-        } catch (Exception ex) {
-            throw new StickerException(ex, StickerDBExceptionEnum.CREATE_OR_OPEN, "");
+    //TODO: criar o negócio pra fechar o banco
+
+    @Override
+    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        dropaTabelas(db);
+        onCreate(db);
+    }
+
+    public static MyDatabase getInstance(Context context) throws StickerException {
+        if (instance == null) {
+            instance = new MyDatabase(context);
         }
+        return instance;
     }
 
-    private static void criaTabelas(Context context) throws StickerException {
-        criaTabelaPacks(context);
-        criaTabelaSticker(context);
+    private void dropaTabelas(SQLiteDatabase db) {
+        db.execSQL("DROP TABLE IF EXISTS packs");
+        db.execSQL("DROP TABLE IF EXISTS stickers");
     }
 
-    private static void criaTabelaPacks(Context context) throws StickerException {
+    private void criaTabelas(SQLiteDatabase db) throws StickerException {
+        criaTabelaPacks(db);
+        criaTabelaSticker(db);
+    }
+
+    private void criaTabelaPacks(SQLiteDatabase db) throws StickerException {
         try {
 
 //            String deleta = "DROP TABLE packs";
@@ -75,15 +81,13 @@ public class MyDatabase {
                     "animatedStickerPack INTEGER NOT NULL" +
                     ")";
 
-            getMyDB(context).execSQL(tbPack);
-        } catch (StickerException ste) {
-            throw ste;
+            db.execSQL(tbPack);
         } catch (Exception ex) {
             throw new StickerException(ex, StickerDBExceptionEnum.CREATE_TBL, "Tabela Packs não foi criada com sucesso - " + ex.getMessage());
         }
     }
 
-    private static void criaTabelaSticker(Context context) throws StickerException {
+    private void criaTabelaSticker(SQLiteDatabase db) throws StickerException {
         try {
             String tbPack = "CREATE TABLE IF NOT EXISTS stickers(" +
                     "id INTEGER PRIMARY KEY AUTOINCREMENT," +
@@ -93,28 +97,13 @@ public class MyDatabase {
                     "FOREIGN KEY (packIdentifier) REFERENCES packs(identifier)" +
                     ")";
 
-            getMyDB(context).execSQL(tbPack);
-        } catch (StickerException ste) {
-            throw ste;
+            db.execSQL(tbPack);
         } catch (Exception ex) {
             throw new StickerException(ex, StickerDBExceptionEnum.CREATE_TBL, "Tabela Sticker não foi criada com sucesso");
         }
     }
 
-    static SQLiteDatabase getMyDB(Context context) throws StickerException {
-        if (myDB == null) {
-            inicializaBancoETabelas(context);
-            return myDB;
-        } else {
-            return myDB;
-        }
-    }
-
-    public static StickerPackRepository getStickerPackRepository() {
-        return stickerPackRepository;
-    }
-
-    public static StickerRepository getStickerRepository() {
-        return stickerRepository;
+    public SQLiteDatabase getMyDB() {
+        return myDB;
     }
 }
