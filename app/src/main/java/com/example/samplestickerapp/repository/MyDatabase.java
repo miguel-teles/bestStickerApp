@@ -34,7 +34,7 @@ public class MyDatabase extends SQLiteOpenHelper {
         }
     }
 
-    //TODO: criar o negócio pra fechar o banco
+    //TODO: criar o negócio pra fechar o banco -
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
