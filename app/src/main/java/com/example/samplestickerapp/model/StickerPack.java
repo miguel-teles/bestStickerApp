@@ -35,10 +35,10 @@ public class StickerPack implements Parcelable {
     private static final String ANIMATED_STICKER_PACK = "animatedStickerPack";
 
     private Integer identifier;
-    private final String name;
-    private final String publisher;
-    private final String originalTrayImageFile;
-    private final String resizedTrayImageFile;
+    private String name;
+    private String publisher;
+    private String originalTrayImageFile;
+    private String resizedTrayImageFile;
     private final String publisherEmail;
     private final String publisherWebsite;
     private final String privacyPolicyWebsite;
@@ -355,5 +355,21 @@ public class StickerPack implements Parcelable {
         if (this.identifier == null) {
             this.identifier = identifier;
         }
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setPublisher(String publisher) {
+        this.publisher = publisher;
+    }
+
+    public void setOriginalTrayImageFile(String originalTrayImageFile) {
+        this.originalTrayImageFile = originalTrayImageFile;
+    }
+
+    public void setResizedTrayImageFile(String resizedTrayImageFile) {
+        this.resizedTrayImageFile = resizedTrayImageFile;
     }
 }

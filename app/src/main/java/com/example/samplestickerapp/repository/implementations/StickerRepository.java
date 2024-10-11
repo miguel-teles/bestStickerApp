@@ -75,13 +75,9 @@ public class StickerRepository extends Repository<Sticker> {
         try {
             String deleteStickers = "DELETE FROM stickers WHERE packIdentifier=?";
             SQLiteStatement stmt = sqLiteDatabase.compileStatement(deleteStickers);
-            stmt.bindLong(0, packIdentifier);
-            if (stmt.executeUpdateDelete() != -1) {
-                throw new StickerException(null, StickerDBExceptionEnum.DELETE, "Figurinhas não foram deletadas");
-            }
+            stmt.bindLong(1, packIdentifier);
+            stmt.executeUpdateDelete();
             return null;
-        } catch (StickerException ex) {
-            throw ex;
         } catch (Exception ex) {
             throw new StickerException(ex, StickerDBExceptionEnum.DELETE, "Erro ao deletar figurinhas do pacote");
         }
@@ -93,16 +89,16 @@ public class StickerRepository extends Repository<Sticker> {
     }
 
     @Override
-    public Sticker find(Integer id, Context context) throws StickerException {
+    public Sticker find(Integer id) throws StickerException {
         return null;
     }
 
     @Override
-    public List<Sticker> findAll(Context context) throws StickerException {
+    public List<Sticker> findAll() throws StickerException {
         return null;
     }
 
-    public List<Sticker> findByPackIdentifier(int packIdentifier, Context context) throws Exception {
+    public List<Sticker> findByPackIdentifier(int packIdentifier) throws Exception {
         try {
             String selectStickersQuery = String.format(FIND_ALL_BY_PACKIDENTIFIER, packIdentifier);
             Cursor cursor = sqLiteDatabase.rawQuery(selectStickersQuery, null);

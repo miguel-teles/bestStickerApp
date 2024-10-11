@@ -58,4 +58,6 @@
     <string name="COPY" translatable="false">Erro ao copiar arquivo ao destino novo</string>
     <string name="RESIZE" translatable="false">Erro ao mudar tamanho da imagem</string>
     <string name="DELETE_FOLDER" translatable="false">Erro ao apagar pasta</string>
+    <string name="CREATE_STICKER_PACK" translatable="false">Erro criar novo pacote de figurinhas</string>
+    <string name="EDIT_STICKER_PACK" translatable="false">Erro ao editar pacote de figurinhas</string>
 </resources>

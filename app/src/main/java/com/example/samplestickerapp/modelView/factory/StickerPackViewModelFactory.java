@@ -4,6 +4,7 @@ import android.content.Context;
 
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.lifecycle.ViewModelStoreOwner;
 
 import com.example.samplestickerapp.exception.StickerDataBaseException;
 import com.example.samplestickerapp.exception.StickerException;
@@ -29,6 +30,11 @@ public class StickerPackViewModelFactory implements ViewModelProvider.Factory {
         } catch (StickerException ex) {
             throw new StickerDataBaseException(ex);
         }
+    }
+
+    public static StickerPackViewModel create(ViewModelStoreOwner viewModelStoreOwner, Context applicationContext) throws StickerException {
+        return new ViewModelProvider(viewModelStoreOwner,
+                new StickerPackViewModelFactory(applicationContext)).get(StickerPackViewModel.class);
     }
 
 }

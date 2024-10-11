@@ -1,13 +1,21 @@
 package com.example.samplestickerapp.exception.enums;
 
+import com.example.samplestickerapp.R;
+import com.example.samplestickerapp.utils.Utils;
+
 public enum StickerExceptionEnum {
 
-    CSP("Erro criar novo pacote de figurinhas");
+    CSP(R.string.CREATE_STICKER_PACK),
+    ESP(R.string.EDIT_STICKER_PACK);
 
 
-    String text;
-    StickerExceptionEnum(String str) {
-        this.text = str;
+    int mResourceId;
+
+    StickerExceptionEnum(int id) {
+        this.mResourceId = id;
     }
 
+    public String toString(){
+        return Utils.getContext().getString(mResourceId);
+    }
 }

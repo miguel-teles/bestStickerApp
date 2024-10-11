@@ -8,6 +8,7 @@
 
 package com.example.samplestickerapp.view;
 
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -21,11 +22,17 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.samplestickerapp.R;
+import com.example.samplestickerapp.exception.StickerException;
+import com.example.samplestickerapp.exception.StickerExceptionHandler;
+import com.example.samplestickerapp.exception.enums.StickerExceptionEnum;
 import com.example.samplestickerapp.model.StickerPack;
+import com.example.samplestickerapp.modelView.StickerPackViewModel;
+import com.example.samplestickerapp.modelView.factory.StickerPackViewModelFactory;
 import com.facebook.drawee.view.SimpleDraweeView;
 
 import java.lang.ref.WeakReference;
@@ -57,8 +64,10 @@ public class StickerPackDetailsActivity extends AddStickerPackActivity {
     private View divider;
     private ImageView btnAddNewSticker;
     private ImageView btnEditStickerPack;
+    private ImageView btnDeleteStickerPack;
     private WhiteListCheckAsyncTask whiteListCheckAsyncTask;
 
+    private StickerPackViewModel stickerPackViewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,17 +80,19 @@ public class StickerPackDetailsActivity extends AddStickerPackActivity {
         ImageView packTrayIcon = findViewById(R.id.tray_image);
         TextView packSizeTextView = findViewById(R.id.pack_size);
         SimpleDraweeView expandedStickerView = findViewById(R.id.sticker_details_expanded_sticker);
-        btnAddNewSticker = findViewById(R.id.btn_add_new_sticker);
-        btnEditStickerPack = findViewById(R.id.btn_edit_pack);
 
-        btnAddToWhatsapp = findViewById(R.id.add_to_whatsapp_button);
-        alreadyAddedText = findViewById(R.id.already_added_text);
+        declaraComponents();
+
+        try {
+            stickerPackViewModel = StickerPackViewModelFactory.create(this, getApplicationContext());
+        } catch (StickerException ex) {
+            StickerExceptionHandler.handleException(ex, this);
+        }
+
         layoutManager = new GridLayoutManager(this, 1);
-        recyclerView = findViewById(R.id.sticker_list);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.getViewTreeObserver().addOnGlobalLayoutListener(pageLayoutListener);
         recyclerView.addOnScrollListener(dividerScrollListener);
-        divider = findViewById(R.id.divider);
         if (stickerPreviewAdapter == null) {
             stickerPreviewAdapter = new StickerPreviewAdapter(getLayoutInflater(), R.drawable.sticker_error, getResources().getDimensionPixelSize(R.dimen.sticker_pack_details_image_size), getResources().getDimensionPixelSize(R.dimen.sticker_pack_details_image_padding), stickerPack, expandedStickerView, this);
             recyclerView.setAdapter(stickerPreviewAdapter);
@@ -90,9 +101,7 @@ public class StickerPackDetailsActivity extends AddStickerPackActivity {
         packPublisherTextView.setText(stickerPack.getPublisher());
         packTrayIcon.setImageURI(StickerPackLoader.getStickerAssetUri(stickerPack.getIdentifier().toString(), stickerPack.getResizedTrayImageFile()));
         packSizeTextView.setText(Formatter.formatShortFileSize(this, stickerPack.getTotalSize()));
-        btnAddToWhatsapp.setOnClickListener(v -> addStickerPackToWhatsApp(stickerPack.getIdentifier().toString(), stickerPack.getName()));
-        btnEditStickerPack.setOnClickListener(btn -> editStickerPack(stickerPack));
-//        btnAddNewSticker.setOnClickListener(btn -> addNewSticker(stickerPack));
+        setaOnClickListeners();
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(showUpButton);
             getSupportActionBar().setTitle(showUpButton ? getResources().getString(R.string.title_activity_sticker_pack_details_multiple_pack) : getResources().getQuantityString(R.plurals.title_activity_sticker_packs_list, 1));
@@ -100,7 +109,33 @@ public class StickerPackDetailsActivity extends AddStickerPackActivity {
         findViewById(R.id.sticker_pack_animation_indicator).setVisibility(stickerPack.isAnimatedStickerPack() ? View.VISIBLE : View.GONE);
     }
 
-    private void editStickerPack(StickerPack stickerPack) {
+    private void declaraComponents() {
+        btnAddNewSticker = findViewById(R.id.btn_add_new_sticker);
+        btnEditStickerPack = findViewById(R.id.btn_edit_pack);
+        btnDeleteStickerPack = findViewById(R.id.btn_delete_pack);
+        btnAddToWhatsapp = findViewById(R.id.add_to_whatsapp_button);
+        alreadyAddedText = findViewById(R.id.already_added_text);
+        recyclerView = findViewById(R.id.sticker_list);
+        divider = findViewById(R.id.divider);
+    }
+
+    private void setaOnClickListeners() {
+        btnAddToWhatsapp.setOnClickListener(v -> addStickerPackToWhatsApp(stickerPack.getIdentifier().toString(), stickerPack.getName()));
+        btnEditStickerPack.setOnClickListener(btn -> editStickerPack());
+        btnDeleteStickerPack.setOnClickListener(btn -> deleteStickerPack());
+    }
+
+    private void deleteStickerPack() {
+        try {
+            stickerPackViewModel.deleteStickerPack(stickerPack, getApplicationContext());
+            Intent intent = new Intent(this, StickerPackListActivity.class);
+            startActivity(intent);
+        } catch (StickerException ex) {
+            StickerExceptionHandler.handleException(ex, this);
+        }
+    }
+
+    private void editStickerPack() {
         Intent intent = new Intent(this, StickerPackFormActivity.class);
         intent.putExtra(StickerPackFormActivity.STICKER_PACK, stickerPack);
         startActivity(intent);

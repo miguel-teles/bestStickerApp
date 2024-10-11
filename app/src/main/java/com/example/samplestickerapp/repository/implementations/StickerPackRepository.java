@@ -72,8 +72,8 @@ public class StickerPackRepository extends Repository<StickerPack> {
         try {
             SQLiteStatement stmt = sqLiteDatabase.compileStatement(UPDATE);
 
-            stmt.bindString(0, stickerPack.getName());
-            stmt.bindString(1, stickerPack.getPublisher());
+            stmt.bindString(1, stickerPack.getName());
+            stmt.bindString(2, stickerPack.getPublisher());
             stmt.bindLong(3, stickerPack.getIdentifier());
 
             long result = (long) stmt.executeUpdateDelete();
@@ -101,11 +101,8 @@ public class StickerPackRepository extends Repository<StickerPack> {
             stickerRepository.removeByPackIdentifier(identifier, context);
 
             SQLiteStatement stmt = sqLiteDatabase.compileStatement(DELETAR_BY_ID);
-            stmt.bindLong(0, identifier);
-            if (stmt.executeUpdateDelete() != -1) {
-                throw new StickerException(null, StickerDBExceptionEnum.DELETE, "Pacote de figurinha não foi deletado");
-            }
-
+            stmt.bindLong(1, identifier);
+            stmt.executeUpdateDelete();
         } catch (StickerException ex) {
             throw ex;
         } catch (Exception ex) {
@@ -115,12 +112,12 @@ public class StickerPackRepository extends Repository<StickerPack> {
     }
 
     @Override
-    public StickerPack find(Integer id, Context context) throws StickerException {
+    public StickerPack find(Integer id) throws StickerException {
         return null;
     }
 
     @Override
-    public List<StickerPack> findAll(Context context) throws StickerException {
+    public List<StickerPack> findAll() throws StickerException {
         try {
             List<StickerPack> stickerPackList = new ArrayList<>();
             Cursor meuCursor = sqLiteDatabase.rawQuery(FIND_ALL, null);
@@ -159,7 +156,7 @@ public class StickerPackRepository extends Repository<StickerPack> {
                         meuCursor.getString(10), //privacy_policy_website
                         meuCursor.getString(11), //license_agreement_website
                         meuCursor.getInt(12) == 1 ? true : false,//animated
-                        stickerRepository.findByPackIdentifier(meuCursor.getInt(0), context));
+                        stickerRepository.findByPackIdentifier(meuCursor.getInt(0)));
 
                 stickerPackList.add(stickerPack);
                 meuCursor.moveToNext();

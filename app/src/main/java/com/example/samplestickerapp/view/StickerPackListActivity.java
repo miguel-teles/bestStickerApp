@@ -15,12 +15,18 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
 
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.samplestickerapp.R;
+import com.example.samplestickerapp.exception.StickerException;
+import com.example.samplestickerapp.exception.StickerExceptionHandler;
 import com.example.samplestickerapp.model.StickerPack;
+import com.example.samplestickerapp.modelView.StickerPackViewModel;
+import com.example.samplestickerapp.modelView.factory.StickerPackViewModelFactory;
+import com.example.samplestickerapp.repository.implementations.StickerPackRepository;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -36,8 +42,9 @@ public class StickerPackListActivity extends AddStickerPackActivity {
     private StickerPackListAdapter allStickerPacksListAdapter;
     private WhiteListCheckAsyncTask whiteListCheckAsyncTask;
     private ArrayList<StickerPack> stickerPackList;
-
     private TextView btnCreateNewStickerPack;
+
+    private StickerPackViewModel stickerPackViewModel;
 
 
     @Override
@@ -45,9 +52,17 @@ public class StickerPackListActivity extends AddStickerPackActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sticker_pack_list);
         packRecyclerView = findViewById(R.id.sticker_pack_list);
-        stickerPackList = getIntent().getParcelableArrayListExtra(EXTRA_STICKER_PACK_LIST_DATA);
         btnCreateNewStickerPack = findViewById(R.id.createNewStickerPack);
         btnCreateNewStickerPack.setOnClickListener(createNewStickerPack());
+
+        try {
+            stickerPackViewModel = new ViewModelProvider(this,
+                    new StickerPackViewModelFactory(getApplicationContext())).get(StickerPackViewModel.class);
+            stickerPackList = new ArrayList<>(stickerPackViewModel.fetchStickerPacks());
+        } catch (StickerException ex) {
+            StickerExceptionHandler.handleException(ex, this);
+        }
+
         showStickerPackList(stickerPackList);
         if (getSupportActionBar() != null) {
             getSupportActionBar().setTitle(getResources().getQuantityString(R.plurals.title_activity_sticker_packs_list, stickerPackList.size()));
@@ -57,6 +72,11 @@ public class StickerPackListActivity extends AddStickerPackActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        try {
+            stickerPackList = new ArrayList<>(stickerPackViewModel.fetchStickerPacks());
+        } catch (StickerException ex) {
+            StickerExceptionHandler.handleException(ex, this);
+        }
         whiteListCheckAsyncTask = new WhiteListCheckAsyncTask(this);
         whiteListCheckAsyncTask.execute(stickerPackList.toArray(new StickerPack[0]));
     }

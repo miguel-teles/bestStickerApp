@@ -17,10 +17,10 @@ public abstract class StickerExceptionHandler {
         StringBuilder text = new StringBuilder();
         if (ex.getStickerCriticalException() != null) {
             isCritical = true;
-            text.append(ex.getStickerCriticalException());
+            text.append(ex.getStickerCriticalException().toString());
         } else if (ex.getStickerExceptionEnum() != null) {
             isCritical = false;
-            text.append(ex.getStickerExceptionEnum());
+            text.append(ex.getStickerExceptionEnum().toString());
         }
 
         if (text.length() != 0 && ex.getMsgErro() != null) {
@@ -29,9 +29,15 @@ public abstract class StickerExceptionHandler {
         } else if (ex.getMsgErro() != null) {
             text.append(ex.getMsgErro());
         }
-
         text.append(" - ");
-        text.append(ex.getLocationException());
+        text.append(ex.getException().getClass().getName());
+
+        StackTraceElement[] stackTraceElement = ex.getStackTrace();
+        if (stackTraceElement != null) {
+            text.append(" - ");
+            text.append(stackTraceElement[0].getFileName() + "(" + stackTraceElement[0].getLineNumber() + ")");
+        }
+
         System.out.println(ex.getLocationException());
         new AlertDialog.Builder(context)
                 .setTitle("Erro :(")

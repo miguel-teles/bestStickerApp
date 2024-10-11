@@ -189,7 +189,7 @@ public class StickerContentProvider extends ContentProvider {
     private List<StickerPack> getStickerPackList() {
         if (stickerPackList == null) {
             try {
-                stickerPackList = stickerPackRepository.findAll(getContext());
+                stickerPackList = stickerPackRepository.findAll();
             } catch (StickerException ex) {
                 StickerExceptionHandler.handleException(ex, getContext());
             }

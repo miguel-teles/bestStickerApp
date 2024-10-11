@@ -58,13 +58,11 @@ public class StickerPackFormActivity extends AppCompatActivity {
         stickerPackImageView = findViewById(R.id.pacoteImageView);
         cbAnimated = findViewById(R.id.cbAnimado);
         cbAnimated.setActivated(true);
+        cbAnimated.setEnabled(false);
 
         try {
             setaOnClickListeners();
-
-            stickerPackViewModel = new ViewModelProvider(this,
-                    new StickerPackViewModelFactory(getApplicationContext())).get(StickerPackViewModel.class);
-
+            stickerPackViewModel = StickerPackViewModelFactory.create(this, getApplicationContext());
         } catch (StickerException ex) {
             StickerExceptionHandler.handleException(ex, this);
         }
@@ -74,7 +72,8 @@ public class StickerPackFormActivity extends AppCompatActivity {
             this.stickerPack = (StickerPack) intent.getExtras().get(STICKER_PACK);
             txtNomePacote.setText(stickerPack.getName());
             txtAutor.setText(stickerPack.getPublisher());
-            stickerPackImageView.setImageURI(StickerPackLoader.getStickerAssetUri(stickerPack.getIdentifier().toString(), stickerPack.getOriginalTrayImageFile()));
+            uriImagemStickerPack = StickerPackLoader.getStickerAssetUri(stickerPack.getIdentifier().toString(), stickerPack.getOriginalTrayImageFile());
+            stickerPackImageView.setImageURI(uriImagemStickerPack);
             stickerPackImageView.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
             stickerPackImageView.setTag("modified");
             cbAnimated.setActivated(false);
@@ -83,8 +82,16 @@ public class StickerPackFormActivity extends AppCompatActivity {
         verificaCamposObrigatorios();
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+    }
+
     private void setaOnClickListeners() throws StickerException {
-        stickerPackImageView.setOnClickListener(pacoteImageViewOnClick());
+        if (stickerPack == null) {
+            stickerPackImageView.setOnClickListener(pacoteImageViewOnClick());
+        }
 
         btnAdicionarStickerPack.setOnClickListener(btnSalvarStickerPackOnClick());
         stickerPackImageView.setOnFocusChangeListener(onFocusChangeListener());
@@ -173,25 +180,35 @@ public class StickerPackFormActivity extends AppCompatActivity {
     }
 
     private void updateStickerPack(View view) {
-        return;
+        throw new RuntimeException("Meu runtimeException! Tratar isso aqui");
     }
 
     private View.OnClickListener createOrUpdateStickerPackOnClick() {
+        Context context = this;
         return new View.OnClickListener() {
 
             @Override
             public void onClick(View view) {
-                if (stickerPack == null) {
-                    StickerPack stickerPack = stickerPackViewModel.createStickerPack(txtAutor.getText().toString(),
-                            txtNomePacote.getText().toString(),
-                            uriImagemStickerPack,
-                            cbAnimated.isChecked(),
-                            getApplicationContext());
-                    if (stickerPack != null) {
-                        redirecionaStickerPackDetailsActivity(stickerPack);
+                try {
+                    String nmAutorInput = txtAutor.getText().toString();
+                    String nomePacoteInput = txtNomePacote.getText().toString();
+                    if (stickerPack == null) {
+                        StickerPack stickerPack = stickerPackViewModel.createStickerPack(nmAutorInput,
+                                nomePacoteInput,
+                                uriImagemStickerPack,
+                                cbAnimated.isChecked(),
+                                getApplicationContext());
+                        if (stickerPack != null) {
+                            redirecionaStickerPackDetailsActivity(stickerPack);
+                        }
+                    } else {
+                        redirecionaStickerPackDetailsActivity(stickerPackViewModel.updateStickerPack(stickerPack,
+                                nmAutorInput,
+                                nomePacoteInput,
+                                getApplicationContext()));
                     }
-                } else {
-                    updateStickerPack(view);
+                } catch (StickerException ex) {
+                    StickerExceptionHandler.handleException(ex, context);
                 }
             }
         };

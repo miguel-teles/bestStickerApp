@@ -4,14 +4,12 @@ import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Picture;
 import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
 
 import com.example.samplestickerapp.exception.StickerException;
 import com.example.samplestickerapp.exception.enums.StickerCriticalExceptionEnum;
-import com.example.samplestickerapp.exception.enums.StickerDBExceptionEnum;
 import com.example.samplestickerapp.exception.enums.StickerExceptionEnum;
 
 import java.io.File;
@@ -269,11 +267,16 @@ abstract public class Folders {
         }
     }
 
-    public static void deleteStickerPackFolder(File stickerPackFolderName, Context context) throws StickerException {
+    public static void deleteFile(File stickerPackFolderName) throws StickerException {
         try {
             stickerPackFolderName.deleteOnExit();
         } catch (Exception ex) {
             throw new StickerException(ex, StickerCriticalExceptionEnum.DELETE_FOLDER, "Pasta: " + stickerPackFolderName);
         }
+    }
+
+    public static void deleteStickerPackFolder(String folderName, Context applicationContext) throws StickerException {
+        File folder = getPackFolderByFolderName(folderName, applicationContext);
+        deleteFile(folder);
     }
 }
