@@ -5,12 +5,11 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteStatement;
 
-import com.example.samplestickerapp.repository.MyDatabase;
-import com.example.samplestickerapp.view.StickerPackLoader;
 import com.example.samplestickerapp.exception.StickerException;
 import com.example.samplestickerapp.exception.enums.StickerDBExceptionEnum;
 import com.example.samplestickerapp.model.StickerPack;
 import com.example.samplestickerapp.repository.Repository;
+import com.example.samplestickerapp.view.StickerPackLoader;
 
 import java.util.ArrayList;
 import java.util.List;

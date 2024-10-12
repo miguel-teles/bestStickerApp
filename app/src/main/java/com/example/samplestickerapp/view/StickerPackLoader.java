@@ -188,4 +188,12 @@ public class StickerPackLoader {
     public static Uri getStickerPackInsertUri() {
         return new Uri.Builder().scheme(ContentResolver.SCHEME_CONTENT).authority(BuildConfig.CONTENT_PROVIDER_AUTHORITY).appendPath(StickerContentProvider.METHODS_ADD).appendPath(StickerContentProvider.PACK).build();
     }
+
+    public static Uri getStickerPackUpdateUri() {
+        return new Uri.Builder().scheme(ContentResolver.SCHEME_CONTENT).authority(BuildConfig.CONTENT_PROVIDER_AUTHORITY).appendPath(StickerContentProvider.METHODS_UPDATE).appendPath(StickerContentProvider.PACK).build();
+    }
+
+    public static Uri getStickerPackDeleteUri() {
+        return new Uri.Builder().scheme(ContentResolver.SCHEME_CONTENT).authority(BuildConfig.CONTENT_PROVIDER_AUTHORITY).appendPath(StickerContentProvider.METHODS_DELETE).appendPath(StickerContentProvider.PACK).build();
+    }
 }

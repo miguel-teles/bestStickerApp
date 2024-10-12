@@ -68,9 +68,13 @@ public class StickerContentProvider extends ContentProvider {
     /**
      * Do not change the values in the UriMatcher because otherwise, WhatsApp will not be able to fetch the stickers from the ContentProvider.
      */
-    private static final UriMatcher MATCHER = new UriMatcher(UriMatcher.NO_MATCH);
+    private static UriMatcher MATCHER = new UriMatcher(UriMatcher.NO_MATCH);
     private static final String METADATA = "metadata";
     static final String METHODS_ADD = "methods_add";
+    public static final String METHODS_DELETE = "methods_delete";
+    public static final String METHODS_UPDATE = "methods_update";
+    static final String OUTDATED_STICKERPACK_LIST = "outdated_stickerpack_list";
+
     private static final int METADATA_CODE = 1;
     private static final int METADATA_CODE_FOR_SINGLE_PACK = 2;
     static final String STICKERS = "stickers";
@@ -82,13 +86,18 @@ public class StickerContentProvider extends ContentProvider {
     private static final int STICKERS_ASSET_CODE = 4;
 
     private static final int STICKER_PACK_TRAY_ICON_CODE = 5;
-    private static final int STICKER_ADD_NEW_STICKER_PACK = 6;
-    private static final int STICKER_ADD_NEW_STICKER = 7;
+    private static final int ADD_NEW_STICKER_PACK = 6;
+    private static final int UPDATE_STICKER_PACK = 6;
+    private static final int ADD_NEW_STICKER = 7;
+    private static final int UPDATE_STICKER_PACK_LIST = 8;
+    private static final int DELETE_STICKER_PACKPACK = 8;
 
     private List<StickerPack> stickerPackList;
 
     private StickerRepository stickerRepository;
     private StickerPackRepository stickerPackRepository;
+
+    boolean isStickerPackListOutdated = true;
 
     /**
      * NÃO MUDAR ESSES MATCHERS E NEM AS URIS SE NÃO O WHATSAPP NÃO CONSEGUE BUSCAR DESTE CONTENTPROVIDER
@@ -108,14 +117,22 @@ public class StickerContentProvider extends ContentProvider {
         if (!AUTHORITY.startsWith(Objects.requireNonNull(getContext()).getPackageName())) {
             throw new IllegalStateException("your authority (" + AUTHORITY + ") for the content provider should start with your package name: " + getContext().getPackageName());
         }
+        carregaMatcher();
+        return true;
+    }
+
+    private void carregaMatcher() {
+        MATCHER = new UriMatcher(UriMatcher.NO_MATCH);
         //the call to get the metadata for the sticker packs.
         MATCHER.addURI(AUTHORITY, METADATA, METADATA_CODE); // this returns information about all the sticker packs in your app.
 
         //the call to get the metadata for single sticker pack. * represent the identifier
         MATCHER.addURI(AUTHORITY, METADATA + "/*", METADATA_CODE_FOR_SINGLE_PACK); //this returns information about a single pack.
 
-        MATCHER.addURI(AUTHORITY, METHODS_ADD + "/" + PACK, STICKER_ADD_NEW_STICKER_PACK);
-        MATCHER.addURI(AUTHORITY, METHODS_ADD + "/" + STICKERS, STICKER_ADD_NEW_STICKER);
+        MATCHER.addURI(AUTHORITY, METHODS_ADD + "/" + PACK, ADD_NEW_STICKER_PACK);
+        MATCHER.addURI(AUTHORITY, METHODS_ADD + "/" + STICKERS, ADD_NEW_STICKER);
+        MATCHER.addURI(AUTHORITY, METHODS_UPDATE + "/" + PACK, UPDATE_STICKER_PACK);
+        MATCHER.addURI(AUTHORITY, METHODS_DELETE + "/" + PACK, DELETE_STICKER_PACKPACK);
 
         //gets the list of stickers for a sticker pack, * respresent the identifier.
         MATCHER.addURI(AUTHORITY, STICKERS + "/*", STICKERS_CODE); //this returns information about the  stickers in a pack.
@@ -125,7 +142,6 @@ public class StickerContentProvider extends ContentProvider {
                 insertStickerUri(AUTHORITY, sticker, stickerPack);
             }
         }
-        return true;
     }
 
     private void insertStickerPackUri(String authority, StickerPack stickerPack) {
@@ -187,9 +203,10 @@ public class StickerContentProvider extends ContentProvider {
     }
 
     private List<StickerPack> getStickerPackList() {
-        if (stickerPackList == null) {
+        if (stickerPackList == null || isStickerPackListOutdated) {
             try {
                 stickerPackList = stickerPackRepository.findAll();
+                isStickerPackListOutdated = false;
             } catch (StickerException ex) {
                 StickerExceptionHandler.handleException(ex, getContext());
             }
@@ -313,9 +330,10 @@ public class StickerContentProvider extends ContentProvider {
     public Uri insert(@NonNull Uri uri, ContentValues values) {
         int method = MATCHER.match(uri);
         switch (method) {
-            case STICKER_ADD_NEW_STICKER_PACK:
+            case ADD_NEW_STICKER_PACK:
                 StickerPack stickerPack = StickerPack.fromContentValues(values);
                 insertStickerPackUri(AUTHORITY, stickerPack);
+                isStickerPackListOutdated = true;
                 return uri;
             default:
                 throw new UnsupportedOperationException("Método não esperado / não implementado");
@@ -325,10 +343,25 @@ public class StickerContentProvider extends ContentProvider {
     @Override
     public int update(@NonNull Uri uri, ContentValues values, String selection,
                       String[] selectionArgs) {
-        throw new UnsupportedOperationException("Not supported");
+        int method = MATCHER.match(uri);
+        switch (method) {
+            case UPDATE_STICKER_PACK_LIST:
+            case UPDATE_STICKER_PACK:
+                StickerPack stickerPack = StickerPack.fromContentValues(values);
+                insertStickerPackUri(AUTHORITY, stickerPack);
+                isStickerPackListOutdated = true;
+                carregaMatcher();
+                return 1;
+            default:
+                throw new UnsupportedOperationException("Método não esperado / não implementado");
+        }
     }
 
     public static String getAbsoluteFolder() {
         return ABSOLUTE_FOLDER;
+    }
+
+    public void setStickerPackListOutdated(boolean stickerPackListOutdated) {
+        isStickerPackListOutdated = stickerPackListOutdated;
     }
 }

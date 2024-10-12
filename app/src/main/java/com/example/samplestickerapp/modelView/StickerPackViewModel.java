@@ -9,12 +9,15 @@ import com.example.samplestickerapp.R;
 import com.example.samplestickerapp.exception.StickerException;
 import com.example.samplestickerapp.exception.enums.StickerDBExceptionEnum;
 import com.example.samplestickerapp.exception.enums.StickerExceptionEnum;
+import com.example.samplestickerapp.model.Sticker;
 import com.example.samplestickerapp.model.StickerPack;
 import com.example.samplestickerapp.repository.MyDatabase;
 import com.example.samplestickerapp.repository.implementations.StickerPackRepository;
 import com.example.samplestickerapp.repository.implementations.StickerRepository;
 import com.example.samplestickerapp.utils.Folders;
 import com.example.samplestickerapp.utils.Utils;
+import com.example.samplestickerapp.view.StickerContentProvider;
+import com.example.samplestickerapp.view.StickerPackLoader;
 
 import java.io.File;
 import java.lang.reflect.Array;
@@ -62,6 +65,7 @@ public class StickerPackViewModel extends ViewModel {
                     isAnimated);
             stickerPackRepository.save(stickerPack, context);
             if (stickerPack.getIdentifier() != null) {
+                context.getContentResolver().insert(StickerPackLoader.getStickerPackInsertUri(),stickerPack.toContentValues());
                 return stickerPack;
             } else {
                 throw new StickerException(null, StickerDBExceptionEnum.INSERT, "Erro ao salvar pacote no banco");
@@ -86,6 +90,8 @@ public class StickerPackViewModel extends ViewModel {
         stickerPack.setName(nmPacoteInput);
         stickerPack.setPublisher(nmAutorInput);
         StickerPack updatedStickerPack = stickerPackRepository.update(stickerPack, applicationContext);
+        applicationContext.getContentResolver().update(StickerPackLoader.getStickerPackUpdateUri(),stickerPack.toContentValues(),null,null);
+        //indica pro content provider que a lista de stickerpack está desatualizada
         return updatedStickerPack;
     }
 

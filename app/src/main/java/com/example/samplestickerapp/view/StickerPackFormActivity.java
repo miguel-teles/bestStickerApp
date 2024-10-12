@@ -60,13 +60,6 @@ public class StickerPackFormActivity extends AppCompatActivity {
         cbAnimated.setActivated(true);
         cbAnimated.setEnabled(false);
 
-        try {
-            setaOnClickListeners();
-            stickerPackViewModel = StickerPackViewModelFactory.create(this, getApplicationContext());
-        } catch (StickerException ex) {
-            StickerExceptionHandler.handleException(ex, this);
-        }
-
         Intent intent = getIntent();
         if (intent.getExtras() != null && intent.getExtras().get(STICKER_PACK) != null) {
             this.stickerPack = (StickerPack) intent.getExtras().get(STICKER_PACK);
@@ -77,6 +70,12 @@ public class StickerPackFormActivity extends AppCompatActivity {
             stickerPackImageView.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
             stickerPackImageView.setTag("modified");
             cbAnimated.setActivated(false);
+        }
+        try {
+            setaOnClickListeners();
+            stickerPackViewModel = StickerPackViewModelFactory.create(this, getApplicationContext());
+        } catch (StickerException ex) {
+            StickerExceptionHandler.handleException(ex, this);
         }
 
         verificaCamposObrigatorios();

@@ -7,6 +7,12 @@
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
         <item name="actionBarTheme">@style/MyApp.ActionBarTheme</item>
+        <item name="android:alertDialogTheme">@style/alertDialogStyle</item>
+    </style>
+
+    <style name="alertDialogStyle">
+        <item name="android:windowIsFloating">true</item>
+        <item name="colorPrimary">#128C7E</item>
     </style>
 
     <style name="MyApp.ActionBarTheme" parent="@style/ThemeOverlay.MaterialComponents.ActionBar">
@@ -14,7 +20,7 @@
     </style>
 
     <style name="StickerPreviewButtonText" parent="Widget.MaterialComponents.Button.TextButton">
-        <item name="android:textColor">@android:color/white</item>
+        <item name="android:textColor">@android:color/primary_text_dark</item>
         <item name="android:textSize">14sp</item>
         <item name="android:textStyle">bold</item>
         <item name="android:singleLine">true</item>

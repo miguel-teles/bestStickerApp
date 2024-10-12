@@ -8,7 +8,9 @@
 
 package com.example.samplestickerapp.view;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -126,13 +128,26 @@ public class StickerPackDetailsActivity extends AddStickerPackActivity {
     }
 
     private void deleteStickerPack() {
-        try {
-            stickerPackViewModel.deleteStickerPack(stickerPack, getApplicationContext());
-            Intent intent = new Intent(this, StickerPackListActivity.class);
-            startActivity(intent);
-        } catch (StickerException ex) {
-            StickerExceptionHandler.handleException(ex, this);
-        }
+        Context context = this;
+        AlertDialog.Builder alertBuilder = new AlertDialog.Builder(this, R.style.alertDialogStyle);
+        alertBuilder.setMessage(R.string.SURE_DELETE_STICKER_PACK)
+                .setPositiveButton(R.string.YES_SIR, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        try {
+                            stickerPackViewModel.deleteStickerPack(stickerPack, getApplicationContext());
+                            Intent intent = new Intent(context, StickerPackListActivity.class);
+                            startActivity(intent);
+                        } catch (StickerException ex) {
+                            StickerExceptionHandler.handleException(ex, context);
+                        }
+                    }
+                })
+                .setNegativeButton(R.string.NOT_TODAY, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                    }
+                }).create().show();
     }
 
     private void editStickerPack() {
