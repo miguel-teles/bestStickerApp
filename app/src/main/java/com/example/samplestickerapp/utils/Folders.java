@@ -269,7 +269,23 @@ abstract public class Folders {
 
     public static void deleteFile(File stickerPackFolderName) throws StickerException {
         try {
-            stickerPackFolderName.deleteOnExit();
+
+            if (stickerPackFolderName.isDirectory()) {
+                for (String fileStr : stickerPackFolderName.list()) {
+                    File file = new File(stickerPackFolderName, fileStr);
+                    if (file.isDirectory()) {
+                        deleteFile(file);
+                    } else {
+                        if (!file.delete()) {
+                            throw new StickerException(null, StickerCriticalExceptionEnum.DELETE_FOLDER, "Erro ao deletar file " + file.getName());
+                        }
+                    }
+                }
+            }
+
+            if (!stickerPackFolderName.delete()) {
+                throw new StickerException(null, StickerCriticalExceptionEnum.DELETE_FOLDER, "Erro ao deletar file " + stickerPackFolderName.getName());
+            }
         } catch (Exception ex) {
             throw new StickerException(ex, StickerCriticalExceptionEnum.DELETE_FOLDER, "Pasta: " + stickerPackFolderName);
         }

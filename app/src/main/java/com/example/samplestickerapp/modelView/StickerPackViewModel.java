@@ -91,10 +91,6 @@ public class StickerPackViewModel extends ViewModel {
 
     public void deleteStickerPack(StickerPack stickerPack, Context applicationContext) throws StickerException {
         stickerPackRepository.remove(stickerPack, applicationContext);
-
-        //TODO: FALTA APAGAR A PASTA E AS IMAGENS DENTRO!
-
-        //todo:  testar isso
         Folders.deleteStickerPackFolder(stickerPack.getFolder(), applicationContext);
 
     }
