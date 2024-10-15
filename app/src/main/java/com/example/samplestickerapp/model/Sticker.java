@@ -8,27 +8,46 @@
 
 package com.example.samplestickerapp.model;
 
+import android.content.ContentValues;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Sticker implements Parcelable {
     public final static String NM_TABELA = "stickers";
+
+    public static String IDENTIFIER = "identifier";
+    public static String PACK_IDENTIFIER = "packIdentifier";
+    public static String STICKER_IMAGE_FILE = "stickerImageFile";
+    public static String EMOJIS = "emojis";
+
+
     private Integer identifier; //PK
     private Integer packIdentifier; //FK
-    private final String imageFileName;
+    private final String stickerImageFile;
     private final List<String> emojis;
     private long size;
 
-    public Sticker(String imageFileName, List<String> emojis, Integer packIdentifier) {
-        this.imageFileName = imageFileName;
-        this.emojis = emojis;
+    public Sticker(Integer identifier,
+                   Integer packIdentifier,
+                   String stickerImageFile) {
+        this.identifier = identifier;
+        this.packIdentifier = packIdentifier;
+        this.stickerImageFile = stickerImageFile;
+        this.emojis = new ArrayList<>();
+    }
+
+    public Sticker(String stickerImageFile,
+                   Integer packIdentifier) {
+        this.stickerImageFile = stickerImageFile;
+        this.emojis = new ArrayList<>();
         this.packIdentifier = packIdentifier;
     }
 
     private Sticker(Parcel in) {
-        imageFileName = in.readString();
+        stickerImageFile = in.readString();
         emojis = in.createStringArrayList();
         size = in.readLong();
     }
@@ -45,6 +64,20 @@ public class Sticker implements Parcelable {
         }
     };
 
+    public static Sticker fromContentValues(ContentValues values) {
+        return new Sticker(values.getAsInteger(IDENTIFIER),
+                values.getAsInteger(PACK_IDENTIFIER),
+                values.getAsString(STICKER_IMAGE_FILE));
+    }
+
+    public ContentValues toContentValues() {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(IDENTIFIER, this.getIdentifier());
+        contentValues.put(PACK_IDENTIFIER, this.getPackIdentifier());
+        contentValues.put(STICKER_IMAGE_FILE, this.getStickerImageFile());
+        return contentValues;
+    }
+
     public void setSize(long size) {
         this.size = size;
     }
@@ -56,13 +89,13 @@ public class Sticker implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(imageFileName);
+        dest.writeString(stickerImageFile);
         dest.writeStringList(emojis);
         dest.writeLong(size);
     }
 
-    public String getImageFileName() {
-        return imageFileName;
+    public String getStickerImageFile() {
+        return stickerImageFile;
     }
 
     public List<String> getEmojis() {

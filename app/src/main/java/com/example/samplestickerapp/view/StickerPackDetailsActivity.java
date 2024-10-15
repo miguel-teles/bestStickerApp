@@ -101,7 +101,7 @@ public class StickerPackDetailsActivity extends AddStickerPackActivity {
         }
         packNameTextView.setText(stickerPack.getName());
         packPublisherTextView.setText(stickerPack.getPublisher());
-        packTrayIcon.setImageURI(StickerPackLoader.getStickerAssetUri(stickerPack.getIdentifier().toString(), stickerPack.getResizedTrayImageFile()));
+        packTrayIcon.setImageURI(StickerPackLoader.getStickerResizedAssetUri(stickerPack.getIdentifier().toString(), stickerPack.getResizedTrayImageFile()));
         packSizeTextView.setText(Formatter.formatShortFileSize(this, stickerPack.getTotalSize()));
         setaOnClickListeners();
         if (getSupportActionBar() != null) {
@@ -125,6 +125,13 @@ public class StickerPackDetailsActivity extends AddStickerPackActivity {
         btnAddToWhatsapp.setOnClickListener(v -> addStickerPackToWhatsApp(stickerPack.getIdentifier().toString(), stickerPack.getName()));
         btnEditStickerPack.setOnClickListener(btn -> editStickerPack());
         btnDeleteStickerPack.setOnClickListener(btn -> deleteStickerPack());
+        btnAddNewSticker.setOnClickListener(btn -> addNewSticker());
+    }
+
+    private void addNewSticker() {
+        Intent intent = new Intent(this, StickerAddActivity.class);
+        intent.putExtra(StickerPackFormActivity.STICKER_PACK, stickerPack);
+        startActivity(intent);
     }
 
     private void deleteStickerPack() {
@@ -225,6 +232,11 @@ public class StickerPackDetailsActivity extends AddStickerPackActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        try {
+            stickerPack = stickerPackViewModel.fetchUpdatedStickerPack(stickerPack);
+        } catch (StickerException ex) {
+            StickerExceptionHandler.handleException(ex, this);
+        }
         whiteListCheckAsyncTask = new WhiteListCheckAsyncTask(this);
         whiteListCheckAsyncTask.execute(stickerPack);
     }

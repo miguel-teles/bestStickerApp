@@ -15,7 +15,7 @@ public interface RepositoryInterface<T> {
     T update(T obj, Context context) throws StickerException;
     Integer remove(T obj, Context context) throws StickerException;
     Integer remove(Integer id, Context context) throws StickerException;
-    T find(Integer id) throws StickerException;
+    T findById(Integer id) throws StickerException;
     List<T> findAll() throws StickerException;
 
 

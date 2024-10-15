@@ -7,10 +7,12 @@ import android.database.sqlite.SQLiteStatement;
 
 import com.example.samplestickerapp.exception.StickerException;
 import com.example.samplestickerapp.exception.enums.StickerDBExceptionEnum;
+import com.example.samplestickerapp.model.Sticker;
 import com.example.samplestickerapp.model.StickerPack;
 import com.example.samplestickerapp.repository.Repository;
 import com.example.samplestickerapp.view.StickerPackLoader;
 
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -111,8 +113,35 @@ public class StickerPackRepository extends Repository<StickerPack> {
     }
 
     @Override
-    public StickerPack find(Integer id) throws StickerException {
-        return null;
+    public StickerPack findById(Integer id) throws StickerException {
+        try {
+            Cursor meuCursor = sqLiteDatabase.rawQuery(FIND_BY_ID.replace("?", id.toString()), null);
+            if (meuCursor != null) {
+                meuCursor.moveToFirst();
+            }
+
+            StickerPack stickerPack = new StickerPack(meuCursor.getInt(0), //identifier
+                    meuCursor.getString(1), //name
+                    meuCursor.getString(2), //publisher
+                    meuCursor.getString(3), //originalTrayImageFile
+                    meuCursor.getString(4), //resizedTrayImageFile
+                    meuCursor.getString(5), //folder
+                    meuCursor.getInt(6) == 0 ? null : Integer.valueOf(meuCursor.getInt(4)), //imageDataVersion
+                    meuCursor.getInt(7) == 1 ? true : false, //avoidCache
+                    meuCursor.getString(8), //publisher_email
+                    meuCursor.getString(9), //publisher_website
+                    meuCursor.getString(10), //privacy_policy_website
+                    meuCursor.getString(11), //license_agreement_website
+                    meuCursor.getInt(12) == 1 ? true : false,//animated
+                    stickerRepository.findByPackIdentifier(meuCursor.getInt(0)));
+
+
+            return stickerPack;
+        } catch (StickerException ex) {
+            throw ex;
+        } catch (Exception ex) {
+            throw new StickerException(ex, StickerDBExceptionEnum.SELECT, "Erro ao buscar pack por ID");
+        }
     }
 
     @Override

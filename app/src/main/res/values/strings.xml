@@ -63,4 +63,8 @@
     <string name="SURE_DELETE_STICKER_PACK" translatable="false">Tem certeza que quer excluir este pacote?</string>
     <string name="YES_SIR" translatable="false">Sim!</string>
     <string name="NOT_TODAY" translatable="false">Hoje não...</string>
+    <string name="SELECT_A_PICTURE_FOR_PACK" translatable="false">Imagem do pacote (se vazio, será um macaco)</string>
+    <string name="SELECT_A_PICTURE_FOR_STICKER" translatable="false">Selecione uma imagem</string>
+    <string name="ADD_STICKER" translatable="false">ADICIONAR FIGURINHA</string>
+    <string name="ADD_PACK" translatable="false">CRIAR PACOTE</string>
 </resources>

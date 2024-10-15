@@ -125,15 +125,15 @@ public class StickerPackValidator {
 
     private static void validateSticker(@NonNull Context context, @NonNull final String identifier, @NonNull final Sticker sticker, final boolean animatedStickerPack) throws IllegalStateException {
         if (sticker.getEmojis().size() > EMOJI_MAX_LIMIT) {
-            throw new IllegalStateException("emoji count exceed limit, sticker pack identifier: " + identifier + ", filename: " + sticker.getImageFileName());
+            throw new IllegalStateException("emoji count exceed limit, sticker pack identifier: " + identifier + ", filename: " + sticker.getStickerImageFile());
         }
         if (sticker.getEmojis().size() < EMOJI_MIN_LIMIT) {
-            throw new IllegalStateException("To provide best user experience, please associate at least 1 emoji to this sticker, sticker pack identifier: " + identifier + ", filename: " + sticker.getImageFileName());
+            throw new IllegalStateException("To provide best user experience, please associate at least 1 emoji to this sticker, sticker pack identifier: " + identifier + ", filename: " + sticker.getStickerImageFile());
         }
-        if (TextUtils.isEmpty(sticker.getImageFileName())) {
+        if (TextUtils.isEmpty(sticker.getStickerImageFile())) {
             throw new IllegalStateException("no file path for sticker, sticker pack identifier:" + identifier);
         }
-        validateStickerFile(context, identifier, sticker.getImageFileName(), animatedStickerPack);
+        validateStickerFile(context, identifier, sticker.getStickerImageFile(), animatedStickerPack);
     }
 
     private static void validateStickerFile(@NonNull Context context, @NonNull String identifier, @NonNull final String fileName, final boolean animatedStickerPack) throws IllegalStateException {

@@ -38,7 +38,7 @@
         android:layout_height="50dp"
         android:background="@color/gray"
         android:gravity="center"
-        android:text="CLICK ME TO ADD A NEW PACK"
+        android:text="@string/ADD_PACK"
         android:textColor="@color/white"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

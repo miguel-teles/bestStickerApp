@@ -60,6 +60,8 @@ public class StickerContentProvider extends ContentProvider {
 
     public static final String STICKER_FILE_NAME_IN_QUERY = "imageFile";
     public static final String STICKER_FILE_EMOJI_IN_QUERY = "emoji";
+    public static final String STICKER_IDENTIFIER = "identifier";
+    public static final String STICKER_PACK_IDENTIFIER = "packIdentifier";
 
 
     public static final Uri AUTHORITY_URI = new Uri.Builder().scheme(ContentResolver.SCHEME_CONTENT).authority(BuildConfig.CONTENT_PROVIDER_AUTHORITY).appendPath(StickerContentProvider.METADATA).build();
@@ -73,24 +75,25 @@ public class StickerContentProvider extends ContentProvider {
     static final String METHODS_ADD = "methods_add";
     public static final String METHODS_DELETE = "methods_delete";
     public static final String METHODS_UPDATE = "methods_update";
-    static final String OUTDATED_STICKERPACK_LIST = "outdated_stickerpack_list";
 
     private static final int METADATA_CODE = 1;
     private static final int METADATA_CODE_FOR_SINGLE_PACK = 2;
     static final String STICKERS = "stickers";
     static final String STICKERS_ASSET = "stickers_asset";
+    static final String STICKERS_ASSET_ORIGINAL = "stickers_asset_original";
 
     static String AUTHORITY = null;
     private static final int STICKERS_CODE = 3;
     static final String PACK = "pack";
     private static final int STICKERS_ASSET_CODE = 4;
+    private static final int STICKERS_ASSET_ORIGINAL_CODE = 10;
 
     private static final int STICKER_PACK_TRAY_ICON_CODE = 5;
     private static final int ADD_NEW_STICKER_PACK = 6;
     private static final int UPDATE_STICKER_PACK = 6;
     private static final int ADD_NEW_STICKER = 7;
     private static final int UPDATE_STICKER_PACK_LIST = 8;
-    private static final int DELETE_STICKER_PACKPACK = 8;
+    private static final int DELETE_STICKER_PACKPACK = 9;
 
     private List<StickerPack> stickerPackList;
 
@@ -139,18 +142,18 @@ public class StickerContentProvider extends ContentProvider {
         for (StickerPack stickerPack : getStickerPackList()) {
             insertStickerPackUri(AUTHORITY, stickerPack);
             for (Sticker sticker : stickerPack.getStickers()) {
-                insertStickerUri(AUTHORITY, sticker, stickerPack);
+                insertStickerUri(AUTHORITY, sticker);
             }
         }
     }
 
     private void insertStickerPackUri(String authority, StickerPack stickerPack) {
         MATCHER.addURI(authority, STICKERS_ASSET + "/" + stickerPack.getIdentifier() + "/" + stickerPack.getResizedTrayImageFile(), STICKER_PACK_TRAY_ICON_CODE); //this returns the binary information of the sticker: `AssetFileDescriptor`, which points to the asset file for the sticker.
-        MATCHER.addURI(authority, STICKERS_ASSET + "/" + stickerPack.getIdentifier() + "/" + stickerPack.getOriginalTrayImageFile(), STICKER_PACK_TRAY_ICON_CODE); //this returns the binary information of the sticker: `AssetFileDescriptor`, which points to the asset file for the sticker.
+        MATCHER.addURI(authority, STICKERS_ASSET_ORIGINAL + "/" + stickerPack.getIdentifier() + "/" + stickerPack.getOriginalTrayImageFile(), STICKER_PACK_TRAY_ICON_CODE); //this returns the binary information of the sticker: `AssetFileDescriptor`, which points to the asset file for the sticker.
     }
 
-    private void insertStickerUri(String authority, Sticker sticker, StickerPack stickerPack) {
-        MATCHER.addURI(authority, STICKERS_ASSET + "/" + stickerPack.getIdentifier() + "/" + sticker.getImageFileName(), STICKERS_ASSET_CODE);
+    private void insertStickerUri(String authority, Sticker sticker) {
+        MATCHER.addURI(authority, STICKERS_ASSET + "/" + sticker.getPackIdentifier() + "/" + sticker.getStickerImageFile(), STICKERS_ASSET_CODE);
     }
 
     @Override
@@ -270,11 +273,13 @@ public class StickerContentProvider extends ContentProvider {
     @NonNull
     private Cursor getStickersForAStickerPack(@NonNull Uri uri) {
         final String identifier = uri.getLastPathSegment();
-        MatrixCursor cursor = new MatrixCursor(new String[]{STICKER_FILE_NAME_IN_QUERY, STICKER_FILE_EMOJI_IN_QUERY});
+        MatrixCursor cursor = new MatrixCursor(new String[]{STICKER_FILE_NAME_IN_QUERY,
+                STICKER_IDENTIFIER,
+                STICKER_PACK_IDENTIFIER});
         for (StickerPack stickerPack : getStickerPackList()) {
             if (identifier.equals(stickerPack.getIdentifier())) {
                 for (Sticker sticker : stickerPack.getStickers()) {
-                    cursor.addRow(new Object[]{sticker.getImageFileName(), TextUtils.join(",", sticker.getEmojis())});
+                    cursor.addRow(new Object[]{sticker.getStickerImageFile(), sticker.getIdentifier(), sticker.getPackIdentifier()});
                 }
             }
         }
@@ -302,7 +307,7 @@ public class StickerContentProvider extends ContentProvider {
                     return fetchFile(fileName, stickerPack.getFolder());
                 } else {
                     for (Sticker sticker : stickerPack.getStickers()) {
-                        if (fileName.equals(sticker.getImageFileName())) {
+                        if (fileName.equals(sticker.getStickerImageFile())) {
                             return fetchFile(fileName, stickerPack.getFolder());
                         }
                     }
@@ -331,8 +336,11 @@ public class StickerContentProvider extends ContentProvider {
         int method = MATCHER.match(uri);
         switch (method) {
             case ADD_NEW_STICKER_PACK:
-                StickerPack stickerPack = StickerPack.fromContentValues(values);
-                insertStickerPackUri(AUTHORITY, stickerPack);
+                insertStickerPackUri(AUTHORITY, StickerPack.fromContentValues(values));
+                isStickerPackListOutdated = true;
+                return uri;
+            case ADD_NEW_STICKER:
+                insertStickerUri(AUTHORITY, Sticker.fromContentValues(values));
                 isStickerPackListOutdated = true;
                 return uri;
             default:

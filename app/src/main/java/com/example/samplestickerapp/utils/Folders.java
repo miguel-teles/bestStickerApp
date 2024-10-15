@@ -201,6 +201,7 @@ abstract public class Folders {
                                                   String imageFileName,
                                                   int imgSize,
                                                   int fileSize,
+                                                  boolean mantemCopia,
                                                   Context context) throws StickerException {
         try {
             File pacotePasta = getPackFolderByFolderName(folderPack, context);
@@ -211,7 +212,9 @@ abstract public class Folders {
                 File packImgRzd = new File(imageFileName + "Rzd" + getFileExtension(img, true)); //imagem pequena
                 File absolutePackImg = new File(pacotePasta, packImg.getPath()); //file absoluta da imagem
                 File absolutePackImgRzd = new File(pacotePasta, packImgRzd.getPath()); //file absoluta da imagem pequena
-                copiaImagem(img, absolutePackImg);
+                if (mantemCopia) {
+                    copiaImagem(img, absolutePackImg);
+                }
                 copiaImagem(img, absolutePackImgRzd);
 
                 resizeImage(absolutePackImgRzd, imgSize, fileSize);

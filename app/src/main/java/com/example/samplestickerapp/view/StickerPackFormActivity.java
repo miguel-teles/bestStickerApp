@@ -51,12 +51,7 @@ public class StickerPackFormActivity extends AppCompatActivity {
         super.onCreate(bundle);
         setContentView(R.layout.activity_sticker_create_pack);
 
-        btnAdicionarStickerPack = findViewById(R.id.adicionarStickerPack);
-        btnAdicionarStickerPack.setEnabled(false);
-        txtNomePacote = findViewById(R.id.txtInpEdtNomePacote);
-        txtAutor = findViewById(R.id.txtInpEdtAutor);
-        stickerPackImageView = findViewById(R.id.pacoteImageView);
-        cbAnimated = findViewById(R.id.cbAnimado);
+        declaraCampos();
         cbAnimated.setActivated(true);
         cbAnimated.setEnabled(false);
 
@@ -81,10 +76,18 @@ public class StickerPackFormActivity extends AppCompatActivity {
         verificaCamposObrigatorios();
     }
 
+    private void declaraCampos() {
+        btnAdicionarStickerPack = findViewById(R.id.adicionarStickerPack);
+        btnAdicionarStickerPack.setEnabled(false);
+        txtNomePacote = findViewById(R.id.txtInpEdtNomePacote);
+        txtAutor = findViewById(R.id.txtInpEdtAutor);
+        stickerPackImageView = findViewById(R.id.pacoteImageView);
+        cbAnimated = findViewById(R.id.cbAnimado);
+    }
+
     @Override
     protected void onResume() {
         super.onResume();
-
     }
 
     private void setaOnClickListeners() throws StickerException {

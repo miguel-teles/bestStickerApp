@@ -20,19 +20,19 @@ import java.util.List;
 public class StickerPack implements Parcelable {
 
     public static final String NM_TABELA = "packs";
-    private static final String IDENTIFIER = "identifier";
-    private static final String NAME = "name";
-    private static final String PUBLISHER = "publisher";
-    private static final String ORIGINAL_TRAY_IMAGE_FILE = "originalTrayImageFile";
-    private static final String RESIZED_TRAY_IMAGE_FILE = "resizedTrayImageFile";
-    private static final String PUBLISHER_EMAIL = "publisherEmail";
-    private static final String PUBLISHER_WEBSITE = "publisherWebsite";
-    private static final String PRIVACY_POLICY_WEBSITE = "privacyPolicyWebsite";
-    private static final String LICENSE_AGREEMENT_WEBSITE = "licenseAgreementWebsite";
-    private static final String IMAGE_DATA_VERSION = "imageDataVersion";
-    private static final String FOLDER = "folder";
-    private static final String AVOID_CACHE = "avoidCache";
-    private static final String ANIMATED_STICKER_PACK = "animatedStickerPack";
+    public static final String IDENTIFIER = "identifier";
+    public static final String NAME = "name";
+    public static final String PUBLISHER = "publisher";
+    public static final String ORIGINAL_TRAY_IMAGE_FILE = "originalTrayImageFile";
+    public static final String RESIZED_TRAY_IMAGE_FILE = "resizedTrayImageFile";
+    public static final String PUBLISHER_EMAIL = "publisherEmail";
+    public static final String PUBLISHER_WEBSITE = "publisherWebsite";
+    public static final String PRIVACY_POLICY_WEBSITE = "privacyPolicyWebsite";
+    public static final String LICENSE_AGREEMENT_WEBSITE = "licenseAgreementWebsite";
+    public static final String IMAGE_DATA_VERSION = "imageDataVersion";
+    public static final String FOLDER = "folder";
+    public static final String AVOID_CACHE = "avoidCache";
+    public static final String ANIMATED_STICKER_PACK = "animatedStickerPack";
 
     private Integer identifier;
     private String name;

@@ -8,20 +8,15 @@ import androidx.lifecycle.ViewModel;
 import com.example.samplestickerapp.R;
 import com.example.samplestickerapp.exception.StickerException;
 import com.example.samplestickerapp.exception.enums.StickerDBExceptionEnum;
-import com.example.samplestickerapp.exception.enums.StickerExceptionEnum;
-import com.example.samplestickerapp.model.Sticker;
 import com.example.samplestickerapp.model.StickerPack;
 import com.example.samplestickerapp.repository.MyDatabase;
 import com.example.samplestickerapp.repository.implementations.StickerPackRepository;
 import com.example.samplestickerapp.repository.implementations.StickerRepository;
 import com.example.samplestickerapp.utils.Folders;
 import com.example.samplestickerapp.utils.Utils;
-import com.example.samplestickerapp.view.StickerContentProvider;
 import com.example.samplestickerapp.view.StickerPackLoader;
 
 import java.io.File;
-import java.lang.reflect.Array;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -54,6 +49,7 @@ public class StickerPackViewModel extends ViewModel {
                     STICKER_PACK_IMAGE_NAME + Utils.formatData(new Date(), "yyyyMMddHHmmss"),
                     Folders.TRAY_IMAGE_SIZE,
                     Folders.TRAY_IMAGE_MAX_FILE_SIZE,
+                    true,
                     context);
             StickerPack stickerPack = new StickerPack(null,
                     nmPacoteInput,
@@ -98,6 +94,9 @@ public class StickerPackViewModel extends ViewModel {
     public void deleteStickerPack(StickerPack stickerPack, Context applicationContext) throws StickerException {
         stickerPackRepository.remove(stickerPack, applicationContext);
         Folders.deleteStickerPackFolder(stickerPack.getFolder(), applicationContext);
+    }
 
+    public StickerPack fetchUpdatedStickerPack(StickerPack stickerPack) throws StickerException {
+        return stickerPackRepository.findById(stickerPack.getIdentifier());
     }
 }

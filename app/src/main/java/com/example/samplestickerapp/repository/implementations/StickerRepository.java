@@ -8,6 +8,7 @@ import android.database.sqlite.SQLiteStatement;
 import com.example.samplestickerapp.exception.StickerException;
 import com.example.samplestickerapp.exception.enums.StickerDBExceptionEnum;
 import com.example.samplestickerapp.model.Sticker;
+import com.example.samplestickerapp.model.StickerPack;
 import com.example.samplestickerapp.repository.Repository;
 
 import java.util.ArrayList;
@@ -40,8 +41,8 @@ public class StickerRepository extends Repository<Sticker> {
             * */
 
             stmt.bindString(1, "");
-            stmt.bindString(1, sticker.getImageFileName());
-            stmt.bindLong(2, sticker.getPackIdentifier());
+            stmt.bindString(2, sticker.getStickerImageFile());
+            stmt.bindLong(3, sticker.getPackIdentifier());
 
             long result = stmt.executeInsert();
             if (result != -1) {
@@ -89,7 +90,7 @@ public class StickerRepository extends Repository<Sticker> {
     }
 
     @Override
-    public Sticker find(Integer id) throws StickerException {
+    public Sticker findById(Integer id) throws StickerException {
         return null;
     }
 
@@ -109,14 +110,9 @@ public class StickerRepository extends Repository<Sticker> {
 
             List<Sticker> stickersList = new ArrayList<>();
             while (!cursor.isAfterLast()) {
-                List<String> emojiList = new ArrayList<>();
-                for (String str : cursor.getString(1).split("|")) {
-                    emojiList.add(str);
-                }
-
-                stickersList.add(new Sticker(cursor.getString(2),
-                        emojiList,
-                        packIdentifier));
+                stickersList.add(new Sticker(cursor.getInt(cursor.getColumnIndexOrThrow(Sticker.IDENTIFIER)),
+                        cursor.getInt(cursor.getColumnIndexOrThrow(Sticker.PACK_IDENTIFIER)),
+                        cursor.getString(cursor.getColumnIndexOrThrow(Sticker.STICKER_IMAGE_FILE))));
                 cursor.moveToNext();
             }
 

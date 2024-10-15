@@ -42,6 +42,7 @@
         </activity>
 
         <activity android:name=".view.StickerPackFormActivity" />
+        <activity android:name=".view.StickerAddActivity" />
 
         <provider
             android:name=".view.StickerContentProvider"

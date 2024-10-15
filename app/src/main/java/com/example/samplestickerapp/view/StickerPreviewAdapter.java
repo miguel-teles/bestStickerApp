@@ -81,7 +81,7 @@ public class StickerPreviewAdapter extends RecyclerView.Adapter<StickerPreviewVi
     @Override
     public void onBindViewHolder(@NonNull final StickerPreviewViewHolder stickerPreviewViewHolder, final int i) {
         stickerPreviewViewHolder.stickerPreviewView.setImageResource(errorResource);
-        stickerPreviewViewHolder.stickerPreviewView.setImageURI(StickerPackLoader.getStickerAssetUri(stickerPack.getIdentifier().toString(), stickerPack.getStickers().get(i).getImageFileName()));
+        stickerPreviewViewHolder.stickerPreviewView.setImageURI(StickerPackLoader.getStickerAssetUri(stickerPack.getIdentifier().toString(), stickerPack.getStickers().get(i).getStickerImageFile()));
         stickerPreviewViewHolder.stickerPreviewView.setOnClickListener(v -> expandPreview(i, stickerPreviewViewHolder.stickerPreviewView));
     }
 
@@ -176,7 +176,7 @@ public class StickerPreviewAdapter extends RecyclerView.Adapter<StickerPreviewVi
         if (expandedStickerPreview != null) {
             positionExpandedStickerPreview(position);
 
-            final Uri stickerAssetUri = StickerPackLoader.getStickerAssetUri(stickerPack.getIdentifier().toString(), stickerPack.getStickers().get(position).getImageFileName());
+            final Uri stickerAssetUri = StickerPackLoader.getStickerAssetUri(stickerPack.getIdentifier().toString(), stickerPack.getStickers().get(position).getStickerImageFile());
             DraweeController controller = Fresco.newDraweeControllerBuilder()
                     .setUri(stickerAssetUri)
                     .setAutoPlayAnimations(true)
