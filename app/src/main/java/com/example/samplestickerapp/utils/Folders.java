@@ -4,6 +4,8 @@ import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
+import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
@@ -13,16 +15,20 @@ import com.example.samplestickerapp.exception.enums.StickerCriticalExceptionEnum
 import com.example.samplestickerapp.exception.enums.StickerExceptionEnum;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.nio.channels.FileChannel;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 
-abstract public class Folders {
+public class Folders {
 
     public static final int TRAY_IMAGE_MAX_FILE_SIZE = 50; //50KB
     public static final int STICKER_IMAGE_MAX_FILE_SIZE = 100; //50KB
     public static final int TRAY_IMAGE_SIZE = 96; //96pxs
     public static final int STICKER_IMAGE_SIZE = 512; //512pxs
+
+    private Folders() {
+    }
 
     public static File getLogsFolderPath(Context context) throws StickerException {
         if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
@@ -90,7 +96,7 @@ abstract public class Folders {
         }
     }
 
-    public static File makeDirPackIdentifier(String stickerPackFolderName, Context context) throws StickerException {
+    public static File getStickerPackFolderByFolderName(String stickerPackFolderName, Context context) throws StickerException {
         try {
             if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
 
@@ -98,11 +104,11 @@ abstract public class Folders {
 
                 File folderPacks = new File(externalDir, DirectoryNames.PACKS);
                 if (folderPacks.exists()) {
-                    File novoPacotePasta = new File(folderPacks, stickerPackFolderName);
-                    if (!novoPacotePasta.mkdir()) {
+                    File stickerPackFolder = new File(folderPacks, stickerPackFolderName);
+                    if (!stickerPackFolder.exists() && !stickerPackFolder.mkdir()) {
                         throw new StickerException(null, StickerCriticalExceptionEnum.CREATE_FOLDER_PACOTE, null);
                     }
-                    return novoPacotePasta;
+                    return stickerPackFolder;
                 } else {
                     throw new StickerException(null, StickerCriticalExceptionEnum.GET_FOLDER, "Pasta dos pacotes não existe!");
                 }
@@ -190,83 +196,102 @@ abstract public class Folders {
         return result;
     }
 
-    /**
-     * @param folderPack    The sticker pack folder where all the images are
-     * @param sourceImgPath The image being copied
-     * @param imageFileName The file's name created
-     * @return Retorna as imagens copiadas da imagem original. A primeira é a imagem original e a segunda é a imagem reduzida
-     **/
-    public static File[] copiaFotoParaPastaPacote(String folderPack,
-                                                  String sourceImgPath,
-                                                  String imageFileName,
-                                                  int imgSize,
-                                                  int fileSize,
-                                                  boolean mantemCopia,
-                                                  Context context) throws StickerException {
+    public static Image generateStickerImages(File stickerPackFolder,
+                                              String sourceImagePath,
+                                              String destinationImageFileName,
+                                              Integer imageWidthAndHeight,
+                                              boolean keepOriginalCopy) throws StickerException {
         try {
-            File pacotePasta = getPackFolderByFolderName(folderPack, context);
-            try {
-                //Copia a imagem original para a pasta das figurinhas. O resultado gera 2 imagens, uma com o tamanho original e a outra com o tamanho reduzido
-                File img = new File(sourceImgPath);
-                File packImg = new File(imageFileName + getFileExtension(img, true)); //imagem
-                File packImgRzd = new File(imageFileName + "Rzd" + getFileExtension(img, true)); //imagem pequena
-                File absolutePackImg = new File(pacotePasta, packImg.getPath()); //file absoluta da imagem
-                File absolutePackImgRzd = new File(pacotePasta, packImgRzd.getPath()); //file absoluta da imagem pequena
-                if (mantemCopia) {
-                    copiaImagem(img, absolutePackImg);
-                }
-                copiaImagem(img, absolutePackImgRzd);
+            File sourceImage = new File(sourceImagePath);
+            int rotation = getImageOrientation(sourceImagePath);
 
-                resizeImage(absolutePackImgRzd, imgSize, fileSize);
+            String stickerPackImageFileName = destinationImageFileName + getFileExtension(sourceImage, true);
+            String stickerPackImageResizedFileName = destinationImageFileName + "Rzd" + getFileExtension(sourceImage, true);
 
-                return new File[]{packImg, packImgRzd};
-            } catch (StickerException ste) {
-                throw ste;
-            } catch (Exception ex) {
-                throw new StickerException(ex, StickerCriticalExceptionEnum.COPY, "Erro ao copiar o arquivo da foto do pacote para a pasta dele");
+            if (keepOriginalCopy) {
+                File stickerPackOriginalImageAbsoluteFile = new File(stickerPackFolder, stickerPackImageFileName);
+                copyImageFromSourceToDestination(sourceImage, stickerPackOriginalImageAbsoluteFile);
+                resizeAndRotateImage(stickerPackOriginalImageAbsoluteFile, determineImageSmallerSide(stickerPackOriginalImageAbsoluteFile), Folders.TRAY_IMAGE_MAX_FILE_SIZE, rotation);
             }
+            File stickerPackResizedImageAbsoluteFile = new File(stickerPackFolder, stickerPackImageResizedFileName);
+            copyImageFromSourceToDestination(sourceImage, stickerPackResizedImageAbsoluteFile);
+            resizeAndRotateImage(stickerPackResizedImageAbsoluteFile, imageWidthAndHeight, Folders.TRAY_IMAGE_MAX_FILE_SIZE, rotation);
+
+            return new Image(stickerPackImageFileName, stickerPackImageResizedFileName);
         } catch (StickerException ste) {
             throw ste;
         } catch (Exception ex) {
-            throw new StickerException(ex, StickerExceptionEnum.CSP, "Erro ao copiar foto do pacote para a pasta do pacote " + folderPack);
+            throw new StickerException(ex, StickerExceptionEnum.CSP, "Erro ao copiar foto do pacote para a pasta do pacote " + stickerPackFolder.getName());
         }
     }
 
-    private static void copiaImagem(File sourceFile, File destinationFile) throws StickerException {
+    private static Bitmap applyRotationToBitmap(Bitmap bitmap, int rotate) {
+        Matrix matrix = new Matrix();
+        matrix.postRotate(rotate);
+        Bitmap rotatedBitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
+        return rotatedBitmap;
+    }
+
+    /**
+     * Por algum motivo, as imagens tiradas das câmeras da Samsung são viradas em 90 graus. Então quando copiamos a imagem
+     * **/
+    public static int getImageOrientation(String imagePath) {
+        int rotate = 0;
         try {
-            destinationFile.setWritable(true);
-            if (!destinationFile.createNewFile()) {
-                throw new StickerException(null, StickerCriticalExceptionEnum.COPY, "Imagem não criada");
+            ExifInterface exif = new ExifInterface(imagePath);
+            int orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, 1);
+            switch (orientation) {
+                case ExifInterface.ORIENTATION_ROTATE_270:
+                    rotate = 270;
+                    break;
+                case ExifInterface.ORIENTATION_ROTATE_180:
+                    rotate = 180;
+                    break;
+                case ExifInterface.ORIENTATION_ROTATE_90:
+                    rotate = 90;
+                    break;
             }
-            FileInputStream imageFileInputStream = new FileInputStream(sourceFile);
-            FileOutputStream imageFileOutputStream = new FileOutputStream(destinationFile);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return rotate;
+    }
 
-            FileChannel sourceImageChannel = imageFileInputStream.getChannel();
-            FileChannel destinationImageChannel = imageFileOutputStream.getChannel();
 
-            destinationImageChannel.transferFrom(sourceImageChannel, 0, sourceImageChannel.size());
+    private static int determineImageSmallerSide(File stickerPackImageFile) {
+        Bitmap bitmap = BitmapFactory.decodeFile(stickerPackImageFile.getAbsolutePath());
+        int greaterSide = bitmap.getWidth();
+        if (greaterSide < bitmap.getHeight()) {
+            greaterSide = bitmap.getHeight();
+        }
+        return greaterSide;
+    }
 
-            destinationImageChannel.close();
-            imageFileOutputStream.close();
-            sourceImageChannel.close();
-            imageFileInputStream.close();
+    private static void copyImageFromSourceToDestination(File sourceFile, File destinationFile) throws StickerException {
+        try {
+            Files.copy(sourceFile.toPath(), destinationFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
         } catch (Exception ex) {
             throw new StickerException(ex, StickerCriticalExceptionEnum.COPY, "Erro ao copiar file");
         }
     }
 
-    private static void resizeImage(File packImg,
-                                    int imgSize,
-                                    int fileSize) throws StickerException {
+    //TODO: precisa mudar o tamanho da imagem pra poder enviar para o whats com base na tamanho do parâmetro fileSize
+    private static void resizeAndRotateImage(File imageToResize,
+                                             int imageWidthAndHeight,
+                                             int fileSize,
+                                             int rotation) throws StickerException {
         try {
-            Bitmap bitmap = BitmapFactory.decodeFile(packImg.getAbsolutePath());
-            Bitmap resizedBitmap = Bitmap.createScaledBitmap(bitmap, imgSize, imgSize, false);
-            FileOutputStream out = new FileOutputStream(packImg);
-            resizedBitmap.compress(Bitmap.CompressFormat.JPEG, 90, out);
+            Bitmap bitmap = BitmapFactory.decodeFile(imageToResize.getAbsolutePath());
+
+            bitmap = applyRotationToBitmap(bitmap, rotation);
+            bitmap = Bitmap.createScaledBitmap(bitmap, imageWidthAndHeight, imageWidthAndHeight, false);
+
+            FileOutputStream out = new FileOutputStream(imageToResize);
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 90, out);
             out.flush();
             out.close();
         } catch (Exception ex) {
-            throw new StickerException(ex, StickerCriticalExceptionEnum.RESIZE, "Imagem: " + packImg.getName());
+            throw new StickerException(ex, StickerCriticalExceptionEnum.RESIZE, "Imagem: " + imageToResize.getName());
         }
     }
 
@@ -297,5 +322,32 @@ abstract public class Folders {
     public static void deleteStickerPackFolder(String folderName, Context applicationContext) throws StickerException {
         File folder = getPackFolderByFolderName(folderName, applicationContext);
         deleteFile(folder);
+    }
+
+    public static class Image {
+
+        private String originalImageFileName;
+        private String resizedImageFileName;
+
+        public Image(String originalImage, String resizedImageFileName) {
+            this.originalImageFileName = originalImage;
+            this.resizedImageFileName = resizedImageFileName;
+        }
+
+        public String getOriginalImage() {
+            return originalImageFileName;
+        }
+
+        public void setOriginalImage(String originalImage) {
+            this.originalImageFileName = originalImage;
+        }
+
+        public String getResizedImageFileName() {
+            return resizedImageFileName;
+        }
+
+        public void setResizedImageFileName(String resizedImageFileName) {
+            this.resizedImageFileName = resizedImageFileName;
+        }
     }
 }

@@ -7,12 +7,10 @@ import android.database.sqlite.SQLiteStatement;
 
 import com.example.samplestickerapp.exception.StickerException;
 import com.example.samplestickerapp.exception.enums.StickerDBExceptionEnum;
-import com.example.samplestickerapp.model.Sticker;
 import com.example.samplestickerapp.model.StickerPack;
 import com.example.samplestickerapp.repository.Repository;
 import com.example.samplestickerapp.view.StickerPackLoader;
 
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,7 +38,7 @@ public class StickerPackRepository extends Repository<StickerPack> {
             stmt.bindString(2, stickerPack.getPublisher());
             stmt.bindString(3, stickerPack.getOriginalTrayImageFile());
             stmt.bindString(4, stickerPack.getResizedTrayImageFile());
-            stmt.bindString(5, stickerPack.getFolder());
+            stmt.bindString(5, stickerPack.getFolderName());
             stmt.bindLong(6, Integer.parseInt(stickerPack.getImageDataVersion()));
             stmt.bindLong(7, stickerPack.isAvoidCache() ? 1 : 0);
             stmt.bindString(8, stickerPack.getPublisherEmail());

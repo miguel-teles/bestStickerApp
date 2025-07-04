@@ -30,17 +30,22 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"
+        android:layout_weight="1.2"
         android:orientation="horizontal"
         android:gravity="center|center"
         android:padding="16dp">
         <TextView
             android:id="@+id/createNewStickerPack"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:text="CLICK ME TO ADD A NEW PACK"
+            android:layout_height="50dp"
+            android:text="CRIAR NOVO PACOTE"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:singleLine="true"
+            android:ellipsize="end"
+            android:textAllCaps="true"
             android:gravity="center"
             android:textColor="@color/white"
-            android:background="@drawable/btn_green" />
+            android:background="@drawable/btn_default" />
     </LinearLayout>
 </LinearLayout>

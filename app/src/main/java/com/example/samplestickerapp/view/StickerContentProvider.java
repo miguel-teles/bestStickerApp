@@ -80,13 +80,12 @@ public class StickerContentProvider extends ContentProvider {
     private static final int METADATA_CODE_FOR_SINGLE_PACK = 2;
     static final String STICKERS = "stickers";
     static final String STICKERS_ASSET = "stickers_asset";
-    static final String STICKERS_ASSET_ORIGINAL = "stickers_asset_original";
 
     static String AUTHORITY = null;
     private static final int STICKERS_CODE = 3;
     static final String PACK = "pack";
     private static final int STICKERS_ASSET_CODE = 4;
-    private static final int STICKERS_ASSET_ORIGINAL_CODE = 10;
+
 
     private static final int STICKER_PACK_TRAY_ICON_CODE = 5;
     private static final int ADD_NEW_STICKER_PACK = 6;
@@ -149,7 +148,7 @@ public class StickerContentProvider extends ContentProvider {
 
     private void insertStickerPackUri(String authority, StickerPack stickerPack) {
         MATCHER.addURI(authority, STICKERS_ASSET + "/" + stickerPack.getIdentifier() + "/" + stickerPack.getResizedTrayImageFile(), STICKER_PACK_TRAY_ICON_CODE); //this returns the binary information of the sticker: `AssetFileDescriptor`, which points to the asset file for the sticker.
-        MATCHER.addURI(authority, STICKERS_ASSET_ORIGINAL + "/" + stickerPack.getIdentifier() + "/" + stickerPack.getOriginalTrayImageFile(), STICKER_PACK_TRAY_ICON_CODE); //this returns the binary information of the sticker: `AssetFileDescriptor`, which points to the asset file for the sticker.
+        MATCHER.addURI(authority, STICKERS_ASSET + "/" + stickerPack.getIdentifier() + "/" + stickerPack.getOriginalTrayImageFile(), STICKER_PACK_TRAY_ICON_CODE); //this returns the binary information of the sticker: `AssetFileDescriptor`, which points to the asset file for the sticker.
     }
 
     private void insertStickerUri(String authority, Sticker sticker) {
@@ -257,7 +256,7 @@ public class StickerContentProvider extends ContentProvider {
             builder.add(stickerPack.getPublisher());
             builder.add(stickerPack.getOriginalTrayImageFile());
             builder.add(stickerPack.getResizedTrayImageFile());
-            builder.add(stickerPack.getFolder());
+            builder.add(stickerPack.getFolderName());
             builder.add(stickerPack.getImageDataVersion());
             builder.add(stickerPack.isAvoidCache() ? 1 : 0);
             builder.add(stickerPack.getPublisherEmail());
@@ -304,11 +303,11 @@ public class StickerContentProvider extends ContentProvider {
         for (StickerPack stickerPack : getStickerPackList()) {
             if (identifier.equals(stickerPack.getIdentifier())) {
                 if (fileName.equals(stickerPack.getResizedTrayImageFile()) || fileName.equals(stickerPack.getOriginalTrayImageFile())) {
-                    return fetchFile(fileName, stickerPack.getFolder());
+                    return fetchFile(fileName, stickerPack.getFolderName());
                 } else {
                     for (Sticker sticker : stickerPack.getStickers()) {
                         if (fileName.equals(sticker.getStickerImageFile())) {
-                            return fetchFile(fileName, stickerPack.getFolder());
+                            return fetchFile(fileName, stickerPack.getFolderName());
                         }
                     }
                 }

@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -94,22 +95,27 @@ public class StickerAddActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == Utils.PICK_IMAGE_REQUEST_CODE && resultCode == RESULT_OK && data != null) {
+            stickerImageView.setTag("modified");
+
             Uri imageUri = data.getData();
             stickerImageView.setImageURI(imageUri);
             uriStickerImage = imageUri;
-            stickerImageView.setTag("modified");
-            stickerImageView.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+            adjustPickedImageProportions();
         }
         verificaCamposObrigatorios();
+    }
+
+    private void adjustPickedImageProportions() {
+        stickerImageView.setScaleType(ImageView.ScaleType.FIT_XY);
     }
 
     private void verificaCamposObrigatorios() {
         if (stickerImageView.getTag() != null && stickerImageView.getTag().equals("modified")) {
             btnAdicionarSticker.setEnabled(true);
-            btnAdicionarSticker.setBackground(getResources().getDrawable(R.drawable.btn_green));
+            btnAdicionarSticker.setBackground(getResources().getDrawable(R.drawable.btn_default));
         } else {
             btnAdicionarSticker.setEnabled(false);
-            btnAdicionarSticker.setBackground(getResources().getDrawable(R.color.gray));
+            btnAdicionarSticker.setBackground(getResources().getDrawable(R.drawable.btn_default_disabled));
         }
     }
 }

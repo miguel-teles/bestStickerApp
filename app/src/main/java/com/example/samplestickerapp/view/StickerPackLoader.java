@@ -12,7 +12,6 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
-import android.text.TextUtils;
 
 import androidx.annotation.NonNull;
 
@@ -20,7 +19,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 
@@ -37,7 +35,6 @@ import static com.example.samplestickerapp.view.StickerContentProvider.PUBLISHER
 import static com.example.samplestickerapp.view.StickerContentProvider.PUBLISHER_WEBSITE;
 import static com.example.samplestickerapp.view.StickerContentProvider.RESIZED_TRAY_IMAGE_FILE;
 import static com.example.samplestickerapp.view.StickerContentProvider.STICKERS;
-import static com.example.samplestickerapp.view.StickerContentProvider.STICKER_FILE_EMOJI_IN_QUERY;
 import static com.example.samplestickerapp.view.StickerContentProvider.STICKER_FILE_NAME_IN_QUERY;
 import static com.example.samplestickerapp.view.StickerContentProvider.ORIGINAL_TRAY_IMAGE_FILE;
 import static com.example.samplestickerapp.view.StickerContentProvider.STICKER_IDENTIFIER;
@@ -77,7 +74,7 @@ public class StickerPackLoader {
 
     @NonNull
     private static List<Sticker> getStickersForPack(Context context, StickerPack stickerPack) {
-        final List<Sticker> stickers = fetchFromContentProviderForStickers(stickerPack.getFolder(), context.getContentResolver());
+        final List<Sticker> stickers = fetchFromContentProviderForStickers(stickerPack.getFolderName(), context.getContentResolver());
         for (Sticker sticker : stickers) {
             final byte[] bytes;
             try {
@@ -186,10 +183,6 @@ public class StickerPackLoader {
 
     static Uri getStickerAssetUri(String identifier, String imageName) {
         return new Uri.Builder().scheme(ContentResolver.SCHEME_CONTENT).authority(BuildConfig.CONTENT_PROVIDER_AUTHORITY).appendPath(StickerContentProvider.STICKERS_ASSET).appendPath(identifier).appendPath(imageName).build();
-    }
-
-    static Uri getStickerOriginalAssetUri(String identifier, String imageName) {
-        return new Uri.Builder().scheme(ContentResolver.SCHEME_CONTENT).authority(BuildConfig.CONTENT_PROVIDER_AUTHORITY).appendPath(StickerContentProvider.STICKERS_ASSET_ORIGINAL).appendPath(identifier).appendPath(imageName).build();
     }
 
     static Uri getStickerResizedAssetUri(String identifier, String imageName) {

@@ -16,7 +16,6 @@ public class MyDatabase extends SQLiteOpenHelper {
 
     private static MyDatabase instance;
     private SQLiteDatabase myDB;
-    private File dbFile;
     final private static String dbName = "stickersDB.db";
 
     private MyDatabase(Context context) {

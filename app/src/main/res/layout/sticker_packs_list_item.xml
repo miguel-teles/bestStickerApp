@@ -9,7 +9,7 @@
     android:foreground="?android:attr/selectableItemBackground"
     android:orientation="vertical"
     android:minHeight="76dp"
-    android:maxHeight="76dp"
+    android:maxHeight="90dp"
     android:paddingStart="16dp"
     android:paddingLeft="16dp"
     android:paddingTop="8dp"

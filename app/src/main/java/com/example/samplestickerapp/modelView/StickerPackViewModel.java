@@ -3,6 +3,7 @@ package com.example.samplestickerapp.modelView;
 import android.content.Context;
 import android.net.Uri;
 
+import androidx.annotation.NonNull;
 import androidx.lifecycle.ViewModel;
 
 import com.example.samplestickerapp.R;
@@ -11,7 +12,6 @@ import com.example.samplestickerapp.exception.enums.StickerDBExceptionEnum;
 import com.example.samplestickerapp.model.StickerPack;
 import com.example.samplestickerapp.repository.MyDatabase;
 import com.example.samplestickerapp.repository.implementations.StickerPackRepository;
-import com.example.samplestickerapp.repository.implementations.StickerRepository;
 import com.example.samplestickerapp.utils.Folders;
 import com.example.samplestickerapp.utils.Utils;
 import com.example.samplestickerapp.view.StickerPackLoader;
@@ -23,55 +23,63 @@ import java.util.List;
 public class StickerPackViewModel extends ViewModel {
 
     private final StickerPackRepository stickerPackRepository;
-    private final StickerRepository stickerRepository;
 
     private final String STICKER_PACK_IMAGE_NAME = "packImg";
 
     public StickerPackViewModel(MyDatabase myDatabase) throws StickerException {
         this.stickerPackRepository = new StickerPackRepository(myDatabase.getMyDB());
-        this.stickerRepository = new StickerRepository(myDatabase.getMyDB());
     }
 
     public StickerPack createStickerPack(String nmAutorInput,
                                          String nmPacoteInput,
                                          Uri uriImagemStickerPackInput,
-                                         boolean isAnimated,
                                          Context context) throws StickerException {
         if (Utils.isNothing(nmAutorInput)) {
             nmAutorInput = context.getResources().getString(R.string.defaultPublisher);
         }
-        String stickerPackFolderName = nmPacoteInput + Utils.formatData(new Date(), "yyyy.MM.dd.HH.mm.ss");
         File stickerPackFolder = null;
         try {
-            stickerPackFolder = Folders.makeDirPackIdentifier(stickerPackFolderName, context);
-            File[] imgsCopiada = Folders.copiaFotoParaPastaPacote(stickerPackFolderName,
+            String stickerPackFolderName = nmPacoteInput + Utils.formatData(new Date(), "yyyy.MM.dd.HH.mm.ss");
+            stickerPackFolder = Folders.getStickerPackFolderByFolderName(stickerPackFolderName, context);
+            Folders.Image copiedImages = Folders.generateStickerImages(stickerPackFolder,
                     Folders.getRealPathFromURI(uriImagemStickerPackInput, context),
-                    STICKER_PACK_IMAGE_NAME + Utils.formatData(new Date(), "yyyyMMddHHmmss"),
+                    generateStickerPackImageName(),
                     Folders.TRAY_IMAGE_SIZE,
-                    Folders.TRAY_IMAGE_MAX_FILE_SIZE,
-                    true,
-                    context);
+                    true);
             StickerPack stickerPack = new StickerPack(null,
                     nmPacoteInput,
                     nmAutorInput,
-                    imgsCopiada[0].getPath(),
-                    imgsCopiada[1].getPath(),
+                    copiedImages.getOriginalImage(),
+                    copiedImages.getResizedImageFileName(),
                     stickerPackFolderName,
                     "1",
-                    isAnimated);
+                    false);
             stickerPackRepository.save(stickerPack, context);
-            if (stickerPack.getIdentifier() != null) {
-                context.getContentResolver().insert(StickerPackLoader.getStickerPackInsertUri(),stickerPack.toContentValues());
-                return stickerPack;
-            } else {
-                throw new StickerException(null, StickerDBExceptionEnum.INSERT, "Erro ao salvar pacote no banco");
-            }
+            addStickerPackToContentProvider(context, stickerPack);
+            return stickerPack;
         } catch (StickerException ex) {
-            try {
-                Folders.deleteFile(stickerPackFolder);
-            } catch (Exception e) {
-            }
+            deletePackFolderOnException(stickerPackFolder);
             throw ex;
+        }
+    }
+
+    @NonNull
+    private String generateStickerPackImageName() {
+        return STICKER_PACK_IMAGE_NAME + Utils.formatData(new Date(), "yyyyMMddHHmmss");
+    }
+
+    private static void addStickerPackToContentProvider(Context context, StickerPack stickerPack) throws StickerException {
+        if (stickerPack.getIdentifier() != null) {
+            context.getContentResolver().insert(StickerPackLoader.getStickerPackInsertUri(), stickerPack.toContentValues());
+        } else {
+            throw new StickerException(null, StickerDBExceptionEnum.INSERT, "Erro ao salvar pacote no banco");
+        }
+    }
+
+    private static void deletePackFolderOnException(File stickerPackFolder) {
+        try {
+            Folders.deleteFile(stickerPackFolder);
+        } catch (Exception e) {
         }
     }
 
@@ -87,13 +95,12 @@ public class StickerPackViewModel extends ViewModel {
         stickerPack.setPublisher(nmAutorInput);
         StickerPack updatedStickerPack = stickerPackRepository.update(stickerPack, applicationContext);
         applicationContext.getContentResolver().update(StickerPackLoader.getStickerPackUpdateUri(),stickerPack.toContentValues(),null,null);
-        //indica pro content provider que a lista de stickerpack está desatualizada
         return updatedStickerPack;
     }
 
     public void deleteStickerPack(StickerPack stickerPack, Context applicationContext) throws StickerException {
         stickerPackRepository.remove(stickerPack, applicationContext);
-        Folders.deleteStickerPackFolder(stickerPack.getFolder(), applicationContext);
+        Folders.deleteStickerPackFolder(stickerPack.getFolderName(), applicationContext);
     }
 
     public StickerPack fetchUpdatedStickerPack(StickerPack stickerPack) throws StickerException {

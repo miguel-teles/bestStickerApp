@@ -44,7 +44,7 @@ public class StickerPack implements Parcelable {
     private final String privacyPolicyWebsite;
     private final String licenseAgreementWebsite;
     private final String imageDataVersion;
-    private final String folder;
+    private final String folderName;
     private final boolean avoidCache;
     private final boolean animatedStickerPack;
     private String iosAppStoreLink;
@@ -73,7 +73,7 @@ public class StickerPack implements Parcelable {
                        @NonNull String publisher,
                        @NonNull String originalTrayImageFile,
                        @NonNull String resizedTrayImageFile,
-                       @NonNull String folder,
+                       @NonNull String folderName,
                        @NonNull Integer imageDataVersion,
                        @NonNull Boolean avoidCache,
                        String publisherEmail,
@@ -87,7 +87,7 @@ public class StickerPack implements Parcelable {
         this.publisher = publisher;
         this.originalTrayImageFile = originalTrayImageFile;
         this.resizedTrayImageFile = resizedTrayImageFile;
-        this.folder = folder;
+        this.folderName = folderName;
         this.imageDataVersion = imageDataVersion+"";
         this.avoidCache = avoidCache;
         this.publisherEmail = publisherEmail;
@@ -103,7 +103,7 @@ public class StickerPack implements Parcelable {
                        String publisher,
                        String originalTrayImageFile,
                        String resizedTrayImageFile,
-                       String folder,
+                       String folderName,
                        String publisherEmail,
                        String publisherWebsite,
                        String privacyPolicyWebsite,
@@ -116,7 +116,7 @@ public class StickerPack implements Parcelable {
         this.publisher = publisher;
         this.originalTrayImageFile = originalTrayImageFile;
         this.resizedTrayImageFile = resizedTrayImageFile;
-        this.folder = folder;
+        this.folderName = folderName;
         this.publisherEmail = publisherEmail;
         this.publisherWebsite = publisherWebsite;
         this.privacyPolicyWebsite = privacyPolicyWebsite;
@@ -131,7 +131,7 @@ public class StickerPack implements Parcelable {
                        String publisher,
                        String originalTrayImageFile,
                        String resizedTrayImageFile,
-                       String folder,
+                       String folderName,
                        String imageDataVersion,
                        boolean animatedStickerPack) {
         this.identifier = identifier;
@@ -140,7 +140,7 @@ public class StickerPack implements Parcelable {
         this.originalTrayImageFile = originalTrayImageFile;
         this.resizedTrayImageFile = resizedTrayImageFile;
         this.imageDataVersion = imageDataVersion;
-        this.folder = folder;
+        this.folderName = folderName;
         this.avoidCache = false;
         this.publisherEmail = "";
         this.publisherWebsite = "";
@@ -174,7 +174,7 @@ public class StickerPack implements Parcelable {
         contentValues.put(ORIGINAL_TRAY_IMAGE_FILE, this.getOriginalTrayImageFile());
         contentValues.put(RESIZED_TRAY_IMAGE_FILE, this.getResizedTrayImageFile());
         contentValues.put(IMAGE_DATA_VERSION, this.getImageDataVersion());
-        contentValues.put(FOLDER, this.getFolder());
+        contentValues.put(FOLDER, this.getFolderName());
         contentValues.put(AVOID_CACHE, this.isAvoidCache());
         contentValues.put(PUBLISHER_EMAIL, this.getPublisherEmail());
         contentValues.put(PUBLISHER_WEBSITE, this.getPublisherWebsite());
@@ -198,7 +198,7 @@ public class StickerPack implements Parcelable {
         publisher = in.readString();
         originalTrayImageFile = in.readString();
         resizedTrayImageFile = in.readString();
-        folder = in.readString();
+        folderName = in.readString();
         publisherEmail = in.readString();
         publisherWebsite = in.readString();
         privacyPolicyWebsite = in.readString();
@@ -264,7 +264,7 @@ public class StickerPack implements Parcelable {
         dest.writeString(publisher);
         dest.writeString(originalTrayImageFile);
         dest.writeString(resizedTrayImageFile);
-        dest.writeString(folder);
+        dest.writeString(folderName);
         dest.writeString(publisherEmail);
         dest.writeString(publisherWebsite);
         dest.writeString(privacyPolicyWebsite);
@@ -343,8 +343,8 @@ public class StickerPack implements Parcelable {
         isWhitelisted = whitelisted;
     }
 
-    public String getFolder() {
-        return folder;
+    public String getFolderName() {
+        return folderName;
     }
 
     public String getResizedTrayImageFile() {
