@@ -65,7 +65,7 @@ public class StickerPackListActivity extends AddStickerPackActivity {
 
         showStickerPackList(stickerPackList);
         if (getSupportActionBar() != null) {
-            getSupportActionBar().setTitle(getResources().getQuantityString(R.plurals.title_activity_sticker_packs_list, stickerPackList.size()));
+            getSupportActionBar().hide();
         }
     }
 
