@@ -1,15 +1,10 @@
 package com.example.samplestickerapp.view;
 
-import static com.example.samplestickerapp.view.StickerContentProvider.FOLDER;
-import static com.example.samplestickerapp.view.StickerContentProvider.IDENTIFIER;
-import static com.example.samplestickerapp.view.StickerPackFormActivity.STICKER_PACK;
-
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -23,7 +18,6 @@ import com.example.samplestickerapp.model.Sticker;
 import com.example.samplestickerapp.model.StickerPack;
 import com.example.samplestickerapp.modelView.StickerViewModel;
 import com.example.samplestickerapp.modelView.factory.StickerViewModelFactory;
-import com.example.samplestickerapp.repository.MyDatabase;
 import com.example.samplestickerapp.utils.Utils;
 
 public class StickerAddActivity extends AppCompatActivity {
@@ -46,11 +40,21 @@ public class StickerAddActivity extends AppCompatActivity {
         } catch (StickerException ex) {
             StickerExceptionHandler.handleException(ex, this);
         }
+        loadStickerPackFromIntent();
+        setOnClickListeners();
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().hide();
+        }
+    }
+
+    private void loadStickerPackFromIntent() {
         Intent intent = getIntent();
-        if (intent.getExtras() != null && intent.getExtras().get(StickerPackFormActivity.STICKER_PACK) != null) {
+        if (intent.getExtras().get(StickerPackFormActivity.STICKER_PACK) != null) {
             stickerPack = intent.getParcelableExtra(StickerPackFormActivity.STICKER_PACK);
         }
+    }
 
+    private void setOnClickListeners() {
         stickerImageView.setOnClickListener(selecionaImagem());
         btnAdicionarSticker.setOnClickListener(adicionarSticker());
     }
@@ -112,10 +116,10 @@ public class StickerAddActivity extends AppCompatActivity {
     private void verificaCamposObrigatorios() {
         if (stickerImageView.getTag() != null && stickerImageView.getTag().equals("modified")) {
             btnAdicionarSticker.setEnabled(true);
-            btnAdicionarSticker.setBackground(getResources().getDrawable(R.drawable.btn_default));
+            btnAdicionarSticker.setBackground(getResources().getDrawable(R.drawable.shape_btn_default));
         } else {
             btnAdicionarSticker.setEnabled(false);
-            btnAdicionarSticker.setBackground(getResources().getDrawable(R.drawable.btn_default_disabled));
+            btnAdicionarSticker.setBackground(getResources().getDrawable(R.drawable.shape_btn_default_disabled));
         }
     }
 }

@@ -24,14 +24,12 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.samplestickerapp.R;
 import com.example.samplestickerapp.exception.StickerException;
 import com.example.samplestickerapp.exception.StickerExceptionHandler;
-import com.example.samplestickerapp.exception.enums.StickerExceptionEnum;
 import com.example.samplestickerapp.model.StickerPack;
 import com.example.samplestickerapp.modelView.StickerPackViewModel;
 import com.example.samplestickerapp.modelView.factory.StickerPackViewModelFactory;
@@ -67,6 +65,7 @@ public class StickerPackDetailsActivity extends AddStickerPackActivity {
     private ImageView btnAddNewSticker;
     private ImageView btnEditStickerPack;
     private ImageView btnDeleteStickerPack;
+    private ImageView btnGoBack;
     private WhiteListCheckAsyncTask whiteListCheckAsyncTask;
 
     private StickerPackViewModel stickerPackViewModel;
@@ -75,47 +74,94 @@ public class StickerPackDetailsActivity extends AddStickerPackActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sticker_pack_details);
-        boolean showUpButton = getIntent().getBooleanExtra(StickerPackDetailsActivity.EXTRA_SHOW_UP_BUTTON, false);
         stickerPack = getIntent().getParcelableExtra(EXTRA_STICKER_PACK_DATA);
-        TextView packNameTextView = findViewById(R.id.pack_name);
-        TextView packPublisherTextView = findViewById(R.id.author);
-        ImageView packTrayIcon = findViewById(R.id.tray_image);
-        TextView packSizeTextView = findViewById(R.id.pack_size);
-        SimpleDraweeView expandedStickerView = findViewById(R.id.sticker_details_expanded_sticker);
 
-        declaraComponents();
-
+        declareGlobalComponents();
         try {
             stickerPackViewModel = StickerPackViewModelFactory.create(this, getApplicationContext());
         } catch (StickerException ex) {
             StickerExceptionHandler.handleException(ex, this);
         }
 
-        layoutManager = new GridLayoutManager(this, 1);
-        recyclerView.setLayoutManager(layoutManager);
-        recyclerView.getViewTreeObserver().addOnGlobalLayoutListener(pageLayoutListener);
-        recyclerView.addOnScrollListener(dividerScrollListener);
-        if (stickerPreviewAdapter == null) {
-            stickerPreviewAdapter = new StickerPreviewAdapter(getLayoutInflater(), R.drawable.sticker_error, getResources().getDimensionPixelSize(R.dimen.sticker_pack_details_image_size), getResources().getDimensionPixelSize(R.dimen.sticker_pack_details_image_padding), stickerPack, expandedStickerView, this);
-            recyclerView.setAdapter(stickerPreviewAdapter);
-        }
-        packNameTextView.setText(stickerPack.getName());
-        packPublisherTextView.setText(stickerPack.getPublisher());
-        packTrayIcon.setImageURI(StickerPackLoader.getStickerResizedAssetUri(stickerPack.getIdentifier().toString(), stickerPack.getResizedTrayImageFile()));
-        packSizeTextView.setText(Formatter.formatShortFileSize(this, stickerPack.getTotalSize()));
+        assembleRecyclerView();
+        loadStickersOnScreen();
+        loadStickerPackInfoOnComponents();
         setaOnClickListeners();
         if (getSupportActionBar() != null) {
-            getSupportActionBar().setDisplayHomeAsUpEnabled(showUpButton);
-            getSupportActionBar().setTitle(showUpButton ? getResources().getString(R.string.title_activity_sticker_pack_details_multiple_pack) : getResources().getQuantityString(R.plurals.title_activity_sticker_packs_list, 1));
+            getSupportActionBar().hide();
         }
         findViewById(R.id.sticker_pack_animation_indicator).setVisibility(stickerPack.isAnimatedStickerPack() ? View.VISIBLE : View.GONE);
     }
 
-    private void declaraComponents() {
+    private void loadStickerPackInfoOnComponents() {
+        TextView packNameTextView = findViewById(R.id.pack_name);
+        TextView packPublisherTextView = findViewById(R.id.author);
+        ImageView packTrayIcon = findViewById(R.id.tray_image);
+        TextView packSizeTextView = findViewById(R.id.pack_size);
+
+        packNameTextView.setText(stickerPack.getName());
+        packPublisherTextView.setText("Autor: " + stickerPack.getPublisher());
+        packTrayIcon.setImageURI(StickerPackLoader.getStickerResizedAssetUri(stickerPack.getIdentifier().toString(), stickerPack.getResizedTrayImageFile()));
+        packSizeTextView.setText(Formatter.formatShortFileSize(this, stickerPack.getTotalSize()));
+    }
+
+    private void assembleRecyclerView() {
+        layoutManager = new GridLayoutManager(this, 1);
+        recyclerView.setLayoutManager(layoutManager);
+        recyclerView.getViewTreeObserver().addOnGlobalLayoutListener(pageLayoutListener);
+        recyclerView.addOnScrollListener(dividerScrollListener);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.toolbar, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.action_info && stickerPack != null) {
+            Uri trayIconUri = StickerPackLoader.getStickerAssetUri(stickerPack.getIdentifier().toString(), stickerPack.getOriginalTrayImageFile());
+            launchInfoActivity(stickerPack.getPublisherWebsite(), stickerPack.getPublisherEmail(), stickerPack.getPrivacyPolicyWebsite(), stickerPack.getLicenseAgreementWebsite(), trayIconUri.toString());
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        try {
+            stickerPack = stickerPackViewModel.fetchUpdatedStickerPack(stickerPack);
+        } catch (StickerException ex) {
+            StickerExceptionHandler.handleException(ex, this);
+        }
+        whiteListCheckAsyncTask = new WhiteListCheckAsyncTask(this);
+        whiteListCheckAsyncTask.execute(stickerPack);
+        loadStickersOnScreen();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (whiteListCheckAsyncTask != null && !whiteListCheckAsyncTask.isCancelled()) {
+            whiteListCheckAsyncTask.cancel(true);
+        }
+    }
+
+    private void loadStickersOnScreen() {
+        SimpleDraweeView expandedStickerView = findViewById(R.id.sticker_details_expanded_sticker);
+        stickerPreviewAdapter = new StickerPreviewAdapter(getLayoutInflater(), R.drawable.sticker_error, getResources().getDimensionPixelSize(R.dimen.sticker_pack_details_image_size), getResources().getDimensionPixelSize(R.dimen.sticker_pack_details_image_padding), stickerPack, expandedStickerView, this);
+        recyclerView.setAdapter(stickerPreviewAdapter);
+    }
+
+    private void declareGlobalComponents() {
         btnAddNewSticker = findViewById(R.id.btn_add_new_sticker);
         btnEditStickerPack = findViewById(R.id.btn_edit_pack);
         btnDeleteStickerPack = findViewById(R.id.btn_delete_pack);
         btnAddToWhatsapp = findViewById(R.id.add_to_whatsapp_button);
+        btnGoBack = findViewById(R.id.btn_sticker_pack_details_go_back);
         alreadyAddedText = findViewById(R.id.already_added_text);
         recyclerView = findViewById(R.id.sticker_list);
         divider = findViewById(R.id.divider);
@@ -126,6 +172,11 @@ public class StickerPackDetailsActivity extends AddStickerPackActivity {
         btnEditStickerPack.setOnClickListener(btn -> editStickerPack());
         btnDeleteStickerPack.setOnClickListener(btn -> deleteStickerPack());
         btnAddNewSticker.setOnClickListener(btn -> addNewSticker());
+        btnGoBack.setOnClickListener(btn -> addGoBack());
+    }
+
+    private void addGoBack() {
+        finish();
     }
 
     private void addNewSticker() {
@@ -174,23 +225,6 @@ public class StickerPackDetailsActivity extends AddStickerPackActivity {
         startActivity(intent);
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.toolbar, menu);
-        return super.onCreateOptionsMenu(menu);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == R.id.action_info && stickerPack != null) {
-            Uri trayIconUri = StickerPackLoader.getStickerAssetUri(stickerPack.getIdentifier().toString(), stickerPack.getOriginalTrayImageFile());
-            launchInfoActivity(stickerPack.getPublisherWebsite(), stickerPack.getPublisherEmail(), stickerPack.getPrivacyPolicyWebsite(), stickerPack.getLicenseAgreementWebsite(), trayIconUri.toString());
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
-
     private final ViewTreeObserver.OnGlobalLayoutListener pageLayoutListener = new ViewTreeObserver.OnGlobalLayoutListener() {
         @Override
         public void onGlobalLayout() {
@@ -228,26 +262,6 @@ public class StickerPackDetailsActivity extends AddStickerPackActivity {
             }
         }
     };
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        try {
-            stickerPack = stickerPackViewModel.fetchUpdatedStickerPack(stickerPack);
-        } catch (StickerException ex) {
-            StickerExceptionHandler.handleException(ex, this);
-        }
-        whiteListCheckAsyncTask = new WhiteListCheckAsyncTask(this);
-        whiteListCheckAsyncTask.execute(stickerPack);
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        if (whiteListCheckAsyncTask != null && !whiteListCheckAsyncTask.isCancelled()) {
-            whiteListCheckAsyncTask.cancel(true);
-        }
-    }
 
     private void updateAddUI(Boolean isWhitelisted) {
         if (isWhitelisted) {

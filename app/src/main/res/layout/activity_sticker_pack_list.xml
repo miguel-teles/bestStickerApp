@@ -46,6 +46,6 @@
             android:textAllCaps="true"
             android:gravity="center"
             android:textColor="@color/white"
-            android:background="@drawable/btn_default" />
+            android:background="@drawable/shape_btn_default" />
     </LinearLayout>
 </LinearLayout>

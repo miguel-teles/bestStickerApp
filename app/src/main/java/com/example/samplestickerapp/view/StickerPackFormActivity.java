@@ -138,10 +138,10 @@ public class StickerPackFormActivity extends AppCompatActivity {
     private void verificaCamposObrigatorios() {
         if (!Utils.isNothing(txtNomePacote.getText()) && stickerPackImageView.getTag() != null && stickerPackImageView.getTag().equals("modified")) {
             btnAdicionarStickerPack.setEnabled(true);
-            btnAdicionarStickerPack.setBackground(getResources().getDrawable(R.drawable.btn_default));
+            btnAdicionarStickerPack.setBackground(getResources().getDrawable(R.drawable.shape_btn_default));
         } else {
             btnAdicionarStickerPack.setEnabled(false);
-            btnAdicionarStickerPack.setBackground(getResources().getDrawable(R.drawable.btn_default_disabled));
+            btnAdicionarStickerPack.setBackground(getResources().getDrawable(R.drawable.shape_btn_default_disabled));
         }
     }
 

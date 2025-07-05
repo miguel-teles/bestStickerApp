@@ -81,7 +81,7 @@
         android:id="@+id/adicionarStickerPack"
         android:layout_width="match_parent"
         android:layout_height="50dp"
-        android:background="@drawable/btn_default_disabled"
+        android:background="@drawable/shape_btn_default_disabled"
         android:gravity="center"
         android:text="@string/ADD_PACK"
         android:textColor="@android:color/primary_text_dark"
