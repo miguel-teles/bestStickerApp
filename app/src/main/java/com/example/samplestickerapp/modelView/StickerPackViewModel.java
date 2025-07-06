@@ -49,8 +49,8 @@ public class StickerPackViewModel extends ViewModel {
             StickerPack stickerPack = new StickerPack(null,
                     nmPacoteInput,
                     nmAutorInput,
-                    copiedImages.getOriginalImage(),
-                    copiedImages.getResizedImageFileName(),
+                    copiedImages.getOriginalImageFile().getName(),
+                    copiedImages.getResizedImageFile().getName(),
                     stickerPackFolderName,
                     "1",
                     false);
@@ -81,10 +81,6 @@ public class StickerPackViewModel extends ViewModel {
             Folders.deleteFile(stickerPackFolder);
         } catch (Exception e) {
         }
-    }
-
-    public List<StickerPack> fetchStickerPacks() throws StickerException {
-        return stickerPackRepository.findAll();
     }
 
     public StickerPack updateStickerPack(StickerPack stickerPack,

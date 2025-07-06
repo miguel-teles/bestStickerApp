@@ -165,7 +165,7 @@ public class StickerPackFormActivity extends AppCompatActivity {
             stickerPackImageView.setImageURI(imageUri);
             uriImagemStickerPack = imageUri;
             stickerPackImageView.setTag("modified");
-            stickerPackImageView.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+            stickerPackImageView.setScaleType(ImageView.ScaleType.FIT_XY);
             verificaCamposObrigatorios();
         }
     }

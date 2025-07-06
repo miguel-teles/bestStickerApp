@@ -67,8 +67,8 @@ public class StickerPackDetailsActivity extends AddStickerPackActivity {
     private ImageView btnDeleteStickerPack;
     private ImageView btnGoBack;
     private WhiteListCheckAsyncTask whiteListCheckAsyncTask;
-
     private StickerPackViewModel stickerPackViewModel;
+    private int stickerBytes;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -180,7 +180,7 @@ public class StickerPackDetailsActivity extends AddStickerPackActivity {
     }
 
     private void addNewSticker() {
-        Intent intent = new Intent(this, StickerAddActivity.class);
+        Intent intent = new Intent(this, AddStickerActivity.class);
         intent.putExtra(StickerPackFormActivity.STICKER_PACK, stickerPack);
         startActivity(intent);
     }

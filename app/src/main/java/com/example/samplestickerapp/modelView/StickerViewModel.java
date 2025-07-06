@@ -3,7 +3,6 @@ package com.example.samplestickerapp.modelView;
 import android.content.Context;
 import android.net.Uri;
 
-import androidx.annotation.NonNull;
 import androidx.lifecycle.ViewModel;
 
 import com.example.samplestickerapp.exception.StickerException;
@@ -40,7 +39,7 @@ public class StickerViewModel extends ViewModel {
                 Folders.STICKER_IMAGE_SIZE,
                 false);
 
-        Sticker sticker = new Sticker(copiedImages.getResizedImageFileName(), stickerPack.getIdentifier());
+        Sticker sticker = new Sticker(copiedImages.getResizedImageFile().getName(), stickerPack.getIdentifier(), copiedImages.getResizedImageFile().length());
         stickerRepository.save(sticker, context);
         if (sticker.getIdentifier() != null) {
             context.getContentResolver().insert(StickerPackLoader.getStickerInsertUri(),sticker.toContentValues());

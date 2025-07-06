@@ -40,10 +40,12 @@ public class Sticker implements Parcelable {
     }
 
     public Sticker(String stickerImageFile,
-                   Integer packIdentifier) {
+                   Integer packIdentifier,
+                   long size) {
         this.stickerImageFile = stickerImageFile;
         this.emojis = new ArrayList<>();
         this.packIdentifier = packIdentifier;
+        this.size = size;
     }
 
     private Sticker(Parcel in) {

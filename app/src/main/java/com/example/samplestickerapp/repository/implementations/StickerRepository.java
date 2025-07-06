@@ -16,7 +16,7 @@ import java.util.List;
 
 public class StickerRepository extends Repository<Sticker> {
 
-    private String SAVE = "INSERT INTO stickers VALUES (null, ?, ?, ?)";
+    private String SAVE = "INSERT INTO stickers VALUES (null, ?, ?, ?, ?)";
     private String FIND_ALL_BY_PACKIDENTIFIER = "SELECT * FROM stickers WHERE packIdentifier=%d";
 
     private SQLiteDatabase sqLiteDatabase;
@@ -36,6 +36,7 @@ public class StickerRepository extends Repository<Sticker> {
                     "emoji TEXT NOT NULL," +
                     "imageFile TEXT NOT NULL," +
                     "packIdentifier INTEGER, " +
+                    "size INTEGER, " +
                     "FOREIGN KEY (packIdentifier) REFERENCES packs(identifier)" +
                     ")";
             * */
@@ -43,6 +44,7 @@ public class StickerRepository extends Repository<Sticker> {
             stmt.bindString(1, "");
             stmt.bindString(2, sticker.getStickerImageFile());
             stmt.bindLong(3, sticker.getPackIdentifier());
+            stmt.bindLong(4, sticker.getSize());
 
             long result = stmt.executeInsert();
             if (result != -1) {

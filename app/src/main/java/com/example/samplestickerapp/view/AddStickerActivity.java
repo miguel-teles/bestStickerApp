@@ -20,7 +20,7 @@ import com.example.samplestickerapp.modelView.StickerViewModel;
 import com.example.samplestickerapp.modelView.factory.StickerViewModelFactory;
 import com.example.samplestickerapp.utils.Utils;
 
-public class StickerAddActivity extends AppCompatActivity {
+public class AddStickerActivity extends AppCompatActivity {
 
 
     private ImageView stickerImageView = null;

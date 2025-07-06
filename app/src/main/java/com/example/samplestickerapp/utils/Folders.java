@@ -15,8 +15,10 @@ import com.example.samplestickerapp.exception.enums.StickerCriticalExceptionEnum
 import com.example.samplestickerapp.exception.enums.StickerExceptionEnum;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.channels.FileChannel;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 
@@ -206,10 +208,11 @@ public class Folders {
             int rotation = getImageOrientation(sourceImagePath);
 
             String stickerPackImageFileName = destinationImageFileName + getFileExtension(sourceImage, true);
-            String stickerPackImageResizedFileName = destinationImageFileName + "Rzd" + getFileExtension(sourceImage, true);
+            String stickerPackImageResizedFileName = destinationImageFileName + "Rzd.webp"; //TEM QUE SER .webp se não o whatsapp não aceita
 
+            File stickerPackOriginalImageAbsoluteFile = null;
             if (keepOriginalCopy) {
-                File stickerPackOriginalImageAbsoluteFile = new File(stickerPackFolder, stickerPackImageFileName);
+                stickerPackOriginalImageAbsoluteFile = new File(stickerPackFolder, stickerPackImageFileName);
                 copyImageFromSourceToDestination(sourceImage, stickerPackOriginalImageAbsoluteFile);
                 resizeAndRotateImage(stickerPackOriginalImageAbsoluteFile, determineImageSmallerSide(stickerPackOriginalImageAbsoluteFile), Folders.TRAY_IMAGE_MAX_FILE_SIZE, rotation);
             }
@@ -217,7 +220,7 @@ public class Folders {
             copyImageFromSourceToDestination(sourceImage, stickerPackResizedImageAbsoluteFile);
             resizeAndRotateImage(stickerPackResizedImageAbsoluteFile, imageWidthAndHeight, Folders.TRAY_IMAGE_MAX_FILE_SIZE, rotation);
 
-            return new Image(stickerPackImageFileName, stickerPackImageResizedFileName);
+            return new Image(stickerPackOriginalImageAbsoluteFile, stickerPackResizedImageAbsoluteFile);
         } catch (StickerException ste) {
             throw ste;
         } catch (Exception ex) {
@@ -268,8 +271,11 @@ public class Folders {
     }
 
     private static void copyImageFromSourceToDestination(File sourceFile, File destinationFile) throws StickerException {
-        try {
-            Files.copy(sourceFile.toPath(), destinationFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+        try(FileInputStream in = new FileInputStream(sourceFile);
+            FileOutputStream out = new FileOutputStream(destinationFile)) {
+
+            Bitmap bitmap = BitmapFactory.decodeStream(in);
+            bitmap.compress(Bitmap.CompressFormat.WEBP, 100, out);
         } catch (Exception ex) {
             throw new StickerException(ex, StickerCriticalExceptionEnum.COPY, "Erro ao copiar file");
         }
@@ -326,28 +332,28 @@ public class Folders {
 
     public static class Image {
 
-        private String originalImageFileName;
-        private String resizedImageFileName;
+        private File originalImageFile;
+        private File resizedImageFile;
 
-        public Image(String originalImage, String resizedImageFileName) {
-            this.originalImageFileName = originalImage;
-            this.resizedImageFileName = resizedImageFileName;
+        public Image(File originalImageFile, File resizedImageFile) {
+            this.originalImageFile = originalImageFile;
+            this.resizedImageFile = resizedImageFile;
         }
 
-        public String getOriginalImage() {
-            return originalImageFileName;
+        public File getOriginalImageFile() {
+            return originalImageFile;
         }
 
-        public void setOriginalImage(String originalImage) {
-            this.originalImageFileName = originalImage;
+        public void setOriginalImageFile(File originalImageFile) {
+            this.originalImageFile = originalImageFile;
         }
 
-        public String getResizedImageFileName() {
-            return resizedImageFileName;
+        public File getResizedImageFile() {
+            return resizedImageFile;
         }
 
-        public void setResizedImageFileName(String resizedImageFileName) {
-            this.resizedImageFileName = resizedImageFileName;
+        public void setResizedImageFile(File resizedImageFile) {
+            this.resizedImageFile = resizedImageFile;
         }
     }
 }

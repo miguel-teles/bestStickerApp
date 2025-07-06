@@ -58,7 +58,7 @@ public class StickerPackListActivity extends AddStickerPackActivity {
         try {
             stickerPackViewModel = new ViewModelProvider(this,
                     new StickerPackViewModelFactory(getApplicationContext())).get(StickerPackViewModel.class);
-            stickerPackList = new ArrayList<>(stickerPackViewModel.fetchStickerPacks());
+            stickerPackList = new ArrayList<>(StickerPackLoader.fetchStickerPacks(getApplicationContext()));
         } catch (StickerException ex) {
             StickerExceptionHandler.handleException(ex, this);
         }
@@ -72,11 +72,7 @@ public class StickerPackListActivity extends AddStickerPackActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        try {
-            stickerPackList = new ArrayList<>(stickerPackViewModel.fetchStickerPacks());
-        } catch (StickerException ex) {
-            StickerExceptionHandler.handleException(ex, this);
-        }
+        stickerPackList = new ArrayList<>(StickerPackLoader.fetchStickerPacks(this));
         whiteListCheckAsyncTask = new WhiteListCheckAsyncTask(this);
         whiteListCheckAsyncTask.execute(stickerPackList.toArray(new StickerPack[0]));
     }
@@ -115,7 +111,7 @@ public class StickerPackListActivity extends AddStickerPackActivity {
         }
     }
 
-    private View.OnClickListener createNewStickerPack(){
+    private View.OnClickListener createNewStickerPack() {
         Context context = this;
         return new View.OnClickListener() {
             @Override

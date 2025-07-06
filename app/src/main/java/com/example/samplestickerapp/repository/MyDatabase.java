@@ -18,9 +18,10 @@ public class MyDatabase extends SQLiteOpenHelper {
     private SQLiteDatabase myDB;
     final private static String dbName = "stickersDB.db";
 
-    private MyDatabase(Context context) {
+    private MyDatabase(Context context) throws StickerException {
         super(context, dbName, null, 5);
         myDB = getWritableDatabase();
+        criaTabelas(myDB);
     }
 
     @Override
@@ -93,6 +94,7 @@ public class MyDatabase extends SQLiteOpenHelper {
                     "emoji TEXT NOT NULL," +
                     "stickerImageFile TEXT NOT NULL," +
                     "packIdentifier INTEGER, " +
+                    "size INTEGER, " +
                     "FOREIGN KEY (packIdentifier) REFERENCES packs(identifier)" +
                     ")";
 

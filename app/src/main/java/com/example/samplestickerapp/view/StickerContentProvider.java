@@ -44,25 +44,31 @@ public class StickerContentProvider extends ContentProvider {
     /**
      * Do not change the strings listed below, as these are used by WhatsApp. And changing these will break the interface between sticker app and WhatsApp.
      */
-    public static final String IDENTIFIER = "identifier";
-    public static final String NAME = "name";
-    public static final String PUBLISHER = "publisher";
-    public static final String ORIGINAL_TRAY_IMAGE_FILE = "originalTrayImageFile";
-    public static final String RESIZED_TRAY_IMAGE_FILE = "resizedTrayImageFile";
+    public static final String STICKER_PACK_IDENTIFIER_IN_QUERY = "sticker_pack_identifier";
+    public static final String STICKER_PACK_NAME_IN_QUERY = "sticker_pack_name";
+    public static final String STICKER_PACK_PUBLISHER_IN_QUERY = "sticker_pack_publisher";
+    public static final String STICKER_PACK_ICON_IN_QUERY = "sticker_pack_icon";
+    public static final String STICKER_PACK_ICON_RESIZED_IMAGE_FILE = "resizedTrayImageFile";
     public static final String FOLDER = "folder";
-    public static final String PUBLISHER_EMAIL = "publisherEmail";
-    public static final String PUBLISHER_WEBSITE = "publisherWebsite";
-    public static final String PRIVACY_POLICY_WEBSITE = "privacePolicyWebsite";
-    public static final String LICENSE_AGREENMENT_WEBSITE = "licenseAgreementWebsite";
-    public static final String IMAGE_DATA_VERSION = "imageDataVersion";
-    public static final String AVOID_CACHE = "avoidCache";
-    public static final String ANIMATED_STICKER_PACK = "animatedStickerPack";
+    public static final String PUBLISHER_EMAIL = "sticker_pack_publisher_email";
+    public static final String PUBLISHER_WEBSITE = "sticker_pack_publisher_website";
+    public static final String PRIVACY_POLICY_WEBSITE = "sticker_pack_privacy_policy_website";
+    public static final String LICENSE_AGREENMENT_WEBSITE = "sticker_pack_license_agreement_website";
+    public static final String IMAGE_DATA_VERSION = "image_data_version";
+    public static final String AVOID_CACHE = "whatsapp_will_not_cache_stickers";
+    public static final String ANIMATED_STICKER_PACK = "animated_sticker_pack";
 
-    public static final String STICKER_FILE_NAME_IN_QUERY = "imageFile";
-    public static final String STICKER_FILE_EMOJI_IN_QUERY = "emoji";
+    public static final String STICKER_FILE_NAME_IN_QUERY = "sticker_file_name";
+    public static final String STICKER_FILE_EMOJI_IN_QUERY = "sticker_emoji";
     public static final String STICKER_IDENTIFIER = "identifier";
     public static final String STICKER_PACK_IDENTIFIER = "packIdentifier";
-
+    private static final String METADATA = "metadata";
+    static final String METHODS_ADD = "methods_add";
+    public static final String METHODS_DELETE = "methods_delete";
+    public static final String METHODS_UPDATE = "methods_update";
+    static final String STICKERS = "stickers";
+    static final String STICKERS_ASSET = "stickers_asset";
+    static final String PACK = "pack";
 
     public static final Uri AUTHORITY_URI = new Uri.Builder().scheme(ContentResolver.SCHEME_CONTENT).authority(BuildConfig.CONTENT_PROVIDER_AUTHORITY).appendPath(StickerContentProvider.METADATA).build();
     private static String ABSOLUTE_FOLDER = null;
@@ -71,22 +77,12 @@ public class StickerContentProvider extends ContentProvider {
      * Do not change the values in the UriMatcher because otherwise, WhatsApp will not be able to fetch the stickers from the ContentProvider.
      */
     private static UriMatcher MATCHER = new UriMatcher(UriMatcher.NO_MATCH);
-    private static final String METADATA = "metadata";
-    static final String METHODS_ADD = "methods_add";
-    public static final String METHODS_DELETE = "methods_delete";
-    public static final String METHODS_UPDATE = "methods_update";
+    static String AUTHORITY = null;
 
     private static final int METADATA_CODE = 1;
     private static final int METADATA_CODE_FOR_SINGLE_PACK = 2;
-    static final String STICKERS = "stickers";
-    static final String STICKERS_ASSET = "stickers_asset";
-
-    static String AUTHORITY = null;
     private static final int STICKERS_CODE = 3;
-    static final String PACK = "pack";
     private static final int STICKERS_ASSET_CODE = 4;
-
-
     private static final int STICKER_PACK_TRAY_ICON_CODE = 5;
     private static final int ADD_NEW_STICKER_PACK = 6;
     private static final int UPDATE_STICKER_PACK = 6;
@@ -95,10 +91,8 @@ public class StickerContentProvider extends ContentProvider {
     private static final int DELETE_STICKER_PACKPACK = 9;
 
     private List<StickerPack> stickerPackList;
-
     private StickerRepository stickerRepository;
     private StickerPackRepository stickerPackRepository;
-
     boolean isStickerPackListOutdated = true;
 
     /**
@@ -235,11 +229,11 @@ public class StickerContentProvider extends ContentProvider {
     private Cursor getStickerPackInfo(@NonNull Uri uri, @NonNull List<StickerPack> stickerPackList) {
         MatrixCursor cursor = new MatrixCursor(
                 new String[]{
-                        IDENTIFIER,
-                        NAME,
-                        PUBLISHER,
-                        ORIGINAL_TRAY_IMAGE_FILE,
-                        RESIZED_TRAY_IMAGE_FILE,
+                        STICKER_PACK_IDENTIFIER_IN_QUERY,
+                        STICKER_PACK_NAME_IN_QUERY,
+                        STICKER_PACK_PUBLISHER_IN_QUERY,
+                        STICKER_PACK_ICON_IN_QUERY,
+                        STICKER_PACK_ICON_RESIZED_IMAGE_FILE,
                         FOLDER,
                         IMAGE_DATA_VERSION,
                         AVOID_CACHE,
@@ -276,7 +270,7 @@ public class StickerContentProvider extends ContentProvider {
                 STICKER_IDENTIFIER,
                 STICKER_PACK_IDENTIFIER});
         for (StickerPack stickerPack : getStickerPackList()) {
-            if (identifier.equals(stickerPack.getIdentifier())) {
+            if (identifier.equals(stickerPack.getIdentifier().toString())) {
                 for (Sticker sticker : stickerPack.getStickers()) {
                     cursor.addRow(new Object[]{sticker.getStickerImageFile(), sticker.getIdentifier(), sticker.getPackIdentifier()});
                 }
