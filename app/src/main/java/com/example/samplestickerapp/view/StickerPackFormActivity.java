@@ -42,14 +42,9 @@ public class StickerPackFormActivity extends AppCompatActivity {
 
         declaraCampos();
         populateFieldsWithStickerPackBeingEdited();
-        try {
-            setaOnClickListeners();
-            stickerPackViewModel = StickerPackViewModelFactory.create(this, getApplicationContext());
-        } catch (StickerException ex) {
-            StickerExceptionHandler.handleException(ex, this);
-        }
+        setaOnClickListeners();
+        stickerPackViewModel = StickerPackViewModelFactory.create(this, getApplicationContext());
         verificaCamposObrigatorios();
-
     }
 
     private void populateFieldsWithStickerPackBeingEdited() {
@@ -184,26 +179,22 @@ public class StickerPackFormActivity extends AppCompatActivity {
 
             @Override
             public void onClick(View view) {
-                try {
-                    String nmAutorInput = txtAutor.getText().toString();
-                    String nomePacoteInput = txtNomePacote.getText().toString();
+                String nmAutorInput = txtAutor.getText().toString();
+                String nomePacoteInput = txtNomePacote.getText().toString();
 
-                    if (stickerPackBeingEdited == null) {
-                        stickerPackBeingEdited = stickerPackViewModel.createStickerPack(nmAutorInput,
-                                nomePacoteInput,
-                                uriImagemStickerPack,
-                                getApplicationContext());
-                    } else {
-                        stickerPackBeingEdited = stickerPackViewModel.updateStickerPack(stickerPackBeingEdited,
-                                nmAutorInput,
-                                nomePacoteInput,
-                                getApplicationContext());
-                    }
-
-                    redirecionaStickerPackDetailsActivity(stickerPackBeingEdited);
-                } catch (StickerException ex) {
-                    StickerExceptionHandler.handleException(ex, context);
+                if (stickerPackBeingEdited == null) {
+                    stickerPackBeingEdited = stickerPackViewModel.createStickerPack(nmAutorInput,
+                            nomePacoteInput,
+                            uriImagemStickerPack,
+                            getApplicationContext());
+                } else {
+                    stickerPackBeingEdited = stickerPackViewModel.updateStickerPack(stickerPackBeingEdited,
+                            nmAutorInput,
+                            nomePacoteInput,
+                            getApplicationContext());
                 }
+
+                redirecionaStickerPackDetailsActivity(stickerPackBeingEdited);
             }
         };
     }

@@ -5,8 +5,9 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteStatement;
 
+import com.example.samplestickerapp.exception.StickerDataBaseException;
 import com.example.samplestickerapp.exception.StickerException;
-import com.example.samplestickerapp.exception.enums.StickerDBExceptionEnum;
+import com.example.samplestickerapp.exception.enums.StickerDataBaseExceptionEnum;
 import com.example.samplestickerapp.model.StickerPack;
 import com.example.samplestickerapp.repository.Repository;
 import com.example.samplestickerapp.view.StickerPackLoader;
@@ -56,13 +57,13 @@ public class StickerPackRepository extends Repository<StickerPack> {
                 context.getContentResolver().insert(StickerPackLoader.getStickerPackInsertUri(), stickerPack.toContentValues());
                 return stickerPack;
             } else {
-                throw new StickerException(null, StickerDBExceptionEnum.INSERT, "Erro ao inserir dado, retorno -1");
+                throw new StickerDataBaseException(null, StickerDataBaseExceptionEnum.INSERT, "Erro ao inserir dado, retorno -1");
             }
 
         } catch (StickerException ex) {
             throw ex;
         } catch (Exception ex) {
-            throw new StickerException(ex, StickerDBExceptionEnum.INSERT, ex.getMessage());
+            throw new StickerDataBaseException(ex, StickerDataBaseExceptionEnum.INSERT, ex.getMessage());
         }
     }
 
@@ -79,13 +80,13 @@ public class StickerPackRepository extends Repository<StickerPack> {
             if (result != -1) {
                 return stickerPack;
             } else {
-                throw new StickerException(null, StickerDBExceptionEnum.UPDATE, "Erro ao chamar o update");
+                throw new StickerDataBaseException(null, StickerDataBaseExceptionEnum.UPDATE, "Erro ao chamar o update");
             }
 
         } catch (StickerException ex) {
             throw ex;
         } catch (Exception ex) {
-            throw new StickerException(ex, StickerDBExceptionEnum.UPDATE, "Erro ao atualizar dados do pacote " + stickerPack.getIdentifier());
+            throw new StickerDataBaseException(ex, StickerDataBaseExceptionEnum.UPDATE, "Erro ao atualizar dados do pacote " + stickerPack.getIdentifier());
         }
     }
 
@@ -105,7 +106,7 @@ public class StickerPackRepository extends Repository<StickerPack> {
         } catch (StickerException ex) {
             throw ex;
         } catch (Exception ex) {
-            throw new StickerException(ex, StickerDBExceptionEnum.DELETE, "Erro ao deletar pacote de figurinhas");
+            throw new StickerDataBaseException(ex, StickerDataBaseExceptionEnum.DELETE, "Erro ao deletar pacote de figurinhas");
         }
         return null;
     }
@@ -138,7 +139,7 @@ public class StickerPackRepository extends Repository<StickerPack> {
         } catch (StickerException ex) {
             throw ex;
         } catch (Exception ex) {
-            throw new StickerException(ex, StickerDBExceptionEnum.SELECT, "Erro ao buscar pack por ID");
+            throw new StickerDataBaseException(ex, StickerDataBaseExceptionEnum.SELECT, "Erro ao buscar pack por ID");
         }
     }
 
@@ -193,7 +194,7 @@ public class StickerPackRepository extends Repository<StickerPack> {
         } catch (StickerException ex) {
             throw ex;
         } catch (Exception ex) {
-            throw new StickerException(ex, StickerDBExceptionEnum.SELECT, "Erro ao buscar todos os stickerPacks. " + ex.getMessage());
+            throw new StickerDataBaseException(ex, StickerDataBaseExceptionEnum.SELECT, "Erro ao buscar todos os stickerPacks. " + ex.getMessage());
         }
     }
 }

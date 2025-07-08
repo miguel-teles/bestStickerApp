@@ -1,8 +1,19 @@
 package com.example.samplestickerapp.exception;
 
-public class StickerDataBaseException extends RuntimeException {
+import com.example.samplestickerapp.exception.enums.StickerDataBaseExceptionEnum;
 
-    public StickerDataBaseException(Throwable cause) {
-        super(cause);
+public class StickerDataBaseException extends StickerException {
+
+    private final StickerDataBaseExceptionEnum stickerExceptionEnum;
+    public StickerDataBaseException(Exception ex,
+                                    StickerDataBaseExceptionEnum stickerDataBaseExceptionEnum,
+                                    String msgError) {
+        super(ex, null, msgError);
+        this.stickerExceptionEnum = stickerDataBaseExceptionEnum;
+    }
+
+    @Override
+    public String getStickerExceptionEnumMessage() {
+        return stickerExceptionEnum.toString();
     }
 }

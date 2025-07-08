@@ -8,7 +8,8 @@ import androidx.lifecycle.ViewModel;
 
 import com.example.samplestickerapp.R;
 import com.example.samplestickerapp.exception.StickerException;
-import com.example.samplestickerapp.exception.enums.StickerDBExceptionEnum;
+import com.example.samplestickerapp.exception.enums.StickerDataBaseExceptionEnum;
+import com.example.samplestickerapp.exception.enums.StickerExceptionEnum;
 import com.example.samplestickerapp.model.StickerPack;
 import com.example.samplestickerapp.repository.MyDatabase;
 import com.example.samplestickerapp.repository.implementations.StickerPackRepository;
@@ -18,7 +19,6 @@ import com.example.samplestickerapp.view.StickerPackLoader;
 
 import java.io.File;
 import java.util.Date;
-import java.util.List;
 
 public class StickerPackViewModel extends ViewModel {
 
@@ -26,7 +26,7 @@ public class StickerPackViewModel extends ViewModel {
 
     private final String STICKER_PACK_IMAGE_NAME = "packImg";
 
-    public StickerPackViewModel(MyDatabase myDatabase) throws StickerException {
+    public StickerPackViewModel(MyDatabase myDatabase) {
         this.stickerPackRepository = new StickerPackRepository(myDatabase.getMyDB());
     }
 
@@ -72,7 +72,7 @@ public class StickerPackViewModel extends ViewModel {
         if (stickerPack.getIdentifier() != null) {
             context.getContentResolver().insert(StickerPackLoader.getStickerPackInsertUri(), stickerPack.toContentValues());
         } else {
-            throw new StickerException(null, StickerDBExceptionEnum.INSERT, "Erro ao salvar pacote no banco");
+            throw new StickerException(null, StickerExceptionEnum.CSP, "Erro ao salvar pacote no banco");
         }
     }
 
@@ -97,6 +97,8 @@ public class StickerPackViewModel extends ViewModel {
     public void deleteStickerPack(StickerPack stickerPack, Context applicationContext) throws StickerException {
         stickerPackRepository.remove(stickerPack, applicationContext);
         Folders.deleteStickerPackFolder(stickerPack.getFolderName(), applicationContext);
+
+        applicationContext.getContentResolver().delete(StickerPackLoader.getStickerDeleteUri(), null, null);
     }
 
     public StickerPack fetchUpdatedStickerPack(StickerPack stickerPack) throws StickerException {

@@ -6,11 +6,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 import com.example.samplestickerapp.exception.StickerDataBaseException;
 import com.example.samplestickerapp.exception.StickerException;
-import com.example.samplestickerapp.exception.enums.StickerDBExceptionEnum;
-import com.example.samplestickerapp.repository.implementations.StickerPackRepository;
-import com.example.samplestickerapp.repository.implementations.StickerRepository;
-
-import java.io.File;
+import com.example.samplestickerapp.exception.enums.StickerDataBaseExceptionEnum;
 
 public class MyDatabase extends SQLiteOpenHelper {
 
@@ -26,12 +22,8 @@ public class MyDatabase extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        try {
-            myDB = db;
-            criaTabelas(db);
-        } catch (StickerException e) {
-            throw new StickerDataBaseException(e);
-        }
+        myDB = db;
+        criaTabelas(db);
     }
 
     //TODO: criar o negócio pra fechar o banco -
@@ -83,7 +75,7 @@ public class MyDatabase extends SQLiteOpenHelper {
 
             db.execSQL(tbPack);
         } catch (Exception ex) {
-            throw new StickerException(ex, StickerDBExceptionEnum.CREATE_TBL, "Tabela Packs não foi criada com sucesso - " + ex.getMessage());
+            throw new StickerDataBaseException(ex, StickerDataBaseExceptionEnum.CREATE_TBL, "Tabela Packs não foi criada com sucesso - " + ex.getMessage());
         }
     }
 
@@ -100,7 +92,7 @@ public class MyDatabase extends SQLiteOpenHelper {
 
             db.execSQL(tbPack);
         } catch (Exception ex) {
-            throw new StickerException(ex, StickerDBExceptionEnum.CREATE_TBL, "Tabela Sticker não foi criada com sucesso");
+            throw new StickerDataBaseException(ex, StickerDataBaseExceptionEnum.CREATE_TBL, "Tabela Sticker não foi criada com sucesso");
         }
     }
 

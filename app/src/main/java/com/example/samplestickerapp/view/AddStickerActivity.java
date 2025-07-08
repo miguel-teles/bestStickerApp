@@ -35,11 +35,8 @@ public class AddStickerActivity extends AppCompatActivity {
         setContentView(R.layout.activity_sticker_create_sticker);
         declaraCampos();
 
-        try {
-            stickerViewModel = StickerViewModelFactory.create(this, getApplicationContext());
-        } catch (StickerException ex) {
-            StickerExceptionHandler.handleException(ex, this);
-        }
+        stickerViewModel = StickerViewModelFactory.create(this, getApplicationContext());
+
         loadStickerPackFromIntent();
         setOnClickListeners();
         if (getSupportActionBar() != null) {
@@ -69,15 +66,11 @@ public class AddStickerActivity extends AppCompatActivity {
         return new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                try {
-                    Sticker sticker = stickerViewModel.createSticker(stickerPack,
-                            uriStickerImage,
-                            context);
-                    if (sticker.getIdentifier() != null) {
-                        finish();
-                    }
-                } catch (StickerException ex) {
-                    StickerExceptionHandler.handleException(ex, context);
+                Sticker sticker = stickerViewModel.createSticker(stickerPack,
+                        uriStickerImage,
+                        context);
+                if (sticker.getIdentifier() != null) {
+                    finish();
                 }
             }
         };

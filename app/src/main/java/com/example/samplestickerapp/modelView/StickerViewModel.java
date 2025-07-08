@@ -2,17 +2,20 @@ package com.example.samplestickerapp.modelView;
 
 import android.content.Context;
 import android.net.Uri;
+import android.os.Bundle;
 
 import androidx.lifecycle.ViewModel;
 
 import com.example.samplestickerapp.exception.StickerException;
-import com.example.samplestickerapp.exception.enums.StickerDBExceptionEnum;
+import com.example.samplestickerapp.exception.enums.StickerDataBaseExceptionEnum;
+import com.example.samplestickerapp.exception.enums.StickerExceptionEnum;
 import com.example.samplestickerapp.model.Sticker;
 import com.example.samplestickerapp.model.StickerPack;
 import com.example.samplestickerapp.repository.MyDatabase;
 import com.example.samplestickerapp.repository.implementations.StickerRepository;
 import com.example.samplestickerapp.utils.Folders;
 import com.example.samplestickerapp.utils.Utils;
+import com.example.samplestickerapp.view.StickerContentProvider;
 import com.example.samplestickerapp.view.StickerPackLoader;
 
 import java.io.File;
@@ -24,13 +27,13 @@ public class StickerViewModel extends ViewModel {
 
     private final String STICKER_IMAGE_NAME = "sticker";
 
-    public StickerViewModel(MyDatabase myDatabase) throws StickerException {
+    public StickerViewModel(MyDatabase myDatabase) {
         this.stickerRepository = new StickerRepository(myDatabase.getMyDB());
     }
 
     public Sticker createSticker(StickerPack stickerPack,
-                              Uri uriStickerImage,
-                              Context context) throws StickerException {
+                                 Uri uriStickerImage,
+                                 Context context) throws StickerException {
 
         File stickerPackFolder = Folders.getStickerPackFolderByFolderName(stickerPack.getFolderName(), context);
         Folders.Image copiedImages = Folders.generateStickerImages(stickerPackFolder,
@@ -42,12 +45,22 @@ public class StickerViewModel extends ViewModel {
         Sticker sticker = new Sticker(copiedImages.getResizedImageFile().getName(), stickerPack.getIdentifier(), copiedImages.getResizedImageFile().length());
         stickerRepository.save(sticker, context);
         if (sticker.getIdentifier() != null) {
-            context.getContentResolver().insert(StickerPackLoader.getStickerInsertUri(),sticker.toContentValues());
+            context.getContentResolver().insert(StickerPackLoader.getStickerInsertUri(), sticker.toContentValues());
             return sticker;
         } else {
-            throw new StickerException(null, StickerDBExceptionEnum.INSERT, "Erro ao salvar pacote no banco");
+            throw new StickerException(null, StickerExceptionEnum.CSP, "Erro ao salvar pacote no banco");
         }
+    }
 
+    public void deleteSticker(Sticker sticker,
+                              StickerPack stickerPack,
+                              Context context) throws StickerException {
+        stickerRepository.remove(sticker, context);
+
+        File stickerPackFolder = Folders.getStickerPackFolderByFolderName(stickerPack.getFolderName(), context);
+        Folders.deleteFile(new File(stickerPackFolder, sticker.getStickerImageFile()));
+
+        context.getContentResolver().delete(StickerPackLoader.getStickerDeleteUri(), null);
     }
 
     private String generateStickerImageName() {

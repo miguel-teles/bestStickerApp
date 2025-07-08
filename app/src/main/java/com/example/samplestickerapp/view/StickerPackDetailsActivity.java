@@ -12,15 +12,14 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.format.Formatter;
 import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -30,10 +29,12 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.samplestickerapp.R;
 import com.example.samplestickerapp.exception.StickerException;
 import com.example.samplestickerapp.exception.StickerExceptionHandler;
+import com.example.samplestickerapp.model.Sticker;
 import com.example.samplestickerapp.model.StickerPack;
 import com.example.samplestickerapp.modelView.StickerPackViewModel;
+import com.example.samplestickerapp.modelView.StickerViewModel;
 import com.example.samplestickerapp.modelView.factory.StickerPackViewModelFactory;
-import com.facebook.drawee.view.SimpleDraweeView;
+import com.example.samplestickerapp.modelView.factory.StickerViewModelFactory;
 
 import java.lang.ref.WeakReference;
 
@@ -68,6 +69,7 @@ public class StickerPackDetailsActivity extends AddStickerPackActivity {
     private ImageView btnGoBack;
     private WhiteListCheckAsyncTask whiteListCheckAsyncTask;
     private StickerPackViewModel stickerPackViewModel;
+    private StickerViewModel stickerViewModel;
     private int stickerBytes;
 
     @Override
@@ -77,11 +79,8 @@ public class StickerPackDetailsActivity extends AddStickerPackActivity {
         stickerPack = getIntent().getParcelableExtra(EXTRA_STICKER_PACK_DATA);
 
         declareGlobalComponents();
-        try {
-            stickerPackViewModel = StickerPackViewModelFactory.create(this, getApplicationContext());
-        } catch (StickerException ex) {
-            StickerExceptionHandler.handleException(ex, this);
-        }
+        stickerPackViewModel = StickerPackViewModelFactory.create(this, getApplicationContext());
+        stickerViewModel = StickerViewModelFactory.create(this, getApplicationContext());
 
         assembleRecyclerView();
         loadStickersOnScreen();
@@ -118,25 +117,11 @@ public class StickerPackDetailsActivity extends AddStickerPackActivity {
         return super.onCreateOptionsMenu(menu);
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == R.id.action_info && stickerPack != null) {
-            Uri trayIconUri = StickerPackLoader.getStickerAssetUri(stickerPack.getIdentifier().toString(), stickerPack.getOriginalTrayImageFile());
-            launchInfoActivity(stickerPack.getPublisherWebsite(), stickerPack.getPublisherEmail(), stickerPack.getPrivacyPolicyWebsite(), stickerPack.getLicenseAgreementWebsite(), trayIconUri.toString());
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
 
     @Override
     protected void onResume() {
         super.onResume();
-        try {
-            stickerPack = stickerPackViewModel.fetchUpdatedStickerPack(stickerPack);
-        } catch (StickerException ex) {
-            StickerExceptionHandler.handleException(ex, this);
-        }
+        stickerPack = stickerPackViewModel.fetchUpdatedStickerPack(stickerPack);
         whiteListCheckAsyncTask = new WhiteListCheckAsyncTask(this);
         whiteListCheckAsyncTask.execute(stickerPack);
         loadStickersOnScreen();
@@ -151,8 +136,14 @@ public class StickerPackDetailsActivity extends AddStickerPackActivity {
     }
 
     private void loadStickersOnScreen() {
-        SimpleDraweeView expandedStickerView = findViewById(R.id.sticker_details_expanded_sticker);
-        stickerPreviewAdapter = new StickerPreviewAdapter(getLayoutInflater(), R.drawable.sticker_error, getResources().getDimensionPixelSize(R.dimen.sticker_pack_details_image_size), getResources().getDimensionPixelSize(R.dimen.sticker_pack_details_image_padding), stickerPack, expandedStickerView, this);
+        stickerPreviewAdapter = new StickerPreviewAdapter(getLayoutInflater(),
+                R.drawable.sticker_error,
+                getResources().getDimensionPixelSize(R.dimen.sticker_pack_details_image_size),
+                getResources().getDimensionPixelSize(R.dimen.sticker_pack_details_image_padding),
+                stickerPack,
+                findViewById(R.id.sticker_details_expanded),
+                this,
+                this);
         recyclerView.setAdapter(stickerPreviewAdapter);
     }
 
@@ -192,13 +183,9 @@ public class StickerPackDetailsActivity extends AddStickerPackActivity {
                 .setPositiveButton(R.string.YES_SIR, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        try {
-                            stickerPackViewModel.deleteStickerPack(stickerPack, getApplicationContext());
-                            Intent intent = new Intent(context, StickerPackListActivity.class);
-                            startActivity(intent);
-                        } catch (StickerException ex) {
-                            StickerExceptionHandler.handleException(ex, context);
-                        }
+                        stickerPackViewModel.deleteStickerPack(stickerPack, getApplicationContext());
+                        Intent intent = new Intent(context, StickerPackListActivity.class);
+                        startActivity(intent);
                     }
                 })
                 .setNegativeButton(R.string.NOT_TODAY, new DialogInterface.OnClickListener() {
@@ -211,17 +198,6 @@ public class StickerPackDetailsActivity extends AddStickerPackActivity {
     private void editStickerPack() {
         Intent intent = new Intent(this, StickerPackFormActivity.class);
         intent.putExtra(StickerPackFormActivity.STICKER_PACK, stickerPack);
-        startActivity(intent);
-    }
-
-    private void launchInfoActivity(String publisherWebsite, String publisherEmail, String privacyPolicyWebsite, String licenseAgreementWebsite, String trayIconUriString) {
-        Intent intent = new Intent(this, StickerPackInfoActivity.class);
-        intent.putExtra(StickerPackDetailsActivity.EXTRA_STICKER_PACK_ID, stickerPack.getIdentifier());
-        intent.putExtra(StickerPackDetailsActivity.EXTRA_STICKER_PACK_WEBSITE, publisherWebsite);
-        intent.putExtra(StickerPackDetailsActivity.EXTRA_STICKER_PACK_EMAIL, publisherEmail);
-        intent.putExtra(StickerPackDetailsActivity.EXTRA_STICKER_PACK_PRIVACY_POLICY, privacyPolicyWebsite);
-        intent.putExtra(StickerPackDetailsActivity.EXTRA_STICKER_PACK_LICENSE_AGREEMENT, licenseAgreementWebsite);
-        intent.putExtra(StickerPackDetailsActivity.EXTRA_STICKER_PACK_TRAY_ICON, trayIconUriString);
         startActivity(intent);
     }
 
@@ -273,6 +249,12 @@ public class StickerPackDetailsActivity extends AddStickerPackActivity {
             alreadyAddedText.setVisibility(View.GONE);
             findViewById(R.id.sticker_pack_details_tap_to_preview).setVisibility(View.VISIBLE);
         }
+    }
+
+    public void deleteSticker(Sticker sticker, StickerPack stickerPack, Context context) {
+        this.stickerViewModel.deleteSticker(sticker, stickerPack, context);
+        stickerPack.getStickers().remove(sticker);
+        this.loadStickersOnScreen();
     }
 
     static class WhiteListCheckAsyncTask extends AsyncTask<StickerPack, Void, Boolean> {

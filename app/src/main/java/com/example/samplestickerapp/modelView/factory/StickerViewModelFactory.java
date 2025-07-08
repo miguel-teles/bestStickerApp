@@ -22,14 +22,10 @@ public class StickerViewModelFactory implements ViewModelProvider.Factory{
 
     @Override
     public <T extends ViewModel> T create(Class<T> modelClass) {
-        try {
-            if (modelClass.isAssignableFrom(StickerViewModel.class)) {
-                return (T) new StickerViewModel(myDatabase);
-            }
-            throw new IllegalArgumentException("Unknown ViewModel class");
-        } catch (StickerException ex) {
-            throw new StickerDataBaseException(ex);
+        if (modelClass.isAssignableFrom(StickerViewModel.class)) {
+            return (T) new StickerViewModel(myDatabase);
         }
+        throw new IllegalArgumentException("Unknown ViewModel class");
     }
 
     public static StickerViewModel create(ViewModelStoreOwner viewModelStoreOwner, Context applicationContext) throws StickerException {

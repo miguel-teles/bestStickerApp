@@ -5,10 +5,10 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteStatement;
 
+import com.example.samplestickerapp.exception.StickerDataBaseException;
 import com.example.samplestickerapp.exception.StickerException;
-import com.example.samplestickerapp.exception.enums.StickerDBExceptionEnum;
+import com.example.samplestickerapp.exception.enums.StickerDataBaseExceptionEnum;
 import com.example.samplestickerapp.model.Sticker;
-import com.example.samplestickerapp.model.StickerPack;
 import com.example.samplestickerapp.repository.Repository;
 
 import java.util.ArrayList;
@@ -54,13 +54,13 @@ public class StickerRepository extends Repository<Sticker> {
 
                 return sticker;
             } else {
-                throw new StickerException(null, StickerDBExceptionEnum.INSERT, "Erro ao inserir dado, retorno -1");
+                throw new StickerDataBaseException(null, StickerDataBaseExceptionEnum.INSERT, "Erro ao inserir dado, retorno -1");
             }
 
         } catch (StickerException ex) {
             throw ex;
         } catch (Exception ex) {
-            throw new StickerException(ex, StickerDBExceptionEnum.INSERT, ex.getMessage());
+            throw new StickerDataBaseException(ex, StickerDataBaseExceptionEnum.INSERT, ex.getMessage());
         }
     }
 
@@ -70,8 +70,21 @@ public class StickerRepository extends Repository<Sticker> {
     }
 
     @Override
-    public Integer remove(Sticker obj, Context context) throws StickerException {
-        return null;
+    public Integer remove(Sticker sticker, Context context) throws StickerException {
+        return this.remove(sticker.getIdentifier(), context);
+    }
+
+    @Override
+    public Integer remove(Integer identifier, Context context) throws StickerException {
+        try {
+            String deleteStickers = "DELETE FROM stickers WHERE identifier=?";
+            SQLiteStatement stmt = sqLiteDatabase.compileStatement(deleteStickers);
+            stmt.bindLong(1, identifier);
+            stmt.executeUpdateDelete();
+            return null;
+        } catch (Exception ex) {
+            throw new StickerDataBaseException(ex, StickerDataBaseExceptionEnum.DELETE, "Erro ao deletar figurinhas do pacote");
+        }
     }
 
     public Integer removeByPackIdentifier(Integer packIdentifier, Context context) throws StickerException {
@@ -82,13 +95,8 @@ public class StickerRepository extends Repository<Sticker> {
             stmt.executeUpdateDelete();
             return null;
         } catch (Exception ex) {
-            throw new StickerException(ex, StickerDBExceptionEnum.DELETE, "Erro ao deletar figurinhas do pacote");
+            throw new StickerDataBaseException(ex, StickerDataBaseExceptionEnum.DELETE, "Erro ao deletar figurinhas do pacote");
         }
-    }
-
-    @Override
-    public Integer remove(Integer id, Context context) throws StickerException {
-        return null;
     }
 
     @Override
@@ -121,7 +129,7 @@ public class StickerRepository extends Repository<Sticker> {
             return stickersList;
 
         } catch (Exception ex) {
-            throw new StickerException(ex, StickerDBExceptionEnum.SELECT, "Erro ao selecionar stickers do pacote " + packIdentifier + ". " + ex.getMessage());
+            throw new StickerDataBaseException(ex, StickerDataBaseExceptionEnum.SELECT, "Erro ao selecionar stickers do pacote " + packIdentifier + ". " + ex.getMessage());
         }
     }
 }

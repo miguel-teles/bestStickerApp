@@ -3,7 +3,7 @@ package com.example.samplestickerapp.exception.enums;
 import com.example.samplestickerapp.R;
 import com.example.samplestickerapp.utils.Utils;
 
-public enum StickerCriticalExceptionEnum {
+public enum StickerFolderExceptionEnum {
 
     MKDIR_ROOT(R.string.MKDIR_ROOT),
 
@@ -28,7 +28,7 @@ public enum StickerCriticalExceptionEnum {
 
     int mResourceId;
 
-    StickerCriticalExceptionEnum(int id) {
+    StickerFolderExceptionEnum(int id) {
         this.mResourceId = id;
     }
 

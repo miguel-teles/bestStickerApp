@@ -193,12 +193,32 @@
             android:paddingRight="@dimen/preview_side_margin"
             android:requiresFadingEdge="vertical" />
 
-        <com.facebook.drawee.view.SimpleDraweeView
-            android:id="@+id/sticker_details_expanded_sticker"
-            android:layout_width="128dp"
-            android:layout_height="128dp"
-            android:scaleType="centerCrop"
-            android:visibility="invisible" />
+
+        <LinearLayout
+            android:id="@+id/sticker_details_expanded"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="invisible"
+            android:gravity="center">
+
+            <com.facebook.drawee.view.SimpleDraweeView
+                android:id="@+id/sticker_details_expanded_sticker"
+                android:layout_width="128dp"
+                android:layout_height="128dp"
+                android:scaleType="centerCrop" />
+            <ImageView
+                android:id="@+id/btn_delete_sticker"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="8dp"
+                android:background="?attr/selectableItemBackground"
+                android:contentDescription="@string/add_button_content_description"
+                android:scaleType="center"
+                android:src="@drawable/baseline_delete_24"/>
+
+        </LinearLayout>
 
         <View
             android:id="@+id/divider"

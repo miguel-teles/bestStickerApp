@@ -17,6 +17,7 @@ import android.util.Pair;
 import android.view.View;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.example.samplestickerapp.R;
@@ -34,6 +35,8 @@ public class EntryActivity extends BaseActivity {
     private View progressBar;
     private LoadListAsyncTask loadListAsyncTask;
 
+    public static final boolean SAFE_MODE = true;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -43,16 +46,24 @@ public class EntryActivity extends BaseActivity {
             getSupportActionBar().hide();
         }
         Utils.setContext(getBaseContext());
-        try {
-            Folders.makeAllDirs(this);
-            MyDatabase.getInstance(getApplicationContext());
-        } catch (StickerException ex) {
-            StickerExceptionHandler.handleException(ex, this);
-        }
+        Folders.makeAllDirs(this);
+        MyDatabase.getInstance(getApplicationContext());
 
         progressBar = findViewById(R.id.entry_activity_progress);
         loadListAsyncTask = new LoadListAsyncTask(this);
         loadListAsyncTask.execute();
+        Thread.setDefaultUncaughtExceptionHandler(createGlobalExceptionHandler());
+    }
+
+    private static Thread.UncaughtExceptionHandler createGlobalExceptionHandler() {
+        return new Thread.UncaughtExceptionHandler() {
+            @Override
+            public void uncaughtException(Thread paramThread, Throwable paramThrowable) {
+                if (paramThrowable instanceof StickerException) {
+                    StickerExceptionHandler.handleException((StickerException) paramThrowable, Utils.getContext());
+                }
+            }
+        };
     }
 
     private void showStickerPack(ArrayList<StickerPack> stickerPackList) {

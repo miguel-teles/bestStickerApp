@@ -59,6 +59,7 @@
     <string name="RESIZE" translatable="false">Erro ao mudar tamanho da imagem</string>
     <string name="DELETE_FOLDER" translatable="false">Erro ao apagar pasta</string>
     <string name="CREATE_STICKER_PACK" translatable="false">Erro criar novo pacote de figurinhas</string>
+    <string name="CREATE_STICKER" translatable="false">Erro criar nova figurinha</string>
     <string name="EDIT_STICKER_PACK" translatable="false">Erro ao editar pacote de figurinhas</string>
     <string name="SURE_DELETE_STICKER_PACK" translatable="false">Tem certeza que quer excluir este pacote?</string>
     <string name="YES_SIR" translatable="false">Sim!</string>

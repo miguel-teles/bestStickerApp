@@ -54,14 +54,9 @@ public class StickerPackListActivity extends AddStickerPackActivity {
         packRecyclerView = findViewById(R.id.sticker_pack_list);
         btnCreateNewStickerPack = findViewById(R.id.createNewStickerPack);
         btnCreateNewStickerPack.setOnClickListener(createNewStickerPack());
-
-        try {
-            stickerPackViewModel = new ViewModelProvider(this,
-                    new StickerPackViewModelFactory(getApplicationContext())).get(StickerPackViewModel.class);
-            stickerPackList = new ArrayList<>(StickerPackLoader.fetchStickerPacks(getApplicationContext()));
-        } catch (StickerException ex) {
-            StickerExceptionHandler.handleException(ex, this);
-        }
+        stickerPackViewModel = new ViewModelProvider(this,
+                new StickerPackViewModelFactory(getApplicationContext())).get(StickerPackViewModel.class);
+        stickerPackList = new ArrayList<>(StickerPackLoader.fetchStickerPacks(getApplicationContext()));
 
         showStickerPackList(stickerPackList);
         if (getSupportActionBar() != null) {

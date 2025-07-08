@@ -10,17 +10,16 @@ import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
 
-import com.example.samplestickerapp.exception.StickerException;
-import com.example.samplestickerapp.exception.enums.StickerCriticalExceptionEnum;
+import com.example.samplestickerapp.exception.StickerFolderException;
+import com.example.samplestickerapp.exception.StickerFolderException;
 import com.example.samplestickerapp.exception.enums.StickerExceptionEnum;
+import com.example.samplestickerapp.exception.enums.StickerFolderExceptionEnum;
+import com.example.samplestickerapp.exception.enums.StickerFolderExceptionEnum;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.channels.FileChannel;
-import java.nio.file.Files;
-import java.nio.file.StandardCopyOption;
 
 public class Folders {
 
@@ -32,7 +31,7 @@ public class Folders {
     private Folders() {
     }
 
-    public static File getLogsFolderPath(Context context) throws StickerException {
+    public static File getLogsFolderPath(Context context) throws StickerFolderException {
         if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
 
             File externalDir = context.getExternalFilesDir(null);
@@ -40,15 +39,15 @@ public class Folders {
             if (logs.exists()) {
                 return logs;
             } else {
-                throw new StickerException(null, StickerCriticalExceptionEnum.GET_PATH, "Pasta de logs não encontrada");
+                throw new StickerFolderException(null, StickerFolderExceptionEnum.GET_PATH, "Pasta de logs não encontrada");
             }
 
         } else {
-            throw new StickerException(null, StickerCriticalExceptionEnum.GET_PATH, "Erro ao buscar pasta de logs");
+            throw new StickerFolderException(null, StickerFolderExceptionEnum.GET_PATH, "Erro ao buscar pasta de logs");
         }
     }
 
-    public static File getPacksFolder(Context context) throws StickerException {
+    public static File getPacksFolder(Context context) throws StickerFolderException {
         if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
 
             File externalDir = context.getExternalFilesDir(null);
@@ -56,15 +55,15 @@ public class Folders {
             if (packs.exists()) {
                 return packs;
             } else {
-                throw new StickerException(null, StickerCriticalExceptionEnum.GET_PATH, "Pasta de pacotes não encontrada");
+                throw new StickerFolderException(null, StickerFolderExceptionEnum.GET_PATH, "Pasta de pacotes não encontrada");
             }
 
         } else {
-            throw new StickerException(null, StickerCriticalExceptionEnum.GET_PATH, "Erro ao buscar pasta de pacotes");
+            throw new StickerFolderException(null, StickerFolderExceptionEnum.GET_PATH, "Erro ao buscar pasta de pacotes");
         }
     }
 
-    public static File getPackFolderByFolderName(String folderName, Context context) throws StickerException {
+    public static File getPackFolderByFolderName(String folderName, Context context) throws StickerFolderException {
         if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
 
             File externalDir = context.getExternalFilesDir(null);
@@ -75,30 +74,30 @@ public class Folders {
                 if (stickerPack.exists()) {
                     return stickerPack;
                 } else {
-                    throw new StickerException(null, StickerCriticalExceptionEnum.GET_PATH, "Pasta do pacote " + folderName + " não encontrada");
+                    throw new StickerFolderException(null, StickerFolderExceptionEnum.GET_PATH, "Pasta do pacote " + folderName + " não encontrada");
                 }
 
             } else {
-                throw new StickerException(null, StickerCriticalExceptionEnum.GET_PATH, "Pasta de pacotes não encontrada");
+                throw new StickerFolderException(null, StickerFolderExceptionEnum.GET_PATH, "Pasta de pacotes não encontrada");
             }
 
         } else {
-            throw new StickerException(null, StickerCriticalExceptionEnum.GET_PATH, "Erro ao buscar pasta de pacotes");
+            throw new StickerFolderException(null, StickerFolderExceptionEnum.GET_PATH, "Erro ao buscar pasta de pacotes");
         }
     }
 
-    public static void makeAllDirs(Context context) throws StickerException {
+    public static void makeAllDirs(Context context) throws StickerFolderException {
         if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
             makeDirPacks(context);
             makeDirLogs(context);
             makeDirErrorsLogs(context);
             makeDirCriticalErrorsLogs(context);
         } else {
-            throw new StickerException(null, StickerCriticalExceptionEnum.MKDIR_ROOT, null);
+            throw new StickerFolderException(null, StickerFolderExceptionEnum.MKDIR_ROOT, null);
         }
     }
 
-    public static File getStickerPackFolderByFolderName(String stickerPackFolderName, Context context) throws StickerException {
+    public static File getStickerPackFolderByFolderName(String stickerPackFolderName, Context context) throws StickerFolderException {
         try {
             if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
 
@@ -108,21 +107,21 @@ public class Folders {
                 if (folderPacks.exists()) {
                     File stickerPackFolder = new File(folderPacks, stickerPackFolderName);
                     if (!stickerPackFolder.exists() && !stickerPackFolder.mkdir()) {
-                        throw new StickerException(null, StickerCriticalExceptionEnum.CREATE_FOLDER_PACOTE, null);
+                        throw new StickerFolderException(null, StickerFolderExceptionEnum.CREATE_FOLDER_PACOTE, null);
                     }
                     return stickerPackFolder;
                 } else {
-                    throw new StickerException(null, StickerCriticalExceptionEnum.GET_FOLDER, "Pasta dos pacotes não existe!");
+                    throw new StickerFolderException(null, StickerFolderExceptionEnum.GET_FOLDER, "Pasta dos pacotes não existe!");
                 }
             } else {
-                throw new StickerException(null, StickerCriticalExceptionEnum.MKDIR_PACKS, null);
+                throw new StickerFolderException(null, StickerFolderExceptionEnum.MKDIR_PACKS, null);
             }
         } catch (Exception ex) {
-            throw new StickerException(ex, StickerCriticalExceptionEnum.MKDIR_PACKS, "Erro ao criar pasta do pacote " + stickerPackFolderName);
+            throw new StickerFolderException(ex, StickerFolderExceptionEnum.MKDIR_PACKS, "Erro ao criar pasta do pacote " + stickerPackFolderName);
         }
     }
 
-    public static void makeDirPacks(Context context) throws StickerException {
+    public static void makeDirPacks(Context context) throws StickerFolderException {
         if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
             File externalDir = context.getExternalFilesDir(null);
 
@@ -132,11 +131,11 @@ public class Folders {
             }
 
         } else {
-            throw new StickerException(null, StickerCriticalExceptionEnum.MKDIR_PACKS, null);
+            throw new StickerFolderException(null, StickerFolderExceptionEnum.MKDIR_PACKS, null);
         }
     }
 
-    public static void makeDirLogs(Context context) throws StickerException {
+    public static void makeDirLogs(Context context) throws StickerFolderException {
         if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
 
             File externalStorage = context.getExternalFilesDir(null);
@@ -145,11 +144,11 @@ public class Folders {
                 folderLogs.mkdir();
             }
         } else {
-            throw new StickerException(null, StickerCriticalExceptionEnum.MKDIR_LOG, null);
+            throw new StickerFolderException(null, StickerFolderExceptionEnum.MKDIR_LOG, null);
         }
     }
 
-    public static void makeDirErrorsLogs(Context context) throws StickerException {
+    public static void makeDirErrorsLogs(Context context) throws StickerFolderException {
         if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
 
             File externalStorage = context.getExternalFilesDir(null);
@@ -159,11 +158,11 @@ public class Folders {
                 path.mkdir();
             }
         } else {
-            throw new StickerException(null, StickerCriticalExceptionEnum.MKDIR_LOG_ERRORS, null);
+            throw new StickerFolderException(null, StickerFolderExceptionEnum.MKDIR_LOG_ERRORS, null);
         }
     }
 
-    public static void makeDirCriticalErrorsLogs(Context context) throws StickerException {
+    public static void makeDirCriticalErrorsLogs(Context context) throws StickerFolderException {
         if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
             makeDirLogs(context);
 
@@ -175,7 +174,7 @@ public class Folders {
             }
 
         } else {
-            throw new StickerException(null, StickerCriticalExceptionEnum.MKDIR_LOG_CRITICAL_ERRORS, null);
+            throw new StickerFolderException(null, StickerFolderExceptionEnum.MKDIR_LOG_CRITICAL_ERRORS, null);
         }
     }
 
@@ -202,7 +201,7 @@ public class Folders {
                                               String sourceImagePath,
                                               String destinationImageFileName,
                                               Integer imageWidthAndHeight,
-                                              boolean keepOriginalCopy) throws StickerException {
+                                              boolean keepOriginalCopy) throws StickerFolderException {
         try {
             File sourceImage = new File(sourceImagePath);
             int rotation = getImageOrientation(sourceImagePath);
@@ -221,10 +220,10 @@ public class Folders {
             resizeAndRotateImage(stickerPackResizedImageAbsoluteFile, imageWidthAndHeight, Folders.TRAY_IMAGE_MAX_FILE_SIZE, rotation);
 
             return new Image(stickerPackOriginalImageAbsoluteFile, stickerPackResizedImageAbsoluteFile);
-        } catch (StickerException ste) {
+        } catch (StickerFolderException ste) {
             throw ste;
         } catch (Exception ex) {
-            throw new StickerException(ex, StickerExceptionEnum.CSP, "Erro ao copiar foto do pacote para a pasta do pacote " + stickerPackFolder.getName());
+            throw new StickerFolderException(ex, StickerFolderExceptionEnum.COPY, "Erro ao copiar foto do pacote para a pasta do pacote " + stickerPackFolder.getName());
         }
     }
 
@@ -270,14 +269,14 @@ public class Folders {
         return greaterSide;
     }
 
-    private static void copyImageFromSourceToDestination(File sourceFile, File destinationFile) throws StickerException {
+    private static void copyImageFromSourceToDestination(File sourceFile, File destinationFile) throws StickerFolderException {
         try(FileInputStream in = new FileInputStream(sourceFile);
             FileOutputStream out = new FileOutputStream(destinationFile)) {
 
             Bitmap bitmap = BitmapFactory.decodeStream(in);
-            bitmap.compress(Bitmap.CompressFormat.WEBP, 100, out);
+            bitmap.compress(Bitmap.CompressFormat.WEBP_LOSSLESS, 85, out);
         } catch (Exception ex) {
-            throw new StickerException(ex, StickerCriticalExceptionEnum.COPY, "Erro ao copiar file");
+            throw new StickerFolderException(ex, StickerFolderExceptionEnum.COPY, "Erro ao copiar file");
         }
     }
 
@@ -285,7 +284,7 @@ public class Folders {
     private static void resizeAndRotateImage(File imageToResize,
                                              int imageWidthAndHeight,
                                              int fileSize,
-                                             int rotation) throws StickerException {
+                                             int rotation) throws StickerFolderException {
         try {
             Bitmap bitmap = BitmapFactory.decodeFile(imageToResize.getAbsolutePath());
 
@@ -297,11 +296,11 @@ public class Folders {
             out.flush();
             out.close();
         } catch (Exception ex) {
-            throw new StickerException(ex, StickerCriticalExceptionEnum.RESIZE, "Imagem: " + imageToResize.getName());
+            throw new StickerFolderException(ex, StickerFolderExceptionEnum.RESIZE, "Imagem: " + imageToResize.getName());
         }
     }
 
-    public static void deleteFile(File stickerPackFolderName) throws StickerException {
+    public static void deleteFile(File stickerPackFolderName) throws StickerFolderException {
         try {
 
             if (stickerPackFolderName.isDirectory()) {
@@ -311,21 +310,21 @@ public class Folders {
                         deleteFile(file);
                     } else {
                         if (!file.delete()) {
-                            throw new StickerException(null, StickerCriticalExceptionEnum.DELETE_FOLDER, "Erro ao deletar file " + file.getName());
+                            throw new StickerFolderException(null, StickerFolderExceptionEnum.DELETE_FOLDER, "Erro ao deletar file " + file.getName());
                         }
                     }
                 }
             }
 
             if (!stickerPackFolderName.delete()) {
-                throw new StickerException(null, StickerCriticalExceptionEnum.DELETE_FOLDER, "Erro ao deletar file " + stickerPackFolderName.getName());
+                throw new StickerFolderException(null, StickerFolderExceptionEnum.DELETE_FOLDER, "Erro ao deletar file " + stickerPackFolderName.getName());
             }
         } catch (Exception ex) {
-            throw new StickerException(ex, StickerCriticalExceptionEnum.DELETE_FOLDER, "Pasta: " + stickerPackFolderName);
+            throw new StickerFolderException(ex, StickerFolderExceptionEnum.DELETE_FOLDER, "Pasta: " + stickerPackFolderName);
         }
     }
 
-    public static void deleteStickerPackFolder(String folderName, Context applicationContext) throws StickerException {
+    public static void deleteStickerPackFolder(String folderName, Context applicationContext) throws StickerFolderException {
         File folder = getPackFolderByFolderName(folderName, applicationContext);
         deleteFile(folder);
     }

@@ -6,16 +6,17 @@ import com.example.samplestickerapp.utils.Utils;
 public enum StickerExceptionEnum {
 
     CSP(R.string.CREATE_STICKER_PACK),
+    CS(R.string.CREATE_STICKER),
     ESP(R.string.EDIT_STICKER_PACK);
 
 
-    int mResourceId;
+    final int resourceId;
 
     StickerExceptionEnum(int id) {
-        this.mResourceId = id;
+        this.resourceId = id;
     }
 
     public String toString(){
-        return Utils.getContext().getString(mResourceId);
+        return Utils.getContext().getString(resourceId);
     }
 }

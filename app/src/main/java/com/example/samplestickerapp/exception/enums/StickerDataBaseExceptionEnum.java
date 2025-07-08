@@ -1,6 +1,6 @@
 package com.example.samplestickerapp.exception.enums;
 
-public enum StickerDBExceptionEnum {
+public enum StickerDataBaseExceptionEnum {
 
     CREATE_OR_OPEN("Erro ao abrir ou criar banco de dados das figurinhas"),
 
@@ -18,7 +18,7 @@ public enum StickerDBExceptionEnum {
 
     private String text;
 
-    StickerDBExceptionEnum(String text) {
+    StickerDataBaseExceptionEnum(String text) {
         this.text = text;
     }
 

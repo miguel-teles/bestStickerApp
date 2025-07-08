@@ -1,64 +1,36 @@
 package com.example.samplestickerapp.exception;
 
-import android.content.Context;
-
-import com.example.samplestickerapp.exception.enums.StickerCriticalExceptionEnum;
-import com.example.samplestickerapp.exception.enums.StickerDBExceptionEnum;
+import com.example.samplestickerapp.exception.enums.StickerFolderExceptionEnum;
+import com.example.samplestickerapp.exception.enums.StickerDataBaseExceptionEnum;
 import com.example.samplestickerapp.exception.enums.StickerExceptionEnum;
 
 import java.util.Date;
 
-public class StickerException extends Exception {
+public class StickerException extends RuntimeException {
 
     private Exception exception;
     private String msgErro;
     private String dsErro;
     private StickerExceptionEnum stickerExceptionEnum;
-    private StickerCriticalExceptionEnum stickerCriticalExceptionEnum;
-    private StickerDBExceptionEnum stickerDBExceptionEnum;
     private Date dtException;
     private String locationException;
 
-    private StickerException(Exception ex,
-                             StickerExceptionEnum stickerExceptionEnum,
-                             StickerCriticalExceptionEnum stickerCriticalExceptionEnum,
-                             StickerDBExceptionEnum stickerDBExceptionEnum,
-                             String msgErro) {
+    public StickerException(Exception ex,
+                            StickerExceptionEnum stickerExceptionEnum,
+                            String msgErro) {
         super(msgErro, ex);
         this.msgErro = msgErro;
         this.stickerExceptionEnum = stickerExceptionEnum;
-        this.stickerCriticalExceptionEnum = stickerCriticalExceptionEnum;
-        this.stickerDBExceptionEnum = stickerDBExceptionEnum;
         this.dtException = new Date();
         this.exception = ex;
         StackTraceElement stackTraceElement = null;
-        if (ex!=null) {
+        if (ex != null) {
             ex.printStackTrace();
             stackTraceElement = ex.getStackTrace()[0];
         } else {
             stackTraceElement = getStackTrace()[0];
         }
         this.locationException = stackTraceElement.getClassName() + "." + stackTraceElement.getMethodName() + ":" + stackTraceElement.getLineNumber();
-    }
-
-    //normal exception
-    public StickerException(Exception ex,
-                            StickerExceptionEnum stickerExceptionEnum,
-                            String msgError) {
-        this(ex, stickerExceptionEnum, null, null, msgError);
-    }
-
-    //critical exception
-    public StickerException(Exception ex,
-                            StickerCriticalExceptionEnum stickerCriticalExceptionEnum,
-                            String msgError) {
-        this(ex, null, stickerCriticalExceptionEnum, null, msgError);
-    }
-
-    public StickerException(Exception ex,
-                            StickerDBExceptionEnum stickerDBExceptionEnum,
-                            String msgError) {
-        this(ex, null, null, stickerDBExceptionEnum, msgError);
     }
 
     public Exception getException() {
@@ -69,28 +41,19 @@ public class StickerException extends Exception {
         return msgErro;
     }
 
-    public StickerExceptionEnum getStickerExceptionEnum() {
-        return stickerExceptionEnum;
+    public String getStickerExceptionEnumMessage() {
+        if (stickerExceptionEnum != null) {
+            return stickerExceptionEnum.toString();
+        }
+        return "";
     }
 
     public Date getDtException() {
         return dtException;
     }
 
-    public StickerCriticalExceptionEnum getStickerCriticalException() {
-        return stickerCriticalExceptionEnum;
-    }
-
     public String getLocationException() {
         return locationException;
-    }
-
-    public StickerCriticalExceptionEnum getStickerCriticalExceptionEnum() {
-        return stickerCriticalExceptionEnum;
-    }
-
-    public StickerDBExceptionEnum getStickerDBExceptionEnum() {
-        return stickerDBExceptionEnum;
     }
 
 }

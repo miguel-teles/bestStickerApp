@@ -22,10 +22,11 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.example.samplestickerapp.BuildConfig;
+import com.example.samplestickerapp.exception.StickerFolderException;
 import com.example.samplestickerapp.repository.MyDatabase;
 import com.example.samplestickerapp.exception.StickerException;
 import com.example.samplestickerapp.exception.StickerExceptionHandler;
-import com.example.samplestickerapp.exception.enums.StickerCriticalExceptionEnum;
+import com.example.samplestickerapp.exception.enums.StickerFolderExceptionEnum;
 import com.example.samplestickerapp.model.Sticker;
 import com.example.samplestickerapp.model.StickerPack;
 import com.example.samplestickerapp.repository.implementations.StickerPackRepository;
@@ -66,7 +67,7 @@ public class StickerContentProvider extends ContentProvider {
     static final String METHODS_ADD = "methods_add";
     public static final String METHODS_DELETE = "methods_delete";
     public static final String METHODS_UPDATE = "methods_update";
-    static final String STICKERS = "stickers";
+    public static final String STICKERS = "stickers";
     static final String STICKERS_ASSET = "stickers_asset";
     static final String PACK = "pack";
 
@@ -100,14 +101,8 @@ public class StickerContentProvider extends ContentProvider {
      **/
     @Override
     public boolean onCreate() {
-
-        try {
-            stickerRepository = new StickerRepository(MyDatabase.getInstance(getContext()).getMyDB());
-            stickerPackRepository = new StickerPackRepository(MyDatabase.getInstance(getContext()).getMyDB());
-        } catch (StickerException ex) {
-            StickerExceptionHandler.handleException(ex, getContext());
-            return false;
-        }
+        stickerRepository = new StickerRepository(MyDatabase.getInstance(getContext()).getMyDB());
+        stickerPackRepository = new StickerPackRepository(MyDatabase.getInstance(getContext()).getMyDB());
 
         AUTHORITY = BuildConfig.CONTENT_PROVIDER_AUTHORITY;
         if (!AUTHORITY.startsWith(Objects.requireNonNull(getContext()).getPackageName())) {
@@ -200,12 +195,8 @@ public class StickerContentProvider extends ContentProvider {
 
     private List<StickerPack> getStickerPackList() {
         if (stickerPackList == null || isStickerPackListOutdated) {
-            try {
-                stickerPackList = stickerPackRepository.findAll();
-                isStickerPackListOutdated = false;
-            } catch (StickerException ex) {
-                StickerExceptionHandler.handleException(ex, getContext());
-            }
+            stickerPackList = stickerPackRepository.findAll();
+            isStickerPackListOutdated = false;
         }
         return stickerPackList;
     }
@@ -314,14 +305,15 @@ public class StickerContentProvider extends ContentProvider {
         try {
             return ParcelFileDescriptor.open(new File(Folders.getPackFolderByFolderName(folder, getContext()), fileName), ParcelFileDescriptor.MODE_READ_ONLY);
         } catch (IOException e) {
-            throw new StickerException(e, StickerCriticalExceptionEnum.GET_FILE, "Erro ao abrir arquivo " + folder + "/" + fileName);
+            throw new StickerFolderException(e, StickerFolderExceptionEnum.GET_FILE, "Erro ao abrir arquivo " + folder + "/" + fileName);
         }
     }
 
 
     @Override
     public int delete(@NonNull Uri uri, @Nullable String selection, String[] selectionArgs) {
-        throw new UnsupportedOperationException("Not supported");
+        this.isStickerPackListOutdated = true;
+        return 1;
     }
 
     @Override

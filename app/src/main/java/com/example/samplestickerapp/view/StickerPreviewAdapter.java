@@ -13,12 +13,17 @@ import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.samplestickerapp.R;
+import com.example.samplestickerapp.exception.StickerException;
+import com.example.samplestickerapp.model.Sticker;
 import com.example.samplestickerapp.model.StickerPack;
+import com.example.samplestickerapp.modelView.StickerViewModel;
 import com.facebook.drawee.backends.pipeline.Fresco;
 import com.facebook.drawee.interfaces.DraweeController;
 import com.facebook.drawee.view.SimpleDraweeView;
@@ -27,19 +32,21 @@ public class StickerPreviewAdapter extends RecyclerView.Adapter<StickerPreviewVi
 
     private static final float COLLAPSED_STICKER_PREVIEW_BACKGROUND_ALPHA = 1f;
     private static final float EXPANDED_STICKER_PREVIEW_BACKGROUND_ALPHA = 0.2f;
-
     @NonNull
     private final StickerPack stickerPack;
-
     private final int cellSize;
     private final int cellLimit;
     private final int cellPadding;
     private final int errorResource;
-    private final SimpleDraweeView expandedStickerPreview;
-
+    private final LinearLayout expandedPreview;
+    private SimpleDraweeView expandedStickerPreview;
+    private ImageView btnDeleteSticker;
+    private Sticker expandedSticker;
     private final LayoutInflater layoutInflater;
     private RecyclerView recyclerView;
     private View clickedStickerPreview;
+
+    private StickerPackDetailsActivity stickerPackDetailsActivity;
     float expandedViewLeftX;
     float expandedViewTopY;
 
@@ -51,7 +58,8 @@ public class StickerPreviewAdapter extends RecyclerView.Adapter<StickerPreviewVi
             final int cellSize,
             final int cellPadding,
             @NonNull final StickerPack stickerPack,
-            final SimpleDraweeView expandedStickerView,
+            final LinearLayout expandedStickerView,
+            final StickerPackDetailsActivity stickerPackDetailsActivity,
             Context context) {
         this.cellSize = cellSize;
         this.cellPadding = cellPadding;
@@ -59,8 +67,18 @@ public class StickerPreviewAdapter extends RecyclerView.Adapter<StickerPreviewVi
         this.layoutInflater = layoutInflater;
         this.errorResource = errorResource;
         this.stickerPack = stickerPack;
-        this.expandedStickerPreview = expandedStickerView;
+        this.expandedPreview = expandedStickerView;
         this.context = context;
+        this.stickerPackDetailsActivity = stickerPackDetailsActivity;
+
+        for (int childComponentIndex = 0; childComponentIndex < expandedPreview.getChildCount(); childComponentIndex++) {
+            View childComponent = expandedPreview.getChildAt(childComponentIndex);
+            if (childComponent.getId() == R.id.sticker_details_expanded_sticker) {
+                this.expandedStickerPreview = (SimpleDraweeView) childComponent;
+            } else if (childComponent.getId() == R.id.btn_delete_sticker) {
+                this.btnDeleteSticker = (ImageView) childComponent;
+            }
+        }
     }
 
     @NonNull
@@ -111,7 +129,7 @@ public class StickerPreviewAdapter extends RecyclerView.Adapter<StickerPreviewVi
             };
 
     private void positionExpandedStickerPreview(int selectedPosition) {
-        if (expandedStickerPreview != null) {
+        if (expandedPreview != null) {
             // Calculate the view's center (x, y), then use expandedStickerPreview's height and
             // width to
             // figure out what where to position it.
@@ -137,8 +155,8 @@ public class StickerPreviewAdapter extends RecyclerView.Adapter<StickerPreviewVi
             final float clickedViewCenterY =
                     clickedStickerPreview.getY() + clickedStickerPreview.getHeight() / 2f;
 
-            expandedViewLeftX = clickedViewCenterX - expandedStickerPreview.getWidth() / 2f;
-            expandedViewTopY = clickedViewCenterY - expandedStickerPreview.getHeight() / 2f;
+            expandedViewLeftX = clickedViewCenterX - expandedPreview.getWidth() / 2f;
+            expandedViewTopY = clickedViewCenterY - expandedPreview.getHeight() / 2f;
 
             // If the new x or y positions are negative, anchor them to 0 to avoid clipping
             // the left side of the device and the top of the recycler view.
@@ -150,19 +168,19 @@ public class StickerPreviewAdapter extends RecyclerView.Adapter<StickerPreviewVi
             final float adjustmentX =
                     Math.max(
                             expandedViewLeftX
-                                    + expandedStickerPreview.getWidth()
+                                    + expandedPreview.getWidth()
                                     - recyclerViewWidth
                                     - recyclerViewRightMargin,
                             0);
             final float adjustmentY =
-                    Math.max(expandedViewTopY + expandedStickerPreview.getHeight() - recyclerViewHeight, 0);
+                    Math.max(expandedViewTopY + expandedPreview.getHeight() - recyclerViewHeight, 0);
 
             expandedViewLeftX -= adjustmentX;
             expandedViewTopY -= adjustmentY;
 
 
-            expandedStickerPreview.setX(expandedViewLeftX);
-            expandedStickerPreview.setY(expandedViewTopY);
+            expandedPreview.setX(expandedViewLeftX);
+            expandedPreview.setY(expandedViewTopY);
         }
     }
 
@@ -173,10 +191,10 @@ public class StickerPreviewAdapter extends RecyclerView.Adapter<StickerPreviewVi
         }
 
         this.clickedStickerPreview = clickedStickerPreview;
-        if (expandedStickerPreview != null) {
+        if (expandedPreview != null) {
             positionExpandedStickerPreview(position);
-
-            final Uri stickerAssetUri = StickerPackLoader.getStickerAssetUri(stickerPack.getIdentifier().toString(), stickerPack.getStickers().get(position).getStickerImageFile());
+            this.expandedSticker = stickerPack.getStickers().get(position);
+            final Uri stickerAssetUri = StickerPackLoader.getStickerAssetUri(stickerPack.getIdentifier().toString(), expandedSticker.getStickerImageFile());
             DraweeController controller = Fresco.newDraweeControllerBuilder()
                     .setUri(stickerAssetUri)
                     .setAutoPlayAnimations(true)
@@ -184,23 +202,29 @@ public class StickerPreviewAdapter extends RecyclerView.Adapter<StickerPreviewVi
             expandedStickerPreview.setImageResource(errorResource);
             expandedStickerPreview.setController(controller);
 
-            expandedStickerPreview.setVisibility(View.VISIBLE);
+            expandedPreview.setVisibility(View.VISIBLE);
             recyclerView.setAlpha(EXPANDED_STICKER_PREVIEW_BACKGROUND_ALPHA);
 
-            expandedStickerPreview.setOnClickListener(v -> hideExpandedStickerPreview());
+            expandedPreview.setOnClickListener(v -> hideExpandedStickerPreview());
+            btnDeleteSticker.setOnClickListener(v -> deleteSticker(expandedSticker));
         }
     }
 
+    private void deleteSticker(Sticker sticker) {
+        hideExpandedStickerPreview();
+        stickerPackDetailsActivity.deleteSticker(sticker, stickerPack, context);
+    }
+
     public void hideExpandedStickerPreview() {
-        if (isStickerPreviewExpanded() && expandedStickerPreview != null) {
+        if (isStickerPreviewExpanded() && expandedPreview != null) {
             clickedStickerPreview.setVisibility(View.VISIBLE);
-            expandedStickerPreview.setVisibility(View.INVISIBLE);
+            expandedPreview.setVisibility(View.INVISIBLE);
             recyclerView.setAlpha(COLLAPSED_STICKER_PREVIEW_BACKGROUND_ALPHA);
         }
     }
 
     private boolean isStickerPreviewExpanded() {
-        return expandedStickerPreview != null && expandedStickerPreview.getVisibility() == View.VISIBLE;
+        return expandedPreview != null && expandedPreview.getVisibility() == View.VISIBLE;
     }
 
     @Override

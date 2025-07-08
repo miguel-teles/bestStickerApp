@@ -169,6 +169,12 @@ public class StickerPackValidator {
             }
         } catch (IOException e) {
             throw new IllegalStateException("cannot open sticker file: sticker pack identifier: " + identifier + ", filename: " + fileName, e);
+        } catch (IllegalStateException ex) {
+            if (EntryActivity.SAFE_MODE) {
+                System.err.println(ex.getMessage());
+            } else {
+                throw ex;
+            }
         }
     }
 
