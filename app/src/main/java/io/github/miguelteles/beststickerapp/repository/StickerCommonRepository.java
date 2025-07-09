@@ -13,14 +13,14 @@ import io.github.miguelteles.beststickerapp.domain.entity.Sticker;
 import java.util.ArrayList;
 import java.util.List;
 
-public class StickerRepository extends Repository<Sticker> {
+public class StickerCommonRepository extends CommonRepository<Sticker> {
 
     private String SAVE = "INSERT INTO stickers VALUES (null, ?, ?, ?, ?)";
     private String FIND_ALL_BY_PACKIDENTIFIER = "SELECT * FROM stickers WHERE packIdentifier=%d";
 
     private SQLiteDatabase sqLiteDatabase;
 
-    public StickerRepository(SQLiteDatabase sqLiteDatabase) {
+    public StickerCommonRepository(SQLiteDatabase sqLiteDatabase) {
         super(Sticker.NM_TABELA);
         this.sqLiteDatabase = sqLiteDatabase;
     }
@@ -107,14 +107,12 @@ public class StickerRepository extends Repository<Sticker> {
         return null;
     }
 
-    public List<Sticker> findByPackIdentifier(int packIdentifier) {
+    public List<Sticker> findByPackIdentifier(int packIdentifier) throws StickerDataBaseException {
+        Cursor cursor = null;
         try {
             String selectStickersQuery = String.format(FIND_ALL_BY_PACKIDENTIFIER, packIdentifier);
-            Cursor cursor = sqLiteDatabase.rawQuery(selectStickersQuery, null);
-
-            if (cursor != null) {
-                cursor.moveToFirst();
-            }
+            cursor = sqLiteDatabase.rawQuery(selectStickersQuery, null);
+            cursor.moveToFirst();
 
             List<Sticker> stickersList = new ArrayList<>();
             while (!cursor.isAfterLast()) {
@@ -128,6 +126,8 @@ public class StickerRepository extends Repository<Sticker> {
 
         } catch (Exception ex) {
             throw new StickerDataBaseException(ex, StickerDataBaseExceptionEnum.SELECT, "Erro ao selecionar stickers do pacote " + packIdentifier + ". " + ex.getMessage());
+        } finally {
+            if (cursor != null) cursor.close();
         }
     }
 }

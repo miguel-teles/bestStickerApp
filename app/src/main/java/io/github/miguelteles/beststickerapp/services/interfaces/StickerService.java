@@ -13,6 +13,7 @@ import java.util.List;
 
 import io.github.miguelteles.beststickerapp.domain.entity.Sticker;
 import io.github.miguelteles.beststickerapp.domain.entity.StickerPack;
+import io.github.miguelteles.beststickerapp.exception.StickerException;
 import io.github.miguelteles.beststickerapp.repository.contentProvider.StickerContentProviderReader;
 import io.github.miguelteles.beststickerapp.repository.contentProvider.StickerUriProvider;
 
@@ -20,13 +21,13 @@ public interface StickerService {
 
     Sticker createSticker(StickerPack stickerPack,
                           Uri uriStickerImage,
-                          Context context);
+                          Context context) throws StickerException;
 
     void deleteSticker(Sticker sticker,
                        StickerPack stickerPack,
-                       Context context);
+                       Context context) throws StickerException;
 
-    List<Sticker> fetchAllStickerFromPack(StickerPack stickerPack, Context context);
+    List<Sticker> fetchAllStickerFromPack(StickerPack stickerPack, Context context) throws StickerException ;
 
     /**
      * Busca um asset da pasta (imagem da figurinha ou da capa do sticker pack)

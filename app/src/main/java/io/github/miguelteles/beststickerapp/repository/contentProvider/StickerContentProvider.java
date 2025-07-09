@@ -22,14 +22,15 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import io.github.miguelteles.beststickerapp.BuildConfig;
+import io.github.miguelteles.beststickerapp.exception.StickerExceptionHandler;
 import io.github.miguelteles.beststickerapp.exception.StickerFolderException;
 import io.github.miguelteles.beststickerapp.exception.StickerException;
 import io.github.miguelteles.beststickerapp.exception.enums.StickerFolderExceptionEnum;
 import io.github.miguelteles.beststickerapp.domain.entity.Sticker;
 import io.github.miguelteles.beststickerapp.domain.entity.StickerPack;
 import io.github.miguelteles.beststickerapp.repository.MyDatabase;
-import io.github.miguelteles.beststickerapp.repository.StickerPackRepository;
-import io.github.miguelteles.beststickerapp.repository.StickerRepository;
+import io.github.miguelteles.beststickerapp.repository.StickerPackCommonRepository;
+import io.github.miguelteles.beststickerapp.repository.StickerCommonRepository;
 import io.github.miguelteles.beststickerapp.foldersManagement.Folders;
 
 import java.io.File;
@@ -93,8 +94,8 @@ public class StickerContentProvider extends ContentProvider {
     private static final int DELETE_STICKER_PACKPACK = 9;
 
     private List<StickerPack> stickerPackList;
-    private StickerRepository stickerRepository;
-    private StickerPackRepository stickerPackRepository;
+    private StickerCommonRepository stickerRepository;
+    private StickerPackCommonRepository stickerPackRepository;
     boolean isStickerPackListOutdated = true;
 
     /**
@@ -102,15 +103,20 @@ public class StickerContentProvider extends ContentProvider {
      **/
     @Override
     public boolean onCreate() {
-        stickerRepository = new StickerRepository(MyDatabase.getInstance(getContext()).getSqLiteDatabase());
-        stickerPackRepository = new StickerPackRepository(MyDatabase.getInstance(getContext()).getSqLiteDatabase());
+        try {
+            stickerRepository = new StickerCommonRepository(MyDatabase.getInstance(getContext()).getSqLiteDatabase());
+            stickerPackRepository = new StickerPackCommonRepository(MyDatabase.getInstance(getContext()).getSqLiteDatabase());
 
-        AUTHORITY = BuildConfig.CONTENT_PROVIDER_AUTHORITY;
-        if (!AUTHORITY.startsWith(Objects.requireNonNull(getContext()).getPackageName())) {
-            throw new IllegalStateException("your authority (" + AUTHORITY + ") for the content provider should start with your package name: " + getContext().getPackageName());
+            AUTHORITY = BuildConfig.CONTENT_PROVIDER_AUTHORITY;
+            if (!AUTHORITY.startsWith(Objects.requireNonNull(getContext()).getPackageName())) {
+                throw new IllegalStateException("your authority (" + AUTHORITY + ") for the content provider should start with your package name: " + getContext().getPackageName());
+            }
+            carregaMatcher();
+            return true;
+        } catch (StickerException ex) {
+            StickerExceptionHandler.handleException(ex, this.getContext());
+            return false;
         }
-        carregaMatcher();
-        return true;
     }
 
     private void carregaMatcher() {
@@ -195,11 +201,16 @@ public class StickerContentProvider extends ContentProvider {
     }
 
     private List<StickerPack> getStickerPackList() {
-        if (stickerPackList == null || isStickerPackListOutdated) {
-            stickerPackList = stickerPackRepository.findAll();
-            isStickerPackListOutdated = false;
+        try {
+            if (stickerPackList == null || isStickerPackListOutdated) {
+                stickerPackList = stickerPackRepository.findAll();
+                isStickerPackListOutdated = false;
+            }
+            return stickerPackList;
+        } catch (StickerException ex) {
+            StickerExceptionHandler.handleException(ex, this.getContext());
+            throw new RuntimeException(ex);
         }
-        return stickerPackList;
     }
 
     private Cursor getPackForAllStickerPacks(@NonNull Uri uri) {

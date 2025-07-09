@@ -10,12 +10,12 @@ import io.github.miguelteles.beststickerapp.exception.StickerException;
 import io.github.miguelteles.beststickerapp.exception.enums.StickerExceptionEnum;
 import io.github.miguelteles.beststickerapp.domain.entity.StickerPack;
 import io.github.miguelteles.beststickerapp.repository.MyDatabase;
-import io.github.miguelteles.beststickerapp.repository.StickerPackRepository;
+import io.github.miguelteles.beststickerapp.repository.StickerPackCommonRepository;
 import io.github.miguelteles.beststickerapp.foldersManagement.Folders;
 import io.github.miguelteles.beststickerapp.repository.contentProvider.StickerUriProvider;
+import io.github.miguelteles.beststickerapp.repository.interfaces.Repository;
 import io.github.miguelteles.beststickerapp.services.interfaces.StickerPackService;
 import io.github.miguelteles.beststickerapp.utils.Utils;
-import io.github.miguelteles.beststickerapp.repository.contentProvider.StickerContentProviderReader;
 
 import java.io.File;
 import java.util.Date;
@@ -24,14 +24,17 @@ import java.util.List;
 public class StickerPackServiceImpl implements StickerPackService {
 
     private static StickerPackServiceImpl instance;
-    private final StickerPackRepository stickerPackRepository;
-    private final String STICKER_PACK_IMAGE_NAME = "packImg";
+    private final Repository<StickerPack> stickerPackRepository;
 
-    private StickerPackServiceImpl(Context context) {
-        this.stickerPackRepository = new StickerPackRepository(MyDatabase.getInstance(context).getSqLiteDatabase());
+    private StickerPackServiceImpl(Context context) throws StickerException {
+        this.stickerPackRepository = new StickerPackCommonRepository(MyDatabase.getInstance(context).getSqLiteDatabase());
     }
 
-    public static StickerPackServiceImpl getInstace(Context context) {
+    private StickerPackServiceImpl(Repository<StickerPack> stickerPackRepository) {
+        this.stickerPackRepository = stickerPackRepository;
+    }
+
+    public static StickerPackServiceImpl getInstace(Context context) throws StickerException {
         if (instance == null) {
             instance = new StickerPackServiceImpl(context);
         }
@@ -51,7 +54,7 @@ public class StickerPackServiceImpl implements StickerPackService {
             String stickerPackFolderName = nomePacote + Utils.formatData(new Date(), "yyyy.MM.dd.HH.mm.ss");
             stickerPackFolder = Folders.getStickerPackFolderByFolderName(stickerPackFolderName, context);
             Folders.Image copiedImages = Folders.generateStickerImages(stickerPackFolder,
-                    Folders.getRealPathFromURI(uriImagemStickerPackInput, context),
+                    Folders.getAbsolutePathFromURI(uriImagemStickerPackInput, context),
                     generateStickerPackImageName(),
                     Folders.TRAY_IMAGE_SIZE,
                     true);
@@ -74,7 +77,7 @@ public class StickerPackServiceImpl implements StickerPackService {
 
     @NonNull
     private String generateStickerPackImageName() {
-        return STICKER_PACK_IMAGE_NAME + Utils.formatData(new Date(), "yyyyMMddHHmmss");
+        return "packImg" + Utils.formatData(new Date(), "yyyyMMddHHmmss");
     }
 
     private static void addStickerPackToContentProvider(Context context, StickerPack stickerPack) throws StickerException {
@@ -119,7 +122,7 @@ public class StickerPackServiceImpl implements StickerPackService {
     }
 
     @Override
-    public List<StickerPack> fetchAllStickerPacks() {
+    public List<StickerPack> fetchAllStickerPacks() throws StickerException {
         return stickerPackRepository.findAll();
     }
 }

@@ -25,7 +25,7 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="8"
-        tools:context="io.github.miguelteles.beststickerapp.view.StickerPackListToWhatsappActivity"
+        tools:context="io.github.miguelteles.beststickerapp.view.StickerPackListActivity"
         android:clipToPadding="false"
         tools:showIn="@layout/activity_sticker_pack_list">
 

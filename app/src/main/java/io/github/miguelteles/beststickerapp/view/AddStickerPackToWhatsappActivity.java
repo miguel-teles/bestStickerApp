@@ -80,9 +80,9 @@ public abstract class AddStickerPackToWhatsappActivity extends BaseActivity {
     private Intent createIntentToAddStickerPack(String identifier, String stickerPackName) {
         Intent intent = new Intent();
         intent.setAction("com.whatsapp.intent.action.ENABLE_STICKER_PACK");
-        intent.putExtra(StickerPackDetailsToWhatsappActivity.EXTRA_STICKER_PACK_ID, identifier);
-        intent.putExtra(StickerPackDetailsToWhatsappActivity.EXTRA_STICKER_PACK_AUTHORITY, BuildConfig.CONTENT_PROVIDER_AUTHORITY);
-        intent.putExtra(StickerPackDetailsToWhatsappActivity.EXTRA_STICKER_PACK_NAME, stickerPackName);
+        intent.putExtra(StickerPackDetailsActivity.Extras.EXTRA_STICKER_PACK_ID, identifier);
+        intent.putExtra(StickerPackDetailsActivity.Extras.EXTRA_STICKER_PACK_AUTHORITY, BuildConfig.CONTENT_PROVIDER_AUTHORITY);
+        intent.putExtra(StickerPackDetailsActivity.Extras.EXTRA_STICKER_PACK_NAME, stickerPackName);
         return intent;
     }
 

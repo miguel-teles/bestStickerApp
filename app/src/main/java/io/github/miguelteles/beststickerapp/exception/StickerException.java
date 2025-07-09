@@ -4,7 +4,7 @@ import io.github.miguelteles.beststickerapp.exception.enums.StickerExceptionEnum
 
 import java.util.Date;
 
-public class StickerException extends RuntimeException {
+public class StickerException extends Exception {
 
     private Exception exception;
     private String msgErro;

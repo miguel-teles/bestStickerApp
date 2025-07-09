@@ -22,7 +22,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import io.github.miguelteles.beststickerapp.R;
 import io.github.miguelteles.beststickerapp.domain.entity.Sticker;
 import io.github.miguelteles.beststickerapp.domain.entity.StickerPack;
-import io.github.miguelteles.beststickerapp.repository.contentProvider.StickerContentProviderReader;
 import io.github.miguelteles.beststickerapp.repository.contentProvider.StickerUriProvider;
 
 import com.facebook.drawee.backends.pipeline.Fresco;
@@ -47,7 +46,7 @@ public class StickerPreviewAdapter extends RecyclerView.Adapter<StickerPreviewVi
     private RecyclerView recyclerView;
     private View clickedStickerPreview;
 
-    private StickerPackDetailsToWhatsappActivity stickerPackDetailsActivity;
+    private StickerPackDetailsActivity stickerPackDetailsActivity;
     float expandedViewLeftX;
     float expandedViewTopY;
 
@@ -60,7 +59,7 @@ public class StickerPreviewAdapter extends RecyclerView.Adapter<StickerPreviewVi
             final int cellPadding,
             @NonNull final StickerPack stickerPack,
             final LinearLayout expandedStickerView,
-            final StickerPackDetailsToWhatsappActivity stickerPackDetailsActivity,
+            final StickerPackDetailsActivity stickerPackDetailsActivity,
             Context context) {
         this.cellSize = cellSize;
         this.cellPadding = cellPadding;

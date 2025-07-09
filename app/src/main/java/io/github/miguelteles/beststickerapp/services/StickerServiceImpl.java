@@ -8,12 +8,11 @@ import io.github.miguelteles.beststickerapp.exception.enums.StickerExceptionEnum
 import io.github.miguelteles.beststickerapp.domain.entity.Sticker;
 import io.github.miguelteles.beststickerapp.domain.entity.StickerPack;
 import io.github.miguelteles.beststickerapp.repository.MyDatabase;
-import io.github.miguelteles.beststickerapp.repository.StickerRepository;
+import io.github.miguelteles.beststickerapp.repository.StickerCommonRepository;
 import io.github.miguelteles.beststickerapp.foldersManagement.Folders;
 import io.github.miguelteles.beststickerapp.repository.contentProvider.StickerUriProvider;
 import io.github.miguelteles.beststickerapp.services.interfaces.StickerService;
 import io.github.miguelteles.beststickerapp.utils.Utils;
-import io.github.miguelteles.beststickerapp.repository.contentProvider.StickerContentProviderReader;
 
 import java.io.File;
 import java.io.IOException;
@@ -23,14 +22,13 @@ import java.util.List;
 public class StickerServiceImpl implements StickerService {
 
     private static StickerService instance;
-    private final StickerRepository stickerRepository;
-    private final String STICKER_IMAGE_NAME = "sticker";
+    private final StickerCommonRepository stickerRepository;
 
-    private StickerServiceImpl(Context context) {
-        this.stickerRepository = new StickerRepository(MyDatabase.getInstance(context).getSqLiteDatabase());
+    private StickerServiceImpl(Context context) throws StickerException {
+        this.stickerRepository = new StickerCommonRepository(MyDatabase.getInstance(context).getSqLiteDatabase());
     }
 
-    public static StickerService getInstance(Context context) {
+    public static StickerService getInstance(Context context) throws StickerException {
         if (instance == null) {
             instance = new StickerServiceImpl(context);
         }
@@ -44,7 +42,7 @@ public class StickerServiceImpl implements StickerService {
 
         File stickerPackFolder = Folders.getStickerPackFolderByFolderName(stickerPack.getFolderName(), context);
         Folders.Image copiedImages = Folders.generateStickerImages(stickerPackFolder,
-                Folders.getRealPathFromURI(uriStickerImage, context),
+                Folders.getAbsolutePathFromURI(uriStickerImage, context),
                 generateStickerImageName(),
                 Folders.STICKER_IMAGE_SIZE,
                 false);
@@ -72,7 +70,7 @@ public class StickerServiceImpl implements StickerService {
     }
 
     @Override
-    public List<Sticker> fetchAllStickerFromPack(StickerPack stickerPack, Context context) {
+    public List<Sticker> fetchAllStickerFromPack(StickerPack stickerPack, Context context) throws StickerException {
         List<Sticker> stickers = stickerRepository.findByPackIdentifier(stickerPack.getIdentifier());
 
         for (Sticker sticker : stickers) {
@@ -94,6 +92,6 @@ public class StickerServiceImpl implements StickerService {
     }
 
     private String generateStickerImageName() {
-        return STICKER_IMAGE_NAME + Utils.formatData(new Date(), "yyyyMMddHHmmss");
+        return "sticker" + Utils.formatData(new Date(), "yyyyMMddHHmmss");
     }
 }

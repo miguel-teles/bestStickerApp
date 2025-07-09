@@ -27,38 +27,6 @@ public class Folders {
     private Folders() {
     }
 
-    public static File getLogsFolderPath(Context context) throws StickerFolderException {
-        if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
-
-            File externalDir = context.getExternalFilesDir(null);
-            File logs = new File(externalDir, DirectoryNames.LOGS);
-            if (logs.exists()) {
-                return logs;
-            } else {
-                throw new StickerFolderException(null, StickerFolderExceptionEnum.GET_PATH, "Pasta de logs não encontrada");
-            }
-
-        } else {
-            throw new StickerFolderException(null, StickerFolderExceptionEnum.GET_PATH, "Erro ao buscar pasta de logs");
-        }
-    }
-
-    public static File getPacksFolder(Context context) throws StickerFolderException {
-        if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
-
-            File externalDir = context.getExternalFilesDir(null);
-            File packs = new File(externalDir, DirectoryNames.PACKS);
-            if (packs.exists()) {
-                return packs;
-            } else {
-                throw new StickerFolderException(null, StickerFolderExceptionEnum.GET_PATH, "Pasta de pacotes não encontrada");
-            }
-
-        } else {
-            throw new StickerFolderException(null, StickerFolderExceptionEnum.GET_PATH, "Erro ao buscar pasta de pacotes");
-        }
-    }
-
     public static File getPackFolderByFolderName(String folderName, Context context) throws StickerFolderException {
         if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
 
@@ -174,7 +142,7 @@ public class Folders {
         }
     }
 
-    public static String getRealPathFromURI(Uri contentUri, Context context) {
+    public static String getAbsolutePathFromURI(Uri contentUri, Context context) {
         String[] proj = {MediaStore.Images.Media.DATA};
         Cursor cursor = context.getContentResolver().query(contentUri, proj, null, null, null);
         int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
@@ -226,8 +194,7 @@ public class Folders {
     private static Bitmap applyRotationToBitmap(Bitmap bitmap, int rotate) {
         Matrix matrix = new Matrix();
         matrix.postRotate(rotate);
-        Bitmap rotatedBitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
-        return rotatedBitmap;
+        return Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
     }
 
     /**
@@ -276,7 +243,6 @@ public class Folders {
         }
     }
 
-    //TODO: precisa mudar o tamanho da imagem pra poder enviar para o whats com base na tamanho do parâmetro fileSize
     private static void resizeAndRotateImage(File imageToResize,
                                              int imageWidthAndHeight,
                                              int fileSize,

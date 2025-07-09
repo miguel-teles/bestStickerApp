@@ -30,7 +30,8 @@ import java.lang.ref.WeakReference;
 import io.github.miguelteles.beststickerapp.R;
 import io.github.miguelteles.beststickerapp.domain.entity.Sticker;
 import io.github.miguelteles.beststickerapp.domain.entity.StickerPack;
-import io.github.miguelteles.beststickerapp.repository.contentProvider.StickerContentProviderReader;
+import io.github.miguelteles.beststickerapp.exception.StickerException;
+import io.github.miguelteles.beststickerapp.exception.StickerExceptionHandler;
 import io.github.miguelteles.beststickerapp.repository.contentProvider.StickerUriProvider;
 import io.github.miguelteles.beststickerapp.services.StickerPackServiceImpl;
 import io.github.miguelteles.beststickerapp.services.StickerServiceImpl;
@@ -38,22 +39,7 @@ import io.github.miguelteles.beststickerapp.services.interfaces.StickerPackServi
 import io.github.miguelteles.beststickerapp.services.interfaces.StickerService;
 import io.github.miguelteles.beststickerapp.validator.WhitelistCheck;
 
-public class StickerPackDetailsToWhatsappActivity extends AddStickerPackToWhatsappActivity {
-
-    /**
-     * Do not change below values of below 3 lines as this is also used by WhatsApp
-     */
-    public static final String EXTRA_STICKER_PACK_ID = "sticker_pack_id";
-    public static final String EXTRA_STICKER_PACK_AUTHORITY = "sticker_pack_authority";
-    public static final String EXTRA_STICKER_PACK_NAME = "sticker_pack_name";
-    public static final String EXTRA_STICKER_PACK_WEBSITE = "sticker_pack_website";
-    public static final String EXTRA_STICKER_PACK_EMAIL = "sticker_pack_email";
-    public static final String EXTRA_STICKER_PACK_PRIVACY_POLICY = "sticker_pack_privacy_policy";
-    public static final String EXTRA_STICKER_PACK_LICENSE_AGREEMENT = "sticker_pack_license_agreement";
-    public static final String EXTRA_STICKER_PACK_TRAY_ICON = "sticker_pack_tray_icon";
-    public static final String EXTRA_SHOW_UP_BUTTON = "show_up_button";
-    public static final String EXTRA_STICKER_PACK_DATA = "sticker_pack";
-
+public class StickerPackDetailsActivity extends AddStickerPackToWhatsappActivity {
 
     private RecyclerView recyclerView;
     private GridLayoutManager layoutManager;
@@ -76,11 +62,15 @@ public class StickerPackDetailsToWhatsappActivity extends AddStickerPackToWhatsa
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sticker_pack_details);
-        stickerPack = getIntent().getParcelableExtra(EXTRA_STICKER_PACK_DATA);
+        stickerPack = getIntent().getParcelableExtra(Extras.EXTRA_STICKER_PACK_DATA);
 
         declareGlobalComponents();
-        stickerPackService = StickerPackServiceImpl.getInstace(getApplicationContext());
-        stickerService = StickerServiceImpl.getInstance(getApplicationContext());
+        try {
+            stickerPackService = StickerPackServiceImpl.getInstace(getApplicationContext());
+            stickerService = StickerServiceImpl.getInstance(getApplicationContext());
+        } catch (StickerException ex) {
+            StickerExceptionHandler.handleException(ex, this);
+        }
 
         assembleRecyclerView();
         loadStickersOnScreen();
@@ -121,10 +111,14 @@ public class StickerPackDetailsToWhatsappActivity extends AddStickerPackToWhatsa
     @Override
     protected void onResume() {
         super.onResume();
-        stickerPack = stickerPackService.fetchUpdatedStickerPack(stickerPack);
-        whiteListCheckAsyncTask = new WhiteListCheckAsyncTask(this);
-        whiteListCheckAsyncTask.execute(stickerPack);
-        loadStickersOnScreen();
+        try {
+            stickerPack = stickerPackService.fetchUpdatedStickerPack(stickerPack);
+            whiteListCheckAsyncTask = new WhiteListCheckAsyncTask(this);
+            whiteListCheckAsyncTask.execute(stickerPack);
+            loadStickersOnScreen();
+        } catch (StickerException ex) {
+            StickerExceptionHandler.handleException(ex, this);
+        }
     }
 
     @Override
@@ -172,7 +166,7 @@ public class StickerPackDetailsToWhatsappActivity extends AddStickerPackToWhatsa
 
     private void addNewSticker() {
         Intent intent = new Intent(this, AddStickerActivity.class);
-        intent.putExtra(AddStickerPackActivity.STICKER_PACK, stickerPack);
+        intent.putExtra(AddStickerPackActivity.Extras.STICKER_PACK, stickerPack);
         startActivity(intent);
     }
 
@@ -183,9 +177,13 @@ public class StickerPackDetailsToWhatsappActivity extends AddStickerPackToWhatsa
                 .setPositiveButton(R.string.YES_SIR, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        stickerPackService.deleteStickerPack(stickerPack, getApplicationContext());
-                        Intent intent = new Intent(context, StickerPackListToWhatsappActivity.class);
-                        startActivity(intent);
+                        try {
+                            stickerPackService.deleteStickerPack(stickerPack, getApplicationContext());
+                            Intent intent = new Intent(context, StickerPackListActivity.class);
+                            startActivity(intent);
+                        } catch (StickerException ex) {
+                            StickerExceptionHandler.handleException(ex, context);
+                        }
                     }
                 })
                 .setNegativeButton(R.string.NOT_TODAY, new DialogInterface.OnClickListener() {
@@ -197,8 +195,8 @@ public class StickerPackDetailsToWhatsappActivity extends AddStickerPackToWhatsa
 
     private void editStickerPack() {
         Intent intent = new Intent(this, AddStickerPackActivity.class);
-        intent.putExtra(AddStickerPackActivity.STICKER_PACK, stickerPack);
-        startActivity(intent);
+        intent.putExtra(AddStickerPackActivity.Extras.STICKER_PACK, stickerPack);
+        startActivityForResult(intent, 0);
     }
 
     private final ViewTreeObserver.OnGlobalLayoutListener pageLayoutListener = new ViewTreeObserver.OnGlobalLayoutListener() {
@@ -252,22 +250,26 @@ public class StickerPackDetailsToWhatsappActivity extends AddStickerPackToWhatsa
     }
 
     public void deleteSticker(Sticker sticker, StickerPack stickerPack, Context context) {
-        this.stickerService.deleteSticker(sticker, stickerPack, context);
-        stickerPack.getStickers().remove(sticker);
-        this.loadStickersOnScreen();
+        try {
+            this.stickerService.deleteSticker(sticker, stickerPack, context);
+            stickerPack.getStickers().remove(sticker);
+            this.loadStickersOnScreen();
+        } catch (StickerException ex) {
+            StickerExceptionHandler.handleException(ex, this);
+        }
     }
 
     static class WhiteListCheckAsyncTask extends AsyncTask<StickerPack, Void, Boolean> {
-        private final WeakReference<StickerPackDetailsToWhatsappActivity> stickerPackDetailsActivityWeakReference;
+        private final WeakReference<StickerPackDetailsActivity> stickerPackDetailsActivityWeakReference;
 
-        WhiteListCheckAsyncTask(StickerPackDetailsToWhatsappActivity stickerPackListActivity) {
+        WhiteListCheckAsyncTask(StickerPackDetailsActivity stickerPackListActivity) {
             this.stickerPackDetailsActivityWeakReference = new WeakReference<>(stickerPackListActivity);
         }
 
         @Override
         protected final Boolean doInBackground(StickerPack... stickerPacks) {
             StickerPack stickerPack = stickerPacks[0];
-            final StickerPackDetailsToWhatsappActivity stickerPackDetailsActivity = stickerPackDetailsActivityWeakReference.get();
+            final StickerPackDetailsActivity stickerPackDetailsActivity = stickerPackDetailsActivityWeakReference.get();
             if (stickerPackDetailsActivity == null) {
                 return false;
             }
@@ -276,10 +278,26 @@ public class StickerPackDetailsToWhatsappActivity extends AddStickerPackToWhatsa
 
         @Override
         protected void onPostExecute(Boolean isWhitelisted) {
-            final StickerPackDetailsToWhatsappActivity stickerPackDetailsActivity = stickerPackDetailsActivityWeakReference.get();
+            final StickerPackDetailsActivity stickerPackDetailsActivity = stickerPackDetailsActivityWeakReference.get();
             if (stickerPackDetailsActivity != null) {
                 stickerPackDetailsActivity.updateAddUI(isWhitelisted);
             }
         }
+    }
+
+    public static class Extras {
+        /**
+         * Do not change below values of below 3 lines as this is also used by WhatsApp
+         */
+        public static final String EXTRA_STICKER_PACK_ID = "sticker_pack_id";
+        public static final String EXTRA_STICKER_PACK_AUTHORITY = "sticker_pack_authority";
+        public static final String EXTRA_STICKER_PACK_NAME = "sticker_pack_name";
+        public static final String EXTRA_STICKER_PACK_WEBSITE = "sticker_pack_website";
+        public static final String EXTRA_STICKER_PACK_EMAIL = "sticker_pack_email";
+        public static final String EXTRA_STICKER_PACK_PRIVACY_POLICY = "sticker_pack_privacy_policy";
+        public static final String EXTRA_STICKER_PACK_LICENSE_AGREEMENT = "sticker_pack_license_agreement";
+        public static final String EXTRA_STICKER_PACK_TRAY_ICON = "sticker_pack_tray_icon";
+        public static final String EXTRA_SHOW_UP_BUTTON = "show_up_button";
+        public static final String EXTRA_STICKER_PACK_DATA = "sticker_pack";
     }
 }

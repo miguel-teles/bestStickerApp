@@ -49,31 +49,23 @@ public class EntryActivity extends BaseActivity {
             getSupportActionBar().hide();
         }
         Utils.setContext(getBaseContext());
-        Folders.makeAllDirs(this);
-        MyDatabase.getInstance(getApplicationContext());
-        stickerPackService = StickerPackServiceImpl.getInstace(getApplicationContext());
+        try {
+            Folders.makeAllDirs(this);
+            MyDatabase.getInstance(getApplicationContext());
+            stickerPackService = StickerPackServiceImpl.getInstace(getApplicationContext());
+        } catch (StickerException ex) {
+            StickerExceptionHandler.handleException(ex, this);
+        }
 
         progressBar = findViewById(R.id.entry_activity_progress);
         loadListAsyncTask = new LoadListAsyncTask(this);
         loadListAsyncTask.execute();
-        Thread.setDefaultUncaughtExceptionHandler(createGlobalExceptionHandler());
-    }
-
-    private static Thread.UncaughtExceptionHandler createGlobalExceptionHandler() {
-        return new Thread.UncaughtExceptionHandler() {
-            @Override
-            public void uncaughtException(Thread paramThread, Throwable paramThrowable) {
-                if (paramThrowable instanceof StickerException) {
-                    StickerExceptionHandler.handleException((StickerException) paramThrowable, Utils.getContext());
-                }
-            }
-        };
     }
 
     private void showStickerPack(ArrayList<StickerPack> stickerPackList) {
         progressBar.setVisibility(View.GONE);
-        final Intent intent = new Intent(this, StickerPackListToWhatsappActivity.class);
-        intent.putParcelableArrayListExtra(StickerPackListToWhatsappActivity.EXTRA_STICKER_PACK_LIST_DATA, stickerPackList);
+        final Intent intent = new Intent(this, StickerPackListActivity.class);
+        intent.putParcelableArrayListExtra(StickerPackListActivity.EXTRA_STICKER_PACK_LIST_DATA, stickerPackList);
         startActivity(intent);
         finish();
         overridePendingTransition(0, 0);

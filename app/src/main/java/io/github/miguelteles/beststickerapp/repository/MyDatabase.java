@@ -23,7 +23,11 @@ public class MyDatabase extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         sqLiteDatabase = db;
-        criaTabelas(db);
+        try {
+            criaTabelas(db);
+        } catch (StickerException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override

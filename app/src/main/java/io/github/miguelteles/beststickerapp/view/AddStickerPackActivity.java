@@ -15,14 +15,15 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import io.github.miguelteles.beststickerapp.R;
 import io.github.miguelteles.beststickerapp.exception.StickerException;
+import io.github.miguelteles.beststickerapp.exception.StickerExceptionHandler;
 import io.github.miguelteles.beststickerapp.exception.enums.StickerExceptionEnum;
 import io.github.miguelteles.beststickerapp.domain.entity.StickerPack;
-import io.github.miguelteles.beststickerapp.repository.contentProvider.StickerContentProviderReader;
 import io.github.miguelteles.beststickerapp.repository.contentProvider.StickerUriProvider;
 import io.github.miguelteles.beststickerapp.services.StickerPackServiceImpl;
 import io.github.miguelteles.beststickerapp.services.interfaces.StickerPackService;
 import io.github.miguelteles.beststickerapp.utils.Utils;
 import com.google.android.material.textfield.TextInputEditText;
+
 
 public class AddStickerPackActivity extends AppCompatActivity {
 
@@ -31,10 +32,7 @@ public class AddStickerPackActivity extends AppCompatActivity {
     private TextInputEditText txtNomePacote, txtAutor;
     private ImageView stickerPackImageView;
     private Uri uriImagemStickerPack;
-
     private StickerPackService stickerPackService;
-
-    public static final String STICKER_PACK = "stickerpack";
 
     @Override
     protected void onCreate(Bundle bundle) {
@@ -43,15 +41,23 @@ public class AddStickerPackActivity extends AppCompatActivity {
 
         declaraCampos();
         populateFieldsWithStickerPackBeingEdited();
-        setaOnClickListeners();
-        stickerPackService = StickerPackServiceImpl.getInstace(getApplicationContext());
-        verificaCamposObrigatorios();
+        try {
+            setaOnClickListeners();
+            stickerPackService = StickerPackServiceImpl.getInstace(getApplicationContext());
+        } catch (StickerException ex) {
+            StickerExceptionHandler.handleException(ex, this);
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
     }
 
     private void populateFieldsWithStickerPackBeingEdited() {
         Intent intent = getIntent();
         if (isStickerPackEdit(intent)) {
-            this.stickerPackBeingEdited = (StickerPack) intent.getExtras().get(STICKER_PACK);
+            this.stickerPackBeingEdited = (StickerPack) intent.getExtras().get(Extras.STICKER_PACK);
             txtNomePacote.setText(stickerPackBeingEdited.getName());
             txtAutor.setText(stickerPackBeingEdited.getPublisher());
             uriImagemStickerPack = StickerUriProvider.getStickerOriginalAssetUri(stickerPackBeingEdited.getIdentifier().toString(), stickerPackBeingEdited.getOriginalTrayImageFile());
@@ -62,7 +68,7 @@ public class AddStickerPackActivity extends AppCompatActivity {
     }
 
     private static boolean isStickerPackEdit(Intent intent) {
-        return intent.getExtras() != null && intent.getExtras().get(STICKER_PACK) != null;
+        return intent.getExtras() != null && intent.getExtras().get(Extras.STICKER_PACK) != null;
     }
 
     private void declaraCampos() {
@@ -71,11 +77,6 @@ public class AddStickerPackActivity extends AppCompatActivity {
         txtNomePacote = findViewById(R.id.txtInpEdtNomePacote);
         txtAutor = findViewById(R.id.txtInpEdtAutor);
         stickerPackImageView = findViewById(R.id.pacoteImageView);
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
     }
 
     private void setaOnClickListeners() throws StickerException {
@@ -109,18 +110,6 @@ public class AddStickerPackActivity extends AppCompatActivity {
             }
         };
     }
-
-//    @Override
-//    public void onBackPressed() {
-//        try {
-//            verificaCamposObrigatorios();
-//        } catch (Exception ex) {
-//            StickerExceptionHandler.handleException(new StickerException(ex,
-//                            StickerExceptionEnum.CSP,
-//                            null),
-//                    this);
-//        }
-//    }
 
     private View.OnFocusChangeListener onFocusChangeListener() throws StickerException {
         return new View.OnFocusChangeListener() {
@@ -183,31 +172,37 @@ public class AddStickerPackActivity extends AppCompatActivity {
                 String nmAutorInput = txtAutor.getText().toString();
                 String nomePacoteInput = txtNomePacote.getText().toString();
 
-                if (stickerPackBeingEdited == null) {
-                    stickerPackBeingEdited = stickerPackService.createStickerPack(nmAutorInput,
-                            nomePacoteInput,
-                            uriImagemStickerPack,
-                            getApplicationContext());
-                } else {
-                    stickerPackBeingEdited = stickerPackService.updateStickerPack(stickerPackBeingEdited,
-                            nmAutorInput,
-                            nomePacoteInput,
-                            getApplicationContext());
-                }
+                try {
+                    if (stickerPackBeingEdited == null) {
+                        stickerPackBeingEdited = stickerPackService.createStickerPack(nmAutorInput,
+                                nomePacoteInput,
+                                uriImagemStickerPack,
+                                getApplicationContext());
+                    } else {
+                        stickerPackBeingEdited = stickerPackService.updateStickerPack(stickerPackBeingEdited,
+                                nmAutorInput,
+                                nomePacoteInput,
+                                getApplicationContext());
+                    }
 
-                redirecionaStickerPackDetailsActivity(stickerPackBeingEdited);
+                    redirecionaStickerPackDetailsActivity(stickerPackBeingEdited);
+                } catch (StickerException ex) {
+                    StickerExceptionHandler.handleException(ex, context);
+                }
             }
         };
     }
 
     private void redirecionaStickerPackDetailsActivity(StickerPack stickerPack) {
-        final Intent intent = new Intent(this, StickerPackDetailsToWhatsappActivity.class);
-        intent.putExtra(StickerPackDetailsToWhatsappActivity.EXTRA_SHOW_UP_BUTTON, false);
-        intent.putExtra(StickerPackDetailsToWhatsappActivity.EXTRA_STICKER_PACK_DATA, stickerPack);
+        final Intent intent = new Intent(this, StickerPackDetailsActivity.class);
+        intent.putExtra(StickerPackDetailsActivity.Extras.EXTRA_SHOW_UP_BUTTON, false);
+        intent.putExtra(StickerPackDetailsActivity.Extras.EXTRA_STICKER_PACK_DATA, stickerPack);
         startActivity(intent);
         finish();
         overridePendingTransition(0, 0);
     }
 
-
+    public static class Extras {
+        public static final String STICKER_PACK = "stickerpack";
+    }
 }

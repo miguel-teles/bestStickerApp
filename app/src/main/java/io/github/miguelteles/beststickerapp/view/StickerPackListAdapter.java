@@ -25,7 +25,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import io.github.miguelteles.beststickerapp.R;
 import io.github.miguelteles.beststickerapp.domain.entity.StickerPack;
-import io.github.miguelteles.beststickerapp.repository.contentProvider.StickerContentProviderReader;
 import io.github.miguelteles.beststickerapp.repository.contentProvider.StickerUriProvider;
 
 import com.facebook.drawee.view.SimpleDraweeView;
@@ -64,9 +63,9 @@ public class StickerPackListAdapter extends RecyclerView.Adapter<StickerPackList
 
         viewHolder.titleView.setText(pack.getName());
         viewHolder.container.setOnClickListener(view -> {
-            Intent intent = new Intent(view.getContext(), StickerPackDetailsToWhatsappActivity.class);
-            intent.putExtra(StickerPackDetailsToWhatsappActivity.EXTRA_SHOW_UP_BUTTON, true);
-            intent.putExtra(StickerPackDetailsToWhatsappActivity.EXTRA_STICKER_PACK_DATA, pack);
+            Intent intent = new Intent(view.getContext(), StickerPackDetailsActivity.class);
+            intent.putExtra(StickerPackDetailsActivity.Extras.EXTRA_SHOW_UP_BUTTON, true);
+            intent.putExtra(StickerPackDetailsActivity.Extras.EXTRA_STICKER_PACK_DATA, pack);
             view.getContext().startActivity(intent);
         });
         viewHolder.imageRowView.removeAllViews();
@@ -83,7 +82,6 @@ public class StickerPackListAdapter extends RecyclerView.Adapter<StickerPackList
             }
             viewHolder.imageRowView.addView(rowImage);
         }
-//        setAddButtonAppearance(viewHolder.addButton, pack);
         viewHolder.animatedStickerPackIndicator.setVisibility(pack.isAnimatedStickerPack() ? View.VISIBLE : View.GONE);
     }
 

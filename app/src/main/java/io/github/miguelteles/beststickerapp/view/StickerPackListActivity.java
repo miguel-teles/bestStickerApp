@@ -20,6 +20,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import io.github.miguelteles.beststickerapp.R;
 import io.github.miguelteles.beststickerapp.domain.entity.StickerPack;
+import io.github.miguelteles.beststickerapp.exception.StickerException;
+import io.github.miguelteles.beststickerapp.exception.StickerExceptionHandler;
 import io.github.miguelteles.beststickerapp.services.StickerPackServiceImpl;
 import io.github.miguelteles.beststickerapp.services.interfaces.StickerPackService;
 import io.github.miguelteles.beststickerapp.validator.WhitelistCheck;
@@ -30,7 +32,7 @@ import java.util.Arrays;
 import java.util.List;
 
 
-public class StickerPackListToWhatsappActivity extends AddStickerPackToWhatsappActivity {
+public class StickerPackListActivity extends AddStickerPackToWhatsappActivity {
     public static final String EXTRA_STICKER_PACK_LIST_DATA = "sticker_pack_list";
     private static final int STICKER_PREVIEW_DISPLAY_LIMIT = 8;
     private LinearLayoutManager packLayoutManager;
@@ -49,8 +51,13 @@ public class StickerPackListToWhatsappActivity extends AddStickerPackToWhatsappA
         packRecyclerView = findViewById(R.id.sticker_pack_list);
         btnCreateNewStickerPack = findViewById(R.id.createNewStickerPack);
         btnCreateNewStickerPack.setOnClickListener(createNewStickerPack());
-        stickerPackService = StickerPackServiceImpl.getInstace(this);
-        stickerPackList = new ArrayList<>(stickerPackService.fetchAllStickerPacks());
+
+        try {
+            stickerPackService = StickerPackServiceImpl.getInstace(this);
+            stickerPackList = new ArrayList<>(stickerPackService.fetchAllStickerPacks());
+        } catch (StickerException ex) {
+            StickerExceptionHandler.handleException(ex, this);
+        }
 
         showStickerPackList(stickerPackList);
         if (getSupportActionBar() != null) {
@@ -61,9 +68,13 @@ public class StickerPackListToWhatsappActivity extends AddStickerPackToWhatsappA
     @Override
     protected void onResume() {
         super.onResume();
-        stickerPackList = new ArrayList<>(stickerPackService.fetchAllStickerPacks());
-        whiteListCheckAsyncTask = new WhiteListCheckAsyncTask(this);
-        whiteListCheckAsyncTask.execute(stickerPackList.toArray(new StickerPack[0]));
+        try {
+            stickerPackList = new ArrayList<>(stickerPackService.fetchAllStickerPacks());
+            whiteListCheckAsyncTask = new WhiteListCheckAsyncTask(this);
+            whiteListCheckAsyncTask.execute(stickerPackList.toArray(new StickerPack[0]));
+        } catch (StickerException ex) {
+            StickerExceptionHandler.handleException(ex, this);
+        }
     }
 
     @Override
@@ -112,15 +123,15 @@ public class StickerPackListToWhatsappActivity extends AddStickerPackToWhatsappA
 
 
     static class WhiteListCheckAsyncTask extends AsyncTask<StickerPack, Void, List<StickerPack>> {
-        private final WeakReference<StickerPackListToWhatsappActivity> stickerPackListActivityWeakReference;
+        private final WeakReference<StickerPackListActivity> stickerPackListActivityWeakReference;
 
-        WhiteListCheckAsyncTask(StickerPackListToWhatsappActivity stickerPackListActivity) {
+        WhiteListCheckAsyncTask(StickerPackListActivity stickerPackListActivity) {
             this.stickerPackListActivityWeakReference = new WeakReference<>(stickerPackListActivity);
         }
 
         @Override
         protected final List<StickerPack> doInBackground(StickerPack... stickerPackArray) {
-            final StickerPackListToWhatsappActivity stickerPackListActivity = stickerPackListActivityWeakReference.get();
+            final StickerPackListActivity stickerPackListActivity = stickerPackListActivityWeakReference.get();
             if (stickerPackListActivity == null) {
                 return Arrays.asList(stickerPackArray);
             }
@@ -132,7 +143,7 @@ public class StickerPackListToWhatsappActivity extends AddStickerPackToWhatsappA
 
         @Override
         protected void onPostExecute(List<StickerPack> stickerPackList) {
-            final StickerPackListToWhatsappActivity stickerPackListActivity = stickerPackListActivityWeakReference.get();
+            final StickerPackListActivity stickerPackListActivity = stickerPackListActivityWeakReference.get();
             if (stickerPackListActivity != null) {
                 stickerPackListActivity.allStickerPacksListAdapter.setStickerPackList(stickerPackList);
                 stickerPackListActivity.allStickerPacksListAdapter.notifyDataSetChanged();

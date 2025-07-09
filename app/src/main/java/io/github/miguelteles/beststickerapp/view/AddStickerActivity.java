@@ -14,13 +14,14 @@ import androidx.appcompat.app.AppCompatActivity;
 import io.github.miguelteles.beststickerapp.R;
 import io.github.miguelteles.beststickerapp.domain.entity.Sticker;
 import io.github.miguelteles.beststickerapp.domain.entity.StickerPack;
+import io.github.miguelteles.beststickerapp.exception.StickerException;
+import io.github.miguelteles.beststickerapp.exception.StickerExceptionHandler;
 import io.github.miguelteles.beststickerapp.services.StickerServiceImpl;
 
 import io.github.miguelteles.beststickerapp.services.interfaces.StickerService;
 import io.github.miguelteles.beststickerapp.utils.Utils;
 
 public class AddStickerActivity extends AppCompatActivity {
-
 
     private ImageView stickerImageView = null;
     private Uri uriStickerImage = null;
@@ -34,7 +35,11 @@ public class AddStickerActivity extends AppCompatActivity {
         setContentView(R.layout.activity_sticker_create_sticker);
         declaraCampos();
 
-        stickerService = StickerServiceImpl.getInstance(this);
+        try {
+            stickerService = StickerServiceImpl.getInstance(this);
+        } catch (StickerException ex) {
+            StickerExceptionHandler.handleException(ex, this);
+        }
 
         loadStickerPackFromIntent();
         setOnClickListeners();
@@ -45,8 +50,8 @@ public class AddStickerActivity extends AppCompatActivity {
 
     private void loadStickerPackFromIntent() {
         Intent intent = getIntent();
-        if (intent.getExtras().get(AddStickerPackActivity.STICKER_PACK) != null) {
-            stickerPack = intent.getParcelableExtra(AddStickerPackActivity.STICKER_PACK);
+        if (intent.getExtras().get(AddStickerPackActivity.Extras.STICKER_PACK) != null) {
+            stickerPack = intent.getParcelableExtra(AddStickerPackActivity.Extras.STICKER_PACK);
         }
     }
 
@@ -65,11 +70,15 @@ public class AddStickerActivity extends AppCompatActivity {
         return new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Sticker sticker = stickerService.createSticker(stickerPack,
-                        uriStickerImage,
-                        context);
-                if (sticker.getIdentifier() != null) {
-                    finish();
+                try {
+                    Sticker sticker = stickerService.createSticker(stickerPack,
+                            uriStickerImage,
+                            context);
+                    if (sticker.getIdentifier() != null) {
+                        finish(); //fecha a activity
+                    }
+                } catch (StickerException ex) {
+                    StickerExceptionHandler.handleException(ex, context);
                 }
             }
         };
