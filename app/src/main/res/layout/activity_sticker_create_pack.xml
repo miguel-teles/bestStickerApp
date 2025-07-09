@@ -25,6 +25,7 @@
         android:id="@+id/pacoteImageView"
         android:layout_width="300dp"
         android:layout_height="300dp"
+        android:layout_marginTop="10dp"
         android:scaleType="center"
         android:src="@drawable/sticker_3rdparty_add"
         app:layout_constraintEnd_toEndOf="parent"

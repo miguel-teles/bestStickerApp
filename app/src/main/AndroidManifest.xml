@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="com.example.samplestickerapp">
+    package="io.github.miguelteles.beststickerapp">
 
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
@@ -16,37 +16,28 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
-        <activity android:name=".view.EntryActivity"
+        <activity android:name="io.github.miguelteles.beststickerapp.view.EntryActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".view.StickerPackListActivity" />
+        <activity android:name="io.github.miguelteles.beststickerapp.view.StickerPackListToWhatsappActivity" />
         <activity
-            android:name=".view.StickerPackDetailsActivity"
-            android:parentActivityName=".view.StickerPackListActivity"
+            android:name="io.github.miguelteles.beststickerapp.view.StickerPackDetailsToWhatsappActivity"
+            android:parentActivityName="io.github.miguelteles.beststickerapp.view.StickerPackListToWhatsappActivity"
             tools:ignore="UnusedAttribute">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.example.samplestickerapp.view.StickerPackListActivity" />
-        </activity>
-        <activity
-            android:name=".view.StickerPackInfoActivity"
-            android:label="@string/title_activity_sticker_pack_info"
-            android:parentActivityName=".view.StickerPackDetailsActivity"
-            tools:ignore="UnusedAttribute">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.example.samplestickerapp.view.StickerPackDetailsActivity" />
+                android:value="io.github.miguelteles.beststickerapp.view.StickerPackListToWhatsappActivity" />
         </activity>
 
-        <activity android:name=".view.StickerPackFormActivity" />
-        <activity android:name=".view.AddStickerActivity" />
+        <activity android:name="io.github.miguelteles.beststickerapp.view.AddStickerPackActivity" />
+        <activity android:name="io.github.miguelteles.beststickerapp.view.AddStickerActivity" />
 
         <provider
-            android:name=".view.StickerContentProvider"
+            android:name="io.github.miguelteles.beststickerapp.repository.contentProvider.StickerContentProvider"
             android:authorities="${contentProviderAuthority}"
             android:enabled="true"
             android:exported="true"

@@ -1,14 +1,14 @@
 apply plugin: 'com.android.application'
 
 android {
-    namespace "com.example.samplestickerapp"
+    namespace "io.github.miguelteles.beststickerapp"
     //the compression of webp file during build causes problem with FileDescriptor in ContentProvider.
     aaptOptions {
         noCompress "webp"
     }
     compileSdkVersion 35
     defaultConfig {
-        applicationId "com.example.figurinhasFodas"
+        applicationId "com.best.stickerapp"
         minSdkVersion 30
         targetSdkVersion 33
         versionCode 1
@@ -84,8 +84,8 @@ private void checkApplicationIdInDebug() {
 task checkRelease {
     doLast {
         println("checkRelease")
-        if (android.defaultConfig.applicationId.startsWith("com.example")) {
-            throw new GradleException("applicationId in defaultConfig cannot start with com.example, please change your applicationId in app/build.gradle")
+        if (android.defaultConfig.applicationId.startsWith("com.best")) {
+            throw new GradleException("applicationId in defaultConfig cannot start with com.best, please change your applicationId in app/build.gradle")
         }
     }
 }
