@@ -45,8 +45,8 @@ public class StickerServiceTest {
     StickerPack validStickerPack = new StickerPack(1,
             "teste",
             "teste",
-            "app/src/main/assets/testImage.jpeg",
-            "app/src/main/assets/testImage.jpeg",
+            "app/src/main/assets/testImage.jpg",
+            "app/src/main/assets/testImage.jpg",
             "teste",
             "teste",
             "teste",
@@ -56,7 +56,7 @@ public class StickerServiceTest {
             true,
             false);
 
-    Sticker validSticker = new Sticker(1, 1, "/home/miguel/StudioProjects/stickersProjeto/app/src/main/assets/testImage.jpeg");
+    Sticker validSticker = new Sticker(1, 1, "/home/miguel/StudioProjects/stickersProjeto/app/src/main/assets/testImage.jpg");
 
 
 
@@ -80,8 +80,8 @@ public class StickerServiceTest {
         when(foldersManagementService.generateStickerImages(any(File.class), any(Uri.class), any(String.class), any(Integer.class), any(Boolean.class))).then(new Answer<FoldersManagementService.Image>() {
             @Override
             public FoldersManagementService.Image answer(InvocationOnMock invocation) throws Throwable {
-                return new FoldersManagementService.Image(new File("/home/miguel/StudioProjects/stickersProjeto/app/src/main/assets/testImage.jpeg"),
-                        new File("/home/miguel/StudioProjects/stickersProjeto/app/src/main/assets/testImage.jpeg"),
+                return new FoldersManagementService.Image(new File("/home/miguel/StudioProjects/stickersProjeto/app/src/main/assets/testImage.jpg"),
+                        new File("/home/miguel/StudioProjects/stickersProjeto/app/src/main/assets/testImage.jpg"),
                         new byte[]{1,1,1,1,1,1,1,1});
             }
         });

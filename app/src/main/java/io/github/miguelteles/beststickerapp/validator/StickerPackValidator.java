@@ -8,7 +8,6 @@
 
 package io.github.miguelteles.beststickerapp.validator;
 
-import android.content.ContentResolver;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -23,8 +22,7 @@ import io.github.miguelteles.beststickerapp.domain.entity.Sticker;
 import io.github.miguelteles.beststickerapp.domain.entity.StickerPack;
 import io.github.miguelteles.beststickerapp.exception.StickerException;
 import io.github.miguelteles.beststickerapp.exception.StickerFolderException;
-import io.github.miguelteles.beststickerapp.services.StickerServiceImpl;
-import io.github.miguelteles.beststickerapp.services.interfaces.StickerService;
+import io.github.miguelteles.beststickerapp.exception.enums.StickerExceptionEnum;
 import io.github.miguelteles.beststickerapp.utils.Utils;
 import io.github.miguelteles.beststickerapp.view.EntryActivity;
 
@@ -33,7 +31,6 @@ import com.facebook.imagepipeline.common.ImageDecodeOptions;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashSet;
@@ -86,17 +83,42 @@ public class StickerPackValidator {
         }
     }
 
+    public void verifyCreatedStickerPackValidity(StickerPack stickerPack) throws StickerException {
+        try {
+            validateStickerPack(stickerPack);
+        } catch (Exception e) {
+            throw new StickerException(e, StickerExceptionEnum.ISP, "Error validating sticker pack");
+        }
+    }
+
     /**
      * Checks whether a sticker pack contains valid data
      */
     public void verifyStickerPackValidity(@NonNull StickerPack stickerPack) throws StickerException {
-        if (TextUtils.isEmpty(stickerPack.getIdentifier().toString())) {
-            throw new IllegalStateException("sticker pack identifier is empty");
+        try {
+            if (TextUtils.isEmpty(stickerPack.getIdentifier().toString())) {
+                throw new IllegalStateException("sticker pack identifier is empty");
+            }
+            if (stickerPack.getIdentifier().toString().length() > CHAR_COUNT_MAX) {
+                throw new IllegalStateException("sticker pack identifier cannot exceed " + CHAR_COUNT_MAX + " characters");
+            }
+            checkStringValidity(stickerPack.getIdentifier().toString());
+            validateStickerPack(stickerPack);
+            final List<Sticker> stickers = stickerPack.getStickers();
+            if ((stickers.size() < STICKER_SIZE_MIN || stickers.size() > STICKER_SIZE_MAX) && Utils.tpAmbiente.equals("P")) {
+                throw new IllegalStateException("sticker pack sticker count should be between 3 to 30 inclusive, it currently has " + stickers.size() + ", sticker pack identifier: " + stickerPack.getIdentifier());
+            }
+            for (final Sticker sticker : stickers) {
+                validateSticker(stickerPack.getIdentifier(), sticker, stickerPack.isAnimatedStickerPack());
+            }
+        } catch (IllegalStateException e) {
+            throw new StickerException(e, StickerExceptionEnum.ISP, e.getMessage());
+        } catch (Exception e) {
+            throw new StickerException(e, StickerExceptionEnum.ISP, "Error validating sticker pack");
         }
-        if (stickerPack.getIdentifier().toString().length() > CHAR_COUNT_MAX) {
-            throw new IllegalStateException("sticker pack identifier cannot exceed " + CHAR_COUNT_MAX + " characters");
-        }
-        checkStringValidity(stickerPack.getIdentifier().toString());
+    }
+
+    private void validateStickerPack(@NonNull StickerPack stickerPack) {
         if (TextUtils.isEmpty(stickerPack.getPublisher())) {
             throw new IllegalStateException("sticker pack publisher is empty, sticker pack identifier: " + stickerPack.getIdentifier());
         }
@@ -149,13 +171,6 @@ public class StickerPackValidator {
             }
         } catch (Exception e) {
             throw new IllegalStateException("Cannot open tray image, " + stickerPack.getOriginalTrayImageFile(), e);
-        }
-        final List<Sticker> stickers = stickerPack.getStickers();
-        if ((stickers.size() < STICKER_SIZE_MIN || stickers.size() > STICKER_SIZE_MAX) && Utils.tpAmbiente.equals("P")) {
-            throw new IllegalStateException("sticker pack sticker count should be between 3 to 30 inclusive, it currently has " + stickers.size() + ", sticker pack identifier: " + stickerPack.getIdentifier());
-        }
-        for (final Sticker sticker : stickers) {
-            validateSticker(stickerPack.getIdentifier(), sticker, stickerPack.isAnimatedStickerPack());
         }
     }
 
