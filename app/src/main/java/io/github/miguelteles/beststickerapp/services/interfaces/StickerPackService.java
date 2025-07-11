@@ -13,17 +13,15 @@ import io.github.miguelteles.beststickerapp.exception.StickerFolderException;
 
 public interface StickerPackService {
 
-    StickerPack createStickerPack(String nomeAutor,
-                                  String nomePacote,
-                                  Uri uriImagemStickerPackInput,
-                                  Context context) throws StickerException;
+    StickerPack createStickerPack(String authorName,
+                                  String packName,
+                                  Uri selectedImagemUri) throws StickerException;
 
     StickerPack updateStickerPack(StickerPack stickerPack,
-                                  String nomeAutor,
-                                  String nomePacote,
-                                  Context context) throws StickerException;
+                                  String editedAuthorName,
+                                  String editedPackName) throws StickerException;
 
-    void deleteStickerPack(StickerPack stickerPack, Context context) throws StickerException;
+    void deleteStickerPack(StickerPack stickerPack) throws StickerException;
 
     StickerPack fetchStickerPackByIdWithAssets(StickerPack stickerPack) throws StickerException;
 

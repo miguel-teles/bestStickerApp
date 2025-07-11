@@ -2,6 +2,7 @@ package io.github.miguelteles.beststickerapp.services;
 
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.res.Resources;
 import android.net.Uri;
 
 import androidx.annotation.NonNull;
@@ -35,9 +36,10 @@ public class StickerPackServiceImpl implements StickerPackService {
     private final StickerUriProvider stickerUriProvider;
     private final StickerPackRepository stickerPackRepository;
     private final ContentResolver contentResolver;
-
     private final StickerService stickerService;
     private final StickerPackValidator stickerPackValidator;
+    private final Resources resources;
+
 
     private StickerPackServiceImpl() throws StickerException {
         this.stickerPackRepository = new StickerPackRepository(MyDatabase.getInstance().getSqLiteDatabase());
@@ -46,8 +48,24 @@ public class StickerPackServiceImpl implements StickerPackService {
         contentResolver = Utils.getApplicationContext().getContentResolver();
         stickerPackValidator = StickerPackValidator.getInstance();
         stickerService = StickerServiceImpl.getInstance();
+        resources = Utils.getApplicationContext().getResources();
     }
 
+    public StickerPackServiceImpl(FoldersManagementService foldersManagementService,
+                                  StickerUriProvider stickerUriProvider,
+                                  StickerPackRepository stickerPackRepository,
+                                  ContentResolver contentResolver,
+                                  StickerService stickerService,
+                                  StickerPackValidator stickerPackValidator,
+                                  Resources resources) {
+        this.foldersManagementService = foldersManagementService;
+        this.stickerUriProvider = stickerUriProvider;
+        this.stickerPackRepository = stickerPackRepository;
+        this.contentResolver = contentResolver;
+        this.stickerService = stickerService;
+        this.stickerPackValidator = stickerPackValidator;
+        this.resources = resources;
+    }
 
     public static StickerPackService getInstance() throws StickerException {
         if (instance == null) {
@@ -57,38 +75,47 @@ public class StickerPackServiceImpl implements StickerPackService {
     }
 
     @Override
-    public StickerPack createStickerPack(String nomeAutor,
-                                         String nomePacote,
-                                         Uri uriImagemStickerPackInput,
-                                         Context context) throws StickerException {
-        if (Utils.isNothing(nomeAutor)) {
-            nomeAutor = context.getResources().getString(R.string.defaultPublisher);
+    public StickerPack createStickerPack(String authorName,
+                                         String packName,
+                                         Uri selectedImagemUri) throws StickerException {
+        validateParametersCreateStickerPack(packName, selectedImagemUri);
+        if (Utils.isNothing(authorName)) {
+            authorName = resources.getString(R.string.defaultPublisher);
         }
         File stickerPackFolder = null;
         try {
-            String stickerPackFolderName = nomePacote + Utils.formatData(new Date(), "yyyy.MM.dd.HH.mm.ss");
+            String stickerPackFolderName = packName + Utils.formatData(new Date(), "yyyy.MM.dd.HH.mm.ss");
             stickerPackFolder = foldersManagementService.getStickerPackFolderByFolderName(stickerPackFolderName);
             FoldersManagementServiceImpl.Image copiedImages = foldersManagementService.generateStickerImages(stickerPackFolder,
-                    uriImagemStickerPackInput,
+                    selectedImagemUri,
                     generateStickerPackImageName(),
                     FoldersManagementServiceImpl.TRAY_IMAGE_SIZE,
                     true);
             StickerPack stickerPack = new StickerPack(null,
-                    nomePacote,
-                    nomeAutor,
+                    packName,
+                    authorName,
                     copiedImages.getOriginalImageFile().getName(),
                     copiedImages.getResizedImageFile().getName(),
                     stickerPackFolderName,
                     "1",
-                    false);
-            stickerPackValidator.verifyStickerPackValidity(stickerPack);
+                    false,
+                    copiedImages.getResidezImageFileInBytes());
+            stickerPackValidator.verifyCreatedStickerPackValidity(stickerPack);
             stickerPackRepository.save(stickerPack);
-            context.getContentResolver().insert(StickerUriProvider.getInstance().getStickerPackInsertUri(), stickerPack.toContentValues());
-            addStickerPackToContentProvider(context, stickerPack);
+            addStickerPackToContentProvider(stickerPack);
             return stickerPack;
         } catch (StickerException ex) {
             deletePackFolderOnException(stickerPackFolder);
             throw ex;
+        }
+    }
+
+    private void validateParametersCreateStickerPack(String packName, Uri packImageUri) {
+        if (Utils.isNothing(packName)) {
+            throw new IllegalArgumentException("Pack name cannot be null or empty");
+        }
+        if (packImageUri == null) {
+            throw new IllegalArgumentException("Pack requires a image");
         }
     }
 
@@ -97,9 +124,9 @@ public class StickerPackServiceImpl implements StickerPackService {
         return "packImg" + Utils.formatData(new Date(), "yyyyMMddHHmmss");
     }
 
-    private void addStickerPackToContentProvider(Context context, StickerPack stickerPack) throws StickerException {
+    private void addStickerPackToContentProvider(StickerPack stickerPack) throws StickerException {
         if (stickerPack.getIdentifier() != null) {
-            context.getContentResolver().insert(stickerUriProvider.getStickerPackInsertUri(), stickerPack.toContentValues());
+            contentResolver.insert(stickerUriProvider.getStickerPackInsertUri(), stickerPack.toContentValues());
         } else {
             throw new StickerException(null, StickerExceptionEnum.CSP, "Erro ao salvar pacote no banco");
         }
@@ -114,23 +141,37 @@ public class StickerPackServiceImpl implements StickerPackService {
 
     @Override
     public StickerPack updateStickerPack(StickerPack stickerPack,
-                                         String nomeAutor,
-                                         String nomePacote,
-                                         Context context) throws StickerException {
-        stickerPack.setName(nomePacote);
-        stickerPack.setPublisher(nomeAutor);
+                                         String editedAuthorName,
+                                         String editedPackName) throws StickerException {
+        validateParametersUpdateStickerPack(stickerPack, editedPackName);
+
+        stickerPack.setName(editedPackName);
+        if (Utils.isNothing(editedAuthorName)) {
+            editedAuthorName = resources.getString(R.string.defaultPublisher);
+        }
+        stickerPack.setPublisher(editedAuthorName);
+
         StickerPack updatedStickerPack = stickerPackRepository.update(stickerPack);
-        context.getContentResolver().update(stickerUriProvider.getStickerPackUpdateUri(), stickerPack.toContentValues(), null, null);
+        contentResolver.update(stickerUriProvider.getStickerPackUpdateUri(), stickerPack.toContentValues(), null, null);
         return updatedStickerPack;
     }
 
+    private void validateParametersUpdateStickerPack(StickerPack stickerPack,
+                                                     String nomePacote) {
+        if (stickerPack == null) {
+            throw new IllegalArgumentException("Sticker pack cannot be null");
+        }
+        if (Utils.isNothing(nomePacote)) {
+            throw new IllegalArgumentException("Nome pacote cannot be null");
+        }
+    }
+
     @Override
-    public void deleteStickerPack(StickerPack stickerPack,
-                                  Context applicationContext) throws StickerException {
+    public void deleteStickerPack(StickerPack stickerPack) throws StickerException {
         stickerPackRepository.remove(stickerPack);
         foldersManagementService.deleteStickerPackFolder(stickerPack.getFolderName());
 
-        applicationContext.getContentResolver().delete(stickerUriProvider.getStickerDeleteUri(), null, null);
+        contentResolver.delete(stickerUriProvider.getStickerDeleteUri(), null, null);
     }
 
     @Override

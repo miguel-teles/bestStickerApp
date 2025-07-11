@@ -71,4 +71,6 @@
     <string name="title_activity_exception">ExceptionActivity</string>
     <string name="FETCH_STICKER">Erro ao buscar figurinhas</string>
     <string name="FETCH_STICKER_PACK">Erro ao buscar pacote de figurinhas</string>
+    <string name="sticker_pack_image">Imagem do pacote</string>
+    <string name="INVALID_STICKER_PACK">Invalid sticker pack</string>
 </resources>

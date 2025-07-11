@@ -134,7 +134,8 @@ public class StickerPack implements Parcelable {
                        String resizedTrayImageFile,
                        String folderName,
                        String imageDataVersion,
-                       boolean animatedStickerPack) {
+                       boolean animatedStickerPack,
+                       byte[] resizedTrayImageFileInBytes) {
         this.identifier = identifier;
         this.name = name;
         this.publisher = publisher;
@@ -148,6 +149,7 @@ public class StickerPack implements Parcelable {
         this.privacyPolicyWebsite = "";
         this.licenseAgreementWebsite = "";
         this.animatedStickerPack = animatedStickerPack;
+        this.resizedTrayImageFileInBytes = resizedTrayImageFileInBytes;
     }
 
     public static StickerPack fromContentValues(ContentValues values) {

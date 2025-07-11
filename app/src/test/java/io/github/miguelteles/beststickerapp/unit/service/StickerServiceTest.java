@@ -2,22 +2,16 @@ package io.github.miguelteles.beststickerapp.unit.service;
 
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.net.Uri;
-import android.os.Bundle;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
-import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 
 import java.io.File;
@@ -139,7 +133,7 @@ public class StickerServiceTest {
     }
 
     @Test
-    public void testeCreateSticker() throws StickerException {
+    public void testCreateSticker() throws StickerException {
         Sticker sticker = stickerService.createSticker(validStickerPack, uri);
 
         assertFalse("StickerImageFile is not null", Utils.isNothing(sticker.getStickerImageFile()));
@@ -148,24 +142,24 @@ public class StickerServiceTest {
     }
 
     @Test
-    public void testeCreateStickerInputInvalido() throws StickerException {
+    public void testCreateStickerInputInput() throws StickerException {
         assertThrows("IllegalArgumentException thrown when stickerPack is null", IllegalArgumentException.class, () -> stickerService.createSticker(null, uri));
         assertThrows("IllegalArgumentException thrown when selectedUriImage is null", IllegalArgumentException.class, () -> stickerService.createSticker(validStickerPack, null));
     }
 
     @Test
-    public void testeDeleteSticker() throws StickerException {
+    public void testDeleteSticker() throws StickerException {
         stickerService.deleteSticker(validSticker, validStickerPack);
     }
 
     @Test
-    public void testeDeleteStickerInputInvalido() throws StickerException {
+    public void testDeleteStickerInputInvalido() throws StickerException {
         assertThrows("IllegalArgumentException thrown when sticker is null", IllegalArgumentException.class, () -> stickerService.deleteSticker(null, validStickerPack));
         assertThrows("IllegalArgumentException thrown when stickerPack is null", IllegalArgumentException.class, () -> stickerService.deleteSticker(validSticker, null));
     }
 
     @Test
-    public void testeFetchAllStickerFromPackWithAssets() throws StickerException {
+    public void testFetchAllStickerFromPackWithAssets() throws StickerException {
         List<Sticker> stickers = stickerService.fetchAllStickerFromPackWithAssets(validStickerPack.getIdentifier());
         assertNotNull("Sticker list cannot be null, even thought the sticker pack is empty", stickers);
         for(Sticker sticker : stickers) {
@@ -178,7 +172,7 @@ public class StickerServiceTest {
     }
 
     @Test
-    public void testeFetchAllStickerFromPackWithoutAssets() throws StickerException {
+    public void testFetchAllStickerFromPackWithoutAssets() throws StickerException {
         List<Sticker> stickers = stickerService.fetchAllStickerFromPackWithoutAssets(validStickerPack.getIdentifier());
         assertNotNull("Sticker list cannot be null, even thought the sticker pack is empty", stickers);
         for (Sticker sticker : stickers) {

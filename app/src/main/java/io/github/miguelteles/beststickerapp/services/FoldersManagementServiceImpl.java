@@ -30,6 +30,7 @@ public class FoldersManagementServiceImpl implements FoldersManagementService {
     public static final int STICKER_IMAGE_MAX_FILE_SIZE = 100; //50KB
     public static final int TRAY_IMAGE_SIZE = 96; //96pxs
     public static final int STICKER_IMAGE_SIZE = 512; //512pxs
+    public static final String TESTE_IMAGE = "testImage.jpg";
 
     private final Context context;
 

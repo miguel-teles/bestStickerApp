@@ -178,7 +178,7 @@ public class StickerPackDetailsActivity extends AddStickerPackToWhatsappActivity
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         try {
-                            stickerPackService.deleteStickerPack(stickerPack, getApplicationContext());
+                            stickerPackService.deleteStickerPack(stickerPack);
                             Intent intent = new Intent(context, StickerPackListActivity.class);
                             startActivity(intent);
                         } catch (StickerException ex) {

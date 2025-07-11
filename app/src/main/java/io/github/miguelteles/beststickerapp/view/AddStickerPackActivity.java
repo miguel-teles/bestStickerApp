@@ -176,13 +176,11 @@ public class AddStickerPackActivity extends AppCompatActivity {
                     if (stickerPackBeingEdited == null) {
                         stickerPackBeingEdited = stickerPackService.createStickerPack(nmAutorInput,
                                 nomePacoteInput,
-                                uriImagemStickerPack,
-                                getApplicationContext());
+                                uriImagemStickerPack);
                     } else {
                         stickerPackBeingEdited = stickerPackService.updateStickerPack(stickerPackBeingEdited,
                                 nmAutorInput,
-                                nomePacoteInput,
-                                getApplicationContext());
+                                nomePacoteInput);
                     }
 
                     redirecionaStickerPackDetailsActivity(stickerPackBeingEdited);
