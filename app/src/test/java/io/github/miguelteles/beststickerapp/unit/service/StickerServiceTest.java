@@ -2,6 +2,7 @@ package io.github.miguelteles.beststickerapp.unit.service;
 
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -10,6 +11,7 @@ import android.content.ContentValues;
 import android.net.Uri;
 import android.os.Bundle;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -36,21 +38,15 @@ import io.github.miguelteles.beststickerapp.services.interfaces.StickerService;
 import io.github.miguelteles.beststickerapp.utils.Utils;
 import io.github.miguelteles.beststickerapp.validator.StickerPackValidator;
 
-@RunWith(MockitoJUnitRunner.class)
 public class StickerServiceTest {
 
-    @Mock
-    StickerRepository stickerRepository;
-    @Mock
-    FoldersManagementService foldersManagementService;
-    @Mock
-    StickerUriProvider stickerUriProvider;
-    @Mock
-    ContentResolver contentResolver;
-    @Mock
-    StickerPackValidator stickerPackValidator;
-
-    StickerService stickerService;
+    StickerRepository stickerRepository = mock(StickerRepository.class);
+    FoldersManagementService foldersManagementService = mock(FoldersManagementService.class);
+    StickerUriProvider stickerUriProvider = mock(StickerUriProvider.class);
+    ContentResolver contentResolver = mock(ContentResolver.class);
+    StickerPackValidator stickerPackValidator = mock(StickerPackValidator.class);
+    StickerService stickerService = mock(StickerService.class);
+    Uri uri = mock(Uri.class);
 
     StickerPack validStickerPack = new StickerPack(1,
             "teste",
@@ -68,10 +64,10 @@ public class StickerServiceTest {
 
     Sticker validSticker = new Sticker(1, 1, "/home/miguel/StudioProjects/stickersProjeto/app/src/main/assets/testImage.jpeg");
 
-    @Mock
-    Uri uri;
 
-    private void mockingDepedencies() throws StickerException {
+
+    @Before
+    public void mockingDepedencies() throws StickerException {
         when(stickerRepository.save(any(Sticker.class))).then(new Answer<Sticker>() {
             @Override
             public Sticker answer(InvocationOnMock invocation) {
@@ -144,7 +140,6 @@ public class StickerServiceTest {
 
     @Test
     public void testeCreateSticker() throws StickerException {
-        mockingDepedencies();
         Sticker sticker = stickerService.createSticker(validStickerPack, uri);
 
         assertFalse("StickerImageFile is not null", Utils.isNothing(sticker.getStickerImageFile()));
@@ -154,35 +149,44 @@ public class StickerServiceTest {
 
     @Test
     public void testeCreateStickerInputInvalido() throws StickerException {
-        mockingDepedencies();
-
         assertThrows("IllegalArgumentException thrown when stickerPack is null", IllegalArgumentException.class, () -> stickerService.createSticker(null, uri));
         assertThrows("IllegalArgumentException thrown when selectedUriImage is null", IllegalArgumentException.class, () -> stickerService.createSticker(validStickerPack, null));
     }
 
     @Test
     public void testeDeleteSticker() throws StickerException {
-        mockingDepedencies();
-
         stickerService.deleteSticker(validSticker, validStickerPack);
     }
 
     @Test
     public void testeDeleteStickerInputInvalido() throws StickerException {
-        mockingDepedencies();
-
         assertThrows("IllegalArgumentException thrown when sticker is null", IllegalArgumentException.class, () -> stickerService.deleteSticker(null, validStickerPack));
         assertThrows("IllegalArgumentException thrown when stickerPack is null", IllegalArgumentException.class, () -> stickerService.deleteSticker(validSticker, null));
     }
 
     @Test
     public void testeFetchAllStickerFromPackWithAssets() throws StickerException {
-        mockingDepedencies();
-        
         List<Sticker> stickers = stickerService.fetchAllStickerFromPackWithAssets(validStickerPack.getIdentifier());
         assertNotNull("Sticker list cannot be null, even thought the sticker pack is empty", stickers);
         for(Sticker sticker : stickers) {
+            assertNotNull(sticker.getIdentifier());
+            assertNotNull(sticker.getStickerImageFile());
+            assertTrue(sticker.getSize()!=0);
+            assertNotNull(sticker.getPackIdentifier());
+            assertNotNull(sticker.getStickerImageFileInBytes());
+        }
+    }
 
+    @Test
+    public void testeFetchAllStickerFromPackWithoutAssets() throws StickerException {
+        List<Sticker> stickers = stickerService.fetchAllStickerFromPackWithoutAssets(validStickerPack.getIdentifier());
+        assertNotNull("Sticker list cannot be null, even thought the sticker pack is empty", stickers);
+        for (Sticker sticker : stickers) {
+            assertNotNull(sticker.getIdentifier());
+            assertNotNull(sticker.getStickerImageFile());
+            assertTrue(sticker.getSize() == 0);
+            assertNotNull(sticker.getPackIdentifier());
+            assertNull(sticker.getStickerImageFileInBytes());
         }
     }
 
