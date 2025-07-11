@@ -43,7 +43,7 @@ public class EntryActivity extends BaseActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_entry);
+        setContentView(R.layout.loading_entry);
         overridePendingTransition(0, 0);
         if (getSupportActionBar() != null) {
             getSupportActionBar().hide();
@@ -58,7 +58,7 @@ public class EntryActivity extends BaseActivity {
             StickerExceptionHandler.handleException(ex, this);
         }
 
-        progressBar = findViewById(R.id.entry_activity_progress);
+        progressBar = findViewById(R.id.activity_progress_bar);
         loadListAsyncTask = new LoadListAsyncTask(this);
         loadListAsyncTask.execute();
     }

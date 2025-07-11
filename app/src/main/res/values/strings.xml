@@ -66,11 +66,13 @@
     <string name="NOT_TODAY" translatable="false">Hoje não...</string>
     <string name="SELECT_A_PICTURE_FOR_PACK" translatable="false">Imagem do pacote (se vazio, será um macaco)</string>
     <string name="SELECT_A_PICTURE_FOR_STICKER" translatable="false">Selecione uma imagem</string>
-    <string name="ADD_STICKER" translatable="false">Adicionar figurinha</string>
+    <string name="ADD_STICKER" translatable="false">ADICIONAR FIGURINHAS</string>
     <string name="ADD_PACK" translatable="false">CRIAR PACOTE</string>
+    <string name="SAVE_PACK" translatable="false">SALVAR PACOTE</string>
     <string name="title_activity_exception">ExceptionActivity</string>
     <string name="FETCH_STICKER">Erro ao buscar figurinhas</string>
     <string name="FETCH_STICKER_PACK">Erro ao buscar pacote de figurinhas</string>
     <string name="sticker_pack_image">Imagem do pacote</string>
     <string name="INVALID_STICKER_PACK">Invalid sticker pack</string>
+    <string name="title_activity_loading">LoadingActivity</string>
 </resources>

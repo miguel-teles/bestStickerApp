@@ -1,9 +1,10 @@
 package io.github.miguelteles.beststickerapp.services;
 
 import android.content.ContentResolver;
-import android.content.Context;
 import android.content.res.Resources;
 import android.net.Uri;
+import android.os.Handler;
+import android.os.Looper;
 
 import androidx.annotation.NonNull;
 
@@ -13,6 +14,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 import io.github.miguelteles.beststickerapp.R;
 import io.github.miguelteles.beststickerapp.domain.entity.StickerPack;
@@ -28,6 +31,9 @@ import io.github.miguelteles.beststickerapp.services.interfaces.StickerPackServi
 import io.github.miguelteles.beststickerapp.services.interfaces.StickerService;
 import io.github.miguelteles.beststickerapp.utils.Utils;
 import io.github.miguelteles.beststickerapp.validator.StickerPackValidator;
+import io.github.miguelteles.beststickerapp.view.interfaces.UiThreadPoster;
+import io.github.miguelteles.beststickerapp.view.threadHandlers.AndroidUiThreadPoster;
+import io.github.miguelteles.beststickerapp.view.threadHandlers.ImmediateUiThreadPoster;
 
 public class StickerPackServiceImpl implements StickerPackService {
 
@@ -39,16 +45,20 @@ public class StickerPackServiceImpl implements StickerPackService {
     private final StickerService stickerService;
     private final StickerPackValidator stickerPackValidator;
     private final Resources resources;
+    private final Executor executor;
+    private final UiThreadPoster threadResultPoster;
 
 
     private StickerPackServiceImpl() throws StickerException {
         this.stickerPackRepository = new StickerPackRepository(MyDatabase.getInstance().getSqLiteDatabase());
-        foldersManagementService = FoldersManagementServiceImpl.getInstance();
-        stickerUriProvider = StickerUriProvider.getInstance();
-        contentResolver = Utils.getApplicationContext().getContentResolver();
-        stickerPackValidator = StickerPackValidator.getInstance();
-        stickerService = StickerServiceImpl.getInstance();
-        resources = Utils.getApplicationContext().getResources();
+        this.foldersManagementService = FoldersManagementServiceImpl.getInstance();
+        this.stickerUriProvider = StickerUriProvider.getInstance();
+        this.contentResolver = Utils.getApplicationContext().getContentResolver();
+        this.stickerPackValidator = StickerPackValidator.getInstance();
+        this.stickerService = StickerServiceImpl.getInstance();
+        this.resources = Utils.getApplicationContext().getResources();
+        this.executor = Executors.newSingleThreadExecutor();
+        this.threadResultPoster = new AndroidUiThreadPoster();
     }
 
     public StickerPackServiceImpl(FoldersManagementService foldersManagementService,
@@ -57,7 +67,8 @@ public class StickerPackServiceImpl implements StickerPackService {
                                   ContentResolver contentResolver,
                                   StickerService stickerService,
                                   StickerPackValidator stickerPackValidator,
-                                  Resources resources) {
+                                  Resources resources,
+                                  Executor executor) {
         this.foldersManagementService = foldersManagementService;
         this.stickerUriProvider = stickerUriProvider;
         this.stickerPackRepository = stickerPackRepository;
@@ -65,6 +76,8 @@ public class StickerPackServiceImpl implements StickerPackService {
         this.stickerService = stickerService;
         this.stickerPackValidator = stickerPackValidator;
         this.resources = resources;
+        this.executor = executor;
+        this.threadResultPoster = new ImmediateUiThreadPoster();
     }
 
     public static StickerPackService getInstance() throws StickerException {
@@ -75,47 +88,68 @@ public class StickerPackServiceImpl implements StickerPackService {
     }
 
     @Override
-    public StickerPack createStickerPack(String authorName,
-                                         String packName,
-                                         Uri selectedImagemUri) throws StickerException {
-        validateParametersCreateStickerPack(packName, selectedImagemUri);
-        if (Utils.isNothing(authorName)) {
-            authorName = resources.getString(R.string.defaultPublisher);
+    public void createStickerPack(String authorNameInput,
+                                  String packNameInput,
+                                  Uri selectedImagemUri,
+                                  StickerPackCreationCallback callback) {
+        validateParametersCreateStickerPack(packNameInput, selectedImagemUri, callback);
+        if (Utils.isNothing(authorNameInput)) {
+            authorNameInput = resources.getString(R.string.defaultPublisher);
         }
-        File stickerPackFolder = null;
-        try {
-            String stickerPackFolderName = packName + Utils.formatData(new Date(), "yyyy.MM.dd.HH.mm.ss");
-            stickerPackFolder = foldersManagementService.getStickerPackFolderByFolderName(stickerPackFolderName);
-            FoldersManagementServiceImpl.Image copiedImages = foldersManagementService.generateStickerImages(stickerPackFolder,
-                    selectedImagemUri,
-                    generateStickerPackImageName(),
-                    FoldersManagementServiceImpl.TRAY_IMAGE_SIZE,
-                    true);
-            StickerPack stickerPack = new StickerPack(null,
-                    packName,
-                    authorName,
-                    copiedImages.getOriginalImageFile().getName(),
-                    copiedImages.getResizedImageFile().getName(),
-                    stickerPackFolderName,
-                    "1",
-                    false,
-                    copiedImages.getResidezImageFileInBytes());
-            stickerPackValidator.verifyCreatedStickerPackValidity(stickerPack);
-            stickerPackRepository.save(stickerPack);
-            addStickerPackToContentProvider(stickerPack);
-            return stickerPack;
-        } catch (StickerException ex) {
-            deletePackFolderOnException(stickerPackFolder);
-            throw ex;
-        }
+        final String authorName = authorNameInput;
+
+        executor.execute(() -> {
+            StickerPack stickerPack = null;
+            StickerException exception = null;
+
+            File stickerPackFolder = null;
+            try {
+                callback.onProgressUpdate(10);
+                String stickerPackFolderName = packNameInput + Utils.formatData(new Date(), "yyyy.MM.dd.HH.mm.ss");
+                stickerPackFolder = foldersManagementService.getStickerPackFolderByFolderName(stickerPackFolderName);
+                FoldersManagementServiceImpl.Image copiedImages = foldersManagementService.generateStickerImages(stickerPackFolder,
+                        selectedImagemUri,
+                        generateStickerPackImageName(),
+                        FoldersManagementServiceImpl.TRAY_IMAGE_SIZE,
+                        true);
+                callback.onProgressUpdate(50);
+                stickerPack = new StickerPack(null,
+                        packNameInput,
+                        authorName,
+                        copiedImages.getOriginalImageFile().getName(),
+                        copiedImages.getResizedImageFile().getName(),
+                        stickerPackFolderName,
+                        "1",
+                        false,
+                        copiedImages.getResidezImageFileInBytes());
+                stickerPackValidator.verifyCreatedStickerPackValidity(stickerPack);
+                stickerPackRepository.save(stickerPack);
+                callback.onProgressUpdate(70);
+                addStickerPackToContentProvider(stickerPack);
+            } catch (StickerException ex) {
+                deletePackFolderOnException(stickerPackFolder);
+                exception = ex;
+            }
+            callback.onProgressUpdate(90);
+
+            StickerException finalException = exception;
+            StickerPack finalStickerPack = stickerPack;
+            threadResultPoster.post(() -> {
+                callback.onCreationFinish(finalStickerPack, finalException);
+            });
+        });
+
     }
 
-    private void validateParametersCreateStickerPack(String packName, Uri packImageUri) {
+    private void validateParametersCreateStickerPack(String packName, Uri packImageUri, StickerPackCreationCallback callback) {
         if (Utils.isNothing(packName)) {
             throw new IllegalArgumentException("Pack name cannot be null or empty");
         }
         if (packImageUri == null) {
             throw new IllegalArgumentException("Pack requires a image");
+        }
+        if (callback == null) {
+            throw new IllegalArgumentException("Callback cannot be null");
         }
     }
 
@@ -140,20 +174,37 @@ public class StickerPackServiceImpl implements StickerPackService {
     }
 
     @Override
-    public StickerPack updateStickerPack(StickerPack stickerPack,
-                                         String editedAuthorName,
-                                         String editedPackName) throws StickerException {
-        validateParametersUpdateStickerPack(stickerPack, editedPackName);
-
-        stickerPack.setName(editedPackName);
+    public void updateStickerPack(StickerPack stickerPack,
+                                  String editedAuthorName,
+                                  String editedPackName,
+                                  StickerPackCreationCallback callback) {
         if (Utils.isNothing(editedAuthorName)) {
             editedAuthorName = resources.getString(R.string.defaultPublisher);
         }
-        stickerPack.setPublisher(editedAuthorName);
+        final String _editedAuthorName = editedAuthorName;
+        executor.execute(() -> {
+            StickerException exception = null;
+            StickerPack updatedStickerPack = null;
+            try {
+                callback.onProgressUpdate(20);
+                validateParametersUpdateStickerPack(stickerPack, editedPackName);
 
-        StickerPack updatedStickerPack = stickerPackRepository.update(stickerPack);
-        contentResolver.update(stickerUriProvider.getStickerPackUpdateUri(), stickerPack.toContentValues(), null, null);
-        return updatedStickerPack;
+                stickerPack.setName(editedPackName);
+                stickerPack.setPublisher(_editedAuthorName);
+
+                updatedStickerPack = stickerPackRepository.update(stickerPack);
+                callback.onProgressUpdate(70);
+                contentResolver.update(stickerUriProvider.getStickerPackUpdateUri(), stickerPack.toContentValues(), null, null);
+                callback.onProgressUpdate(90);
+            } catch (StickerException ex) {
+                exception = ex;
+            }
+            StickerException finalException = exception;
+            StickerPack finalUpdatedStickerPack = updatedStickerPack;
+            threadResultPoster.post(() -> {
+                callback.onCreationFinish(finalUpdatedStickerPack, finalException);
+            });
+        });
     }
 
     private void validateParametersUpdateStickerPack(StickerPack stickerPack,

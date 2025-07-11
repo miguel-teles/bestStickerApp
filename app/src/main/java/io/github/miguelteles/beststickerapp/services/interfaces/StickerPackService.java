@@ -1,6 +1,5 @@
 package io.github.miguelteles.beststickerapp.services.interfaces;
 
-import android.content.Context;
 import android.net.Uri;
 
 import androidx.annotation.NonNull;
@@ -13,13 +12,15 @@ import io.github.miguelteles.beststickerapp.exception.StickerFolderException;
 
 public interface StickerPackService {
 
-    StickerPack createStickerPack(String authorName,
-                                  String packName,
-                                  Uri selectedImagemUri) throws StickerException;
+    void createStickerPack(String authorNameInput,
+                           String packNameInput,
+                           Uri selectedImagemUri,
+                           StickerPackCreationCallback callback) throws StickerException;
 
-    StickerPack updateStickerPack(StickerPack stickerPack,
-                                  String editedAuthorName,
-                                  String editedPackName) throws StickerException;
+    void updateStickerPack(StickerPack stickerPack,
+                           String editedAuthorName,
+                           String editedPackName,
+                           StickerPackCreationCallback stickerPackCreationCallback) throws StickerException;
 
     void deleteStickerPack(StickerPack stickerPack) throws StickerException;
 
@@ -29,4 +30,9 @@ public interface StickerPackService {
     List<StickerPack> fetchAllStickerPacksWithoutAssets() throws StickerException;
 
     byte[] fetchStickerPackAsset(@NonNull Integer packIdentifier, @NonNull String stickerPackImageFileName) throws StickerFolderException;
+
+    interface StickerPackCreationCallback {
+        void onCreationFinish(StickerPack createdStickerPack, StickerException stickerException);
+        void onProgressUpdate(int process);
+    }
 }

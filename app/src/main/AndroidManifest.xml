@@ -25,9 +25,9 @@
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
         <activity
-            android:name=".view.ExceptionActivity"
+            android:name=".view.LoadingActivity"
             android:exported="false"
-            android:label="@string/title_activity_exception"
+            android:label="@string/title_activity_loading"
             android:theme="@style/AppTheme" />
         <activity
             android:name=".view.EntryActivity"

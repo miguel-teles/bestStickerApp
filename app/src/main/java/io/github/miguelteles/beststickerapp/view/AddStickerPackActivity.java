@@ -8,6 +8,7 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -33,6 +34,7 @@ public class AddStickerPackActivity extends AppCompatActivity {
     private ImageView stickerPackImageView;
     private Uri uriImagemStickerPack;
     private StickerPackService stickerPackService;
+    private ProgressBar creationProgressBar;
 
     @Override
     protected void onCreate(Bundle bundle) {
@@ -47,6 +49,7 @@ public class AddStickerPackActivity extends AppCompatActivity {
         } catch (StickerException ex) {
             StickerExceptionHandler.handleException(ex, this);
         }
+        verifyMandatoryFields();
     }
 
     @Override
@@ -56,6 +59,7 @@ public class AddStickerPackActivity extends AppCompatActivity {
 
     private void populateFieldsWithStickerPackBeingEdited() {
         Intent intent = getIntent();
+        this.btnAdicionarStickerPack.setText(R.string.ADD_PACK);
         if (isStickerPackEdit(intent)) {
             this.stickerPackBeingEdited = (StickerPack) intent.getExtras().get(Extras.STICKER_PACK);
             txtNomePacote.setText(stickerPackBeingEdited.getName());
@@ -64,6 +68,7 @@ public class AddStickerPackActivity extends AppCompatActivity {
             stickerPackImageView.setImageURI(uriImagemStickerPack);
             stickerPackImageView.setScaleType(ImageView.ScaleType.FIT_XY);
             stickerPackImageView.setTag("modified");
+            this.btnAdicionarStickerPack.setText(R.string.SAVE_PACK);
         }
     }
 
@@ -77,6 +82,7 @@ public class AddStickerPackActivity extends AppCompatActivity {
         txtNomePacote = findViewById(R.id.txtInpEdtNomePacote);
         txtAutor = findViewById(R.id.txtInpEdtAutor);
         stickerPackImageView = findViewById(R.id.pacoteImageView);
+        creationProgressBar = findViewById(R.id.pg_sticker_pack_creation);
     }
 
     private void setaOnClickListeners() throws StickerException {
@@ -106,7 +112,7 @@ public class AddStickerPackActivity extends AppCompatActivity {
 
             @Override
             public void afterTextChanged(Editable s) {
-                verificaCamposObrigatorios();
+                verifyMandatoryFields();
             }
         };
     }
@@ -115,12 +121,12 @@ public class AddStickerPackActivity extends AppCompatActivity {
         return new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View view, boolean b) {
-                verificaCamposObrigatorios();
+                verifyMandatoryFields();
             }
         };
     }
 
-    private void verificaCamposObrigatorios() {
+    private void verifyMandatoryFields() {
         if (!Utils.isNothing(txtNomePacote.getText()) && stickerPackImageView.getTag() != null && stickerPackImageView.getTag().equals("modified")) {
             btnAdicionarStickerPack.setEnabled(true);
             btnAdicionarStickerPack.setBackground(getResources().getDrawable(R.drawable.shape_btn_default));
@@ -151,7 +157,7 @@ public class AddStickerPackActivity extends AppCompatActivity {
             uriImagemStickerPack = imageUri;
             stickerPackImageView.setTag("modified");
             stickerPackImageView.setScaleType(ImageView.ScaleType.FIT_XY);
-            verificaCamposObrigatorios();
+            verifyMandatoryFields();
         }
     }
 
@@ -169,24 +175,48 @@ public class AddStickerPackActivity extends AppCompatActivity {
 
             @Override
             public void onClick(View view) {
+
                 String nmAutorInput = txtAutor.getText().toString();
                 String nomePacoteInput = txtNomePacote.getText().toString();
 
+                creationProgressBar.setVisibility(View.VISIBLE);
                 try {
                     if (stickerPackBeingEdited == null) {
-                        stickerPackBeingEdited = stickerPackService.createStickerPack(nmAutorInput,
+                        stickerPackService.createStickerPack(nmAutorInput,
                                 nomePacoteInput,
-                                uriImagemStickerPack);
+                                uriImagemStickerPack,
+                                generateStickerPackCreationCallback());
                     } else {
-                        stickerPackBeingEdited = stickerPackService.updateStickerPack(stickerPackBeingEdited,
+                        stickerPackService.updateStickerPack(stickerPackBeingEdited,
                                 nmAutorInput,
-                                nomePacoteInput);
+                                nomePacoteInput,
+                                generateStickerPackCreationCallback());
                     }
-
-                    redirecionaStickerPackDetailsActivity(stickerPackBeingEdited);
                 } catch (StickerException ex) {
                     StickerExceptionHandler.handleException(ex, context);
                 }
+            }
+        };
+    }
+
+    private StickerPackService.StickerPackCreationCallback generateStickerPackCreationCallback() {
+        Context context = this;
+        return new StickerPackService.StickerPackCreationCallback() {
+            @Override
+            public void onCreationFinish(StickerPack createdStickerPack, StickerException stickerException) {
+                stickerPackBeingEdited = createdStickerPack;
+                if (stickerException != null) {
+                    creationProgressBar.setVisibility(View.GONE);
+                    StickerExceptionHandler.handleException(stickerException, context);
+                } else {
+                    onProgressUpdate(100);
+                    redirecionaStickerPackDetailsActivity(stickerPackBeingEdited);
+                }
+            }
+
+            @Override
+            public void onProgressUpdate(int process) {
+                creationProgressBar.setProgress(process);
             }
         };
     }

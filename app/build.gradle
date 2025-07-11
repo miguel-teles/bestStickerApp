@@ -47,6 +47,13 @@ android {
     testOptions {
         unitTests.returnDefaultValues = true
     }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
+    }
+    kotlinOptions {
+        jvmTarget = '11'
+    }
 }
 
 tasks.register('checkDebug') {
@@ -104,6 +111,7 @@ dependencies {
     implementation 'androidx.compose.ui:ui-graphics'
     implementation 'androidx.compose.ui:ui-tooling-preview'
     implementation 'androidx.compose.material3:material3'
+    implementation 'androidx.activity:activity:1.10.1'
     androidTestImplementation 'androidx.test:runner:1.6.2'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.6.1'
     implementation 'androidx.recyclerview:recyclerview:1.4.0'

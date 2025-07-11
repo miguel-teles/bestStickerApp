@@ -7,13 +7,13 @@ import android.net.Uri;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
 import io.github.miguelteles.beststickerapp.domain.entity.StickerPack;
 import io.github.miguelteles.beststickerapp.exception.StickerException;
-import io.github.miguelteles.beststickerapp.exception.StickerFolderException;
 import io.github.miguelteles.beststickerapp.repository.StickerPackRepository;
 import io.github.miguelteles.beststickerapp.repository.contentProvider.StickerUriProvider;
 import io.github.miguelteles.beststickerapp.services.StickerPackServiceImpl;
@@ -27,6 +27,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 import java.io.File;
+import java.util.concurrent.Executor;
 
 public class StickerPackServiceTest {
 
@@ -40,13 +41,30 @@ public class StickerPackServiceTest {
     Resources resources = mock(Resources.class);
     Uri uri = mock(Uri.class);
 
+    Executor executor = Runnable::run;
+
+    StickerPackService.StickerPackCreationCallback callback = new StickerPackService.StickerPackCreationCallback() {
+        @Override
+        public void onCreationFinish(StickerPack createdStickerPack, StickerException stickerException) {
+            generatedStickerPack = createdStickerPack;
+        }
+
+        @Override
+        public void onProgressUpdate(int process) {
+            //do nothing...
+        }
+    };
+
+    StickerPack generatedStickerPack = null;
+
     StickerPackService stickerPackService = new StickerPackServiceImpl(foldersManagementService,
             stickerUriProvider,
             stickerPackRepository,
             contentResolver,
             stickerService,
             stickerPackValidator,
-            resources);
+            resources,
+            executor);
 
     StickerPack validStickerPack = new StickerPack(1,
             "teste",
@@ -110,25 +128,25 @@ public class StickerPackServiceTest {
 
     @Test
     public void testCreateStickerPack() throws StickerException {
-        StickerPack stickerPack = stickerPackService.createStickerPack("teste", "teste", uri);
-        assertNotNull(stickerPack.getName());
-        assertNotNull(stickerPack.getIdentifier());
-        assertNotNull(stickerPack.getFolderName());
-        assertNotNull(stickerPack.getOriginalTrayImageFile());
-        assertNotNull(stickerPack.getResizedTrayImageFile());
-        assertNotNull(stickerPack.getResizedTrayImageFileInBytes());
-        assertNotNull(stickerPack.getImageDataVersion());
-        assertNotNull(stickerPack.getPublisher());
+        stickerPackService.createStickerPack("teste", "teste", uri, callback);
+        assertNotNull(generatedStickerPack.getName());
+        assertNotNull(generatedStickerPack.getIdentifier());
+        assertNotNull(generatedStickerPack.getFolderName());
+        assertNotNull(generatedStickerPack.getOriginalTrayImageFile());
+        assertNotNull(generatedStickerPack.getResizedTrayImageFile());
+        assertNotNull(generatedStickerPack.getResizedTrayImageFileInBytes());
+        assertNotNull(generatedStickerPack.getImageDataVersion());
+        assertNotNull(generatedStickerPack.getPublisher());
 
-        stickerPack = stickerPackService.createStickerPack(null, "teste", uri);
-        assertNotNull(stickerPack.getName());
-        assertNotNull(stickerPack.getIdentifier());
-        assertNotNull(stickerPack.getFolderName());
-        assertNotNull(stickerPack.getOriginalTrayImageFile());
-        assertNotNull(stickerPack.getResizedTrayImageFile());
-        assertNotNull(stickerPack.getResizedTrayImageFileInBytes());
-        assertNotNull(stickerPack.getImageDataVersion());
-        assertNotNull(stickerPack.getPublisher());
+        stickerPackService.createStickerPack(null, "teste", uri, callback);
+        assertNotNull(generatedStickerPack.getName());
+        assertNotNull(generatedStickerPack.getIdentifier());
+        assertNotNull(generatedStickerPack.getFolderName());
+        assertNotNull(generatedStickerPack.getOriginalTrayImageFile());
+        assertNotNull(generatedStickerPack.getResizedTrayImageFile());
+        assertNotNull(generatedStickerPack.getResizedTrayImageFileInBytes());
+        assertNotNull(generatedStickerPack.getImageDataVersion());
+        assertNotNull(generatedStickerPack.getPublisher());
     }
 
     @Test
@@ -136,34 +154,34 @@ public class StickerPackServiceTest {
 
         assertThrows("IllegalArgumentException thrown when packName is empty",
                 IllegalArgumentException.class,
-                () -> stickerPackService.createStickerPack("teste", "", uri));
+                () -> stickerPackService.createStickerPack("teste", "", uri, callback));
         assertThrows("IllegalArgumentException thrown when packName is null",
                 IllegalArgumentException.class,
-                () -> stickerPackService.createStickerPack("teste", null, uri));
+                () -> stickerPackService.createStickerPack("teste", null, uri, callback));
         assertThrows("IllegalArgumentException thrown when uri is null",
                 IllegalArgumentException.class,
-                () -> stickerPackService.createStickerPack("teste", "teste", null));
+                () -> stickerPackService.createStickerPack("teste", "teste", null, callback));
     }
 
     @Test
     public void testUpdateStickerPack() throws StickerException {
-        StickerPack stickerPack = stickerPackService.updateStickerPack(validStickerPack, "teste", "teste");
-        assertNotNull(stickerPack.getName());
-        assertNotNull(stickerPack.getIdentifier());
-        assertNotNull(stickerPack.getFolderName());
-        assertNotNull(stickerPack.getOriginalTrayImageFile());
-        assertNotNull(stickerPack.getResizedTrayImageFile());
-        assertNotNull(stickerPack.getImageDataVersion());
-        assertNotNull(stickerPack.getPublisher());
+        stickerPackService.updateStickerPack(validStickerPack, "teste", "teste", callback);
+        assertNotNull(generatedStickerPack.getName());
+        assertNotNull(generatedStickerPack.getIdentifier());
+        assertNotNull(generatedStickerPack.getFolderName());
+        assertNotNull(generatedStickerPack.getOriginalTrayImageFile());
+        assertNotNull(generatedStickerPack.getResizedTrayImageFile());
+        assertNotNull(generatedStickerPack.getImageDataVersion());
+        assertNotNull(generatedStickerPack.getPublisher());
 
-        stickerPack = stickerPackService.updateStickerPack(validStickerPack, null, "teste");
-        assertNotNull(stickerPack.getName());
-        assertNotNull(stickerPack.getIdentifier());
-        assertNotNull(stickerPack.getFolderName());
-        assertNotNull(stickerPack.getOriginalTrayImageFile());
-        assertNotNull(stickerPack.getResizedTrayImageFile());
-        assertNotNull(stickerPack.getImageDataVersion());
-        assertNotNull(stickerPack.getPublisher());
+        stickerPackService.updateStickerPack(validStickerPack, null, "teste", callback);
+        assertNotNull(generatedStickerPack.getName());
+        assertNotNull(generatedStickerPack.getIdentifier());
+        assertNotNull(generatedStickerPack.getFolderName());
+        assertNotNull(generatedStickerPack.getOriginalTrayImageFile());
+        assertNotNull(generatedStickerPack.getResizedTrayImageFile());
+        assertNotNull(generatedStickerPack.getImageDataVersion());
+        assertNotNull(generatedStickerPack.getPublisher());
 
 
     }
@@ -172,10 +190,10 @@ public class StickerPackServiceTest {
     public void testUpdateStickerPackInvalidArguments() {
         assertThrows(IllegalArgumentException.class, () -> stickerPackService.updateStickerPack(null,
                 "teste",
-                "teste"));
+                "teste", callback));
         assertThrows(IllegalArgumentException.class, () -> stickerPackService.updateStickerPack(validStickerPack,
                 "teste",
-                null));
+                null, callback));
     }
 
 }

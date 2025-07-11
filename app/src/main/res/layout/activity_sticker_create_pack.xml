@@ -78,6 +78,17 @@
             android:singleLine="true" />
     </com.google.android.material.textfield.TextInputLayout>
 
+    <ProgressBar
+        android:id="@+id/pg_sticker_pack_creation"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toTopOf="@+id/adicionarStickerPack"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:visibility="invisible"
+        android:max="100"
+        app:layout_constraintStart_toStartOf="parent" />
+
     <TextView
         android:id="@+id/adicionarStickerPack"
         android:layout_width="match_parent"
