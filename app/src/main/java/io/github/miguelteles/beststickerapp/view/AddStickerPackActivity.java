@@ -43,7 +43,7 @@ public class AddStickerPackActivity extends AppCompatActivity {
         populateFieldsWithStickerPackBeingEdited();
         try {
             setaOnClickListeners();
-            stickerPackService = StickerPackServiceImpl.getInstace(getApplicationContext());
+            stickerPackService = StickerPackServiceImpl.getInstance();
         } catch (StickerException ex) {
             StickerExceptionHandler.handleException(ex, this);
         }
@@ -60,7 +60,7 @@ public class AddStickerPackActivity extends AppCompatActivity {
             this.stickerPackBeingEdited = (StickerPack) intent.getExtras().get(Extras.STICKER_PACK);
             txtNomePacote.setText(stickerPackBeingEdited.getName());
             txtAutor.setText(stickerPackBeingEdited.getPublisher());
-            uriImagemStickerPack = StickerUriProvider.getStickerOriginalAssetUri(stickerPackBeingEdited.getIdentifier().toString(), stickerPackBeingEdited.getOriginalTrayImageFile());
+            uriImagemStickerPack = StickerUriProvider.getInstance().getStickerPackOriginalAssetUri(stickerPackBeingEdited.getIdentifier().toString(), stickerPackBeingEdited.getOriginalTrayImageFile());
             stickerPackImageView.setImageURI(uriImagemStickerPack);
             stickerPackImageView.setScaleType(ImageView.ScaleType.FIT_XY);
             stickerPackImageView.setTag("modified");

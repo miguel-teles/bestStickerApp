@@ -9,39 +9,49 @@ import io.github.miguelteles.beststickerapp.BuildConfig;
 
 public class StickerUriProvider {
 
-    public static Uri getStickerListUri(String identifier) {
+    private static StickerUriProvider instance;
+    private StickerUriProvider(){}
+
+    public static StickerUriProvider getInstance() {
+        if (instance == null) {
+            instance = new StickerUriProvider();
+        }
+        return instance;
+    }
+
+    public Uri getStickerListUri(String identifier) {
         return new Uri.Builder().scheme(ContentResolver.SCHEME_CONTENT).authority(BuildConfig.CONTENT_PROVIDER_AUTHORITY).appendPath(STICKERS).appendPath(identifier).build();
     }
 
-    public static Uri getStickerAssetUri(String identifier, String imageName) {
+    public Uri getStickerAssetUri(Integer identifier, String imageName) {
+        return new Uri.Builder().scheme(ContentResolver.SCHEME_CONTENT).authority(BuildConfig.CONTENT_PROVIDER_AUTHORITY).appendPath(StickerContentProvider.STICKERS_ASSET).appendPath(identifier.toString()).appendPath(imageName).build();
+    }
+
+    public Uri getStickerPackResizedAssetUri(String identifier, String imageName) {
         return new Uri.Builder().scheme(ContentResolver.SCHEME_CONTENT).authority(BuildConfig.CONTENT_PROVIDER_AUTHORITY).appendPath(StickerContentProvider.STICKERS_ASSET).appendPath(identifier).appendPath(imageName).build();
     }
 
-    public static Uri getStickerResizedAssetUri(String identifier, String imageName) {
-        return new Uri.Builder().scheme(ContentResolver.SCHEME_CONTENT).authority(BuildConfig.CONTENT_PROVIDER_AUTHORITY).appendPath(StickerContentProvider.STICKERS_ASSET).appendPath(identifier).appendPath(imageName).build();
-    }
-
-    public static Uri getStickerOriginalAssetUri(String identifier, String imageName) {
+    public Uri getStickerPackOriginalAssetUri(String identifier, String imageName) {
         return new Uri.Builder().scheme(ContentResolver.SCHEME_CONTENT).authority(BuildConfig.CONTENT_PROVIDER_AUTHORITY).appendPath(StickerContentProvider.STICKERS_ASSET_ORIGINAL).appendPath(identifier).appendPath(imageName).build();
     }
 
-    public static Uri getStickerPackInsertUri() {
+    public Uri getStickerPackInsertUri() {
         return new Uri.Builder().scheme(ContentResolver.SCHEME_CONTENT).authority(BuildConfig.CONTENT_PROVIDER_AUTHORITY).appendPath(StickerContentProvider.METHODS_ADD).appendPath(StickerContentProvider.PACK).build();
     }
 
-    public static Uri getStickerPackUpdateUri() {
+    public Uri getStickerPackUpdateUri() {
         return new Uri.Builder().scheme(ContentResolver.SCHEME_CONTENT).authority(BuildConfig.CONTENT_PROVIDER_AUTHORITY).appendPath(StickerContentProvider.METHODS_UPDATE).appendPath(StickerContentProvider.PACK).build();
     }
 
-    public static Uri getStickerPackDeleteUri() {
+    public Uri getStickerPackDeleteUri() {
         return new Uri.Builder().scheme(ContentResolver.SCHEME_CONTENT).authority(BuildConfig.CONTENT_PROVIDER_AUTHORITY).appendPath(StickerContentProvider.METHODS_DELETE).appendPath(StickerContentProvider.PACK).build();
     }
 
-    public static Uri getStickerDeleteUri() {
+    public Uri getStickerDeleteUri() {
         return new Uri.Builder().scheme(ContentResolver.SCHEME_CONTENT).authority(BuildConfig.CONTENT_PROVIDER_AUTHORITY).appendPath(StickerContentProvider.METHODS_DELETE).appendPath(StickerContentProvider.STICKERS).build();
     }
 
-    public static Uri getStickerInsertUri() {
+    public Uri getStickerInsertUri() {
         return new Uri.Builder().scheme(ContentResolver.SCHEME_CONTENT).authority(BuildConfig.CONTENT_PROVIDER_AUTHORITY).appendPath(StickerContentProvider.METHODS_ADD).appendPath(STICKERS).build();
     }
 

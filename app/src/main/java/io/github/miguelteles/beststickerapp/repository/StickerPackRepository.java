@@ -9,13 +9,15 @@ import io.github.miguelteles.beststickerapp.exception.StickerDataBaseException;
 import io.github.miguelteles.beststickerapp.exception.StickerException;
 import io.github.miguelteles.beststickerapp.exception.enums.StickerDataBaseExceptionEnum;
 import io.github.miguelteles.beststickerapp.domain.entity.StickerPack;
-import io.github.miguelteles.beststickerapp.repository.contentProvider.StickerContentProviderReader;
 import io.github.miguelteles.beststickerapp.repository.contentProvider.StickerUriProvider;
+import io.github.miguelteles.beststickerapp.repository.interfaces.Repository;
+import io.github.miguelteles.beststickerapp.services.StickerServiceImpl;
+import io.github.miguelteles.beststickerapp.services.interfaces.StickerService;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class StickerPackRepository extends Repository<StickerPack> {
+public class StickerPackRepository extends CommonRepository implements Repository<StickerPack> {
 
     private String PERSIST = "INSERT INTO packs VALUES (null, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
     private String UPDATE = "UPDATE packs SET name=?, publisher=?, imageDataVersion=imageDataVersion+1 WHERE identifier=?";
@@ -30,7 +32,7 @@ public class StickerPackRepository extends Repository<StickerPack> {
     }
 
     @Override
-    public StickerPack save(StickerPack stickerPack, Context context) throws StickerException {
+    public StickerPack save(StickerPack stickerPack) throws StickerException {
         try {
             SQLiteStatement stmt = sqLiteDatabase.compileStatement(PERSIST);
 
@@ -54,7 +56,6 @@ public class StickerPackRepository extends Repository<StickerPack> {
                 stickerPack.setIdentifier(cursor.getInt(0));
                 cursor.close();
 
-                context.getContentResolver().insert(StickerUriProvider.getStickerPackInsertUri(), stickerPack.toContentValues());
                 return stickerPack;
             } else {
                 throw new StickerDataBaseException(null, StickerDataBaseExceptionEnum.INSERT, "Erro ao inserir dado, retorno -1");
@@ -68,7 +69,7 @@ public class StickerPackRepository extends Repository<StickerPack> {
     }
 
     @Override
-    public StickerPack update(StickerPack stickerPack, Context context) throws StickerException {
+    public StickerPack update(StickerPack stickerPack) throws StickerException {
         try {
             SQLiteStatement stmt = sqLiteDatabase.compileStatement(UPDATE);
 
@@ -91,14 +92,14 @@ public class StickerPackRepository extends Repository<StickerPack> {
     }
 
     @Override
-    public Integer remove(StickerPack stickerPack, Context context) throws StickerException {
-        return remove(stickerPack.getIdentifier(), context);
+    public Integer remove(StickerPack stickerPack) throws StickerException {
+        return remove(stickerPack.getIdentifier());
     }
 
     @Override
-    public Integer remove(Integer identifier, Context context) throws StickerException {
+    public Integer remove(Integer identifier) throws StickerException {
         try {
-            stickerRepository.removeByPackIdentifier(identifier, context);
+            stickerRepository.removeByPackIdentifier(identifier);
 
             SQLiteStatement stmt = sqLiteDatabase.compileStatement(DELETE_BY_ID);
             stmt.bindLong(1, identifier);
@@ -131,9 +132,7 @@ public class StickerPackRepository extends Repository<StickerPack> {
                     cursor.getString(10), //privacy_policy_website
                     cursor.getString(11), //license_agreement_website
                     cursor.getInt(12) == 1,//animated
-                    stickerRepository.findByPackIdentifier(cursor.getInt(0)));
-        } catch (StickerException ex) {
-            throw ex;
+                    null);
         } catch (Exception ex) {
             throw new StickerDataBaseException(ex, StickerDataBaseExceptionEnum.SELECT, "Erro ao buscar pack por ID");
         } finally {
@@ -141,6 +140,7 @@ public class StickerPackRepository extends Repository<StickerPack> {
         }
     }
 
+    @Override
     public List<StickerPack> findAll() throws StickerException {
         Cursor cursor = null;
         try {
@@ -162,14 +162,12 @@ public class StickerPackRepository extends Repository<StickerPack> {
                         cursor.getString(10), //privacy_policy_website
                         cursor.getString(11), //license_agreement_website
                         cursor.getInt(12) == 1,//animated
-                        stickerRepository.findByPackIdentifier(cursor.getInt(0)));
+                        null);
 
                 stickerPackList.add(stickerPack);
                 cursor.moveToNext();
             }
             return stickerPackList;
-        } catch (StickerException ex) {
-            throw ex;
         } catch (Exception ex) {
             throw new StickerDataBaseException(ex, StickerDataBaseExceptionEnum.SELECT, "Erro ao buscar todos os stickerPacks. " + ex.getMessage());
         } finally {

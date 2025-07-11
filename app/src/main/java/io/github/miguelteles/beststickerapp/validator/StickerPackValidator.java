@@ -8,6 +8,7 @@
 
 package io.github.miguelteles.beststickerapp.validator;
 
+import android.content.ContentResolver;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -20,6 +21,9 @@ import androidx.annotation.NonNull;
 
 import io.github.miguelteles.beststickerapp.domain.entity.Sticker;
 import io.github.miguelteles.beststickerapp.domain.entity.StickerPack;
+import io.github.miguelteles.beststickerapp.exception.StickerException;
+import io.github.miguelteles.beststickerapp.exception.StickerFolderException;
+import io.github.miguelteles.beststickerapp.services.StickerServiceImpl;
 import io.github.miguelteles.beststickerapp.services.interfaces.StickerService;
 import io.github.miguelteles.beststickerapp.utils.Utils;
 import io.github.miguelteles.beststickerapp.view.EntryActivity;
@@ -36,6 +40,9 @@ import java.util.HashSet;
 import java.util.List;
 
 public class StickerPackValidator {
+
+    private static StickerPackValidator instance;
+
     private static final int STATIC_STICKER_FILE_LIMIT_KB = 100;
     private static final int ANIMATED_STICKER_FILE_LIMIT_KB = 500;
     public static final int EMOJI_MAX_LIMIT = 3;
@@ -54,26 +61,35 @@ public class StickerPackValidator {
     private static final String PLAY_STORE_DOMAIN = "play.google.com";
     private static final String APPLE_STORE_DOMAIN = "itunes.apple.com";
 
-    public static void verifyStickerPacks(@NonNull Context context,
-                                          @NotNull List<StickerPack> stickerPackList) {
+    private StickerPackValidator() {
+    }
+
+    public static StickerPackValidator getInstance() throws StickerException {
+        if (instance == null) {
+            instance = new StickerPackValidator();
+        }
+        return instance;
+    }
+
+    public void verifyStickerPacks(@NonNull Context context,
+                                   @NotNull List<StickerPack> stickerPackList) throws StickerException {
         HashSet<String> identifierSet = new HashSet<>();
         for (StickerPack stickerPack : stickerPackList) {
-            if (identifierSet.contains(stickerPack.getIdentifier())) {
+            if (identifierSet.contains(stickerPack.getIdentifier().toString())) {
                 throw new IllegalStateException("sticker pack identifiers should be unique, there are more than one pack with identifier:" + stickerPack.getIdentifier());
             } else {
                 identifierSet.add(stickerPack.getIdentifier().toString());
             }
         }
         for (StickerPack stickerPack : stickerPackList) {
-            StickerPackValidator.verifyStickerPackValidity(context, stickerPack);
+            this.verifyStickerPackValidity(stickerPack);
         }
     }
 
     /**
      * Checks whether a sticker pack contains valid data
      */
-    public static void verifyStickerPackValidity(@NonNull Context context,
-                                                 @NonNull StickerPack stickerPack) throws IllegalStateException {
+    public void verifyStickerPackValidity(@NonNull StickerPack stickerPack) throws StickerException {
         if (TextUtils.isEmpty(stickerPack.getIdentifier().toString())) {
             throw new IllegalStateException("sticker pack identifier is empty");
         }
@@ -120,19 +136,18 @@ public class StickerPackValidator {
         if (!TextUtils.isEmpty(stickerPack.getPublisherEmail()) && !Patterns.EMAIL_ADDRESS.matcher(stickerPack.getPublisherEmail()).matches()) {
             throw new IllegalStateException("publisher email does not seem valid, email is: " + stickerPack.getPublisherEmail());
         }
+        if (stickerPack.getResizedTrayImageFileInBytes().length > TRAY_IMAGE_FILE_SIZE_MAX_KB * KB_IN_BYTES) {
+            throw new IllegalStateException("tray image should be less than " + TRAY_IMAGE_FILE_SIZE_MAX_KB + " KB, tray image file: " + stickerPack.getOriginalTrayImageFile());
+        }
         try {
-            final byte[] stickerAssetBytes = StickerService.fetchStickerAsset(stickerPack.getIdentifier().toString(), stickerPack.getResizedTrayImageFile(), context.getContentResolver());
-            if (stickerAssetBytes.length > TRAY_IMAGE_FILE_SIZE_MAX_KB * KB_IN_BYTES) {
-                throw new IllegalStateException("tray image should be less than " + TRAY_IMAGE_FILE_SIZE_MAX_KB + " KB, tray image file: " + stickerPack.getOriginalTrayImageFile());
-            }
-            Bitmap bitmap = BitmapFactory.decodeByteArray(stickerAssetBytes, 0, stickerAssetBytes.length);
+            Bitmap bitmap = BitmapFactory.decodeByteArray(stickerPack.getResizedTrayImageFileInBytes(), 0, stickerPack.getResizedTrayImageFileInBytes().length);
             if (bitmap.getHeight() > TRAY_IMAGE_DIMENSION_MAX || bitmap.getHeight() < TRAY_IMAGE_DIMENSION_MIN) {
                 throw new IllegalStateException("tray image height should between " + TRAY_IMAGE_DIMENSION_MIN + " and " + TRAY_IMAGE_DIMENSION_MAX + " pixels, current tray image height is " + bitmap.getHeight() + ", tray image file: " + stickerPack.getOriginalTrayImageFile());
             }
             if (bitmap.getWidth() > TRAY_IMAGE_DIMENSION_MAX || bitmap.getWidth() < TRAY_IMAGE_DIMENSION_MIN) {
                 throw new IllegalStateException("tray image width should be between " + TRAY_IMAGE_DIMENSION_MIN + " and " + TRAY_IMAGE_DIMENSION_MAX + " pixels, current tray image width is " + bitmap.getWidth() + ", tray image file: " + stickerPack.getOriginalTrayImageFile());
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             throw new IllegalStateException("Cannot open tray image, " + stickerPack.getOriginalTrayImageFile(), e);
         }
         final List<Sticker> stickers = stickerPack.getStickers();
@@ -140,56 +155,58 @@ public class StickerPackValidator {
             throw new IllegalStateException("sticker pack sticker count should be between 3 to 30 inclusive, it currently has " + stickers.size() + ", sticker pack identifier: " + stickerPack.getIdentifier());
         }
         for (final Sticker sticker : stickers) {
-            validateSticker(context, stickerPack.getIdentifier().toString(), sticker, stickerPack.isAnimatedStickerPack());
+            validateSticker(stickerPack.getIdentifier(), sticker, stickerPack.isAnimatedStickerPack());
         }
     }
 
-    private static void validateSticker(@NonNull Context context, @NonNull final String identifier, @NonNull final Sticker sticker, final boolean animatedStickerPack) throws IllegalStateException {
+    public void validateSticker(@NonNull final Integer packIdentifier,
+                                @NonNull final Sticker sticker,
+                                final boolean animatedStickerPack) throws IllegalStateException, StickerFolderException {
         if (sticker.getEmojis().size() > EMOJI_MAX_LIMIT) {
-            throw new IllegalStateException("emoji count exceed limit, sticker pack identifier: " + identifier + ", filename: " + sticker.getStickerImageFile());
+            throw new IllegalStateException("emoji count exceed limit, sticker pack identifier: " + packIdentifier + ", filename: " + sticker.getStickerImageFile());
         }
 //        if (sticker.getEmojis().size() < EMOJI_MIN_LIMIT) {
 //            throw new IllegalStateException("To provide best user experience, please associate at least 1 emoji to this sticker, sticker pack identifier: " + identifier + ", filename: " + sticker.getStickerImageFile());
 //        }
         if (TextUtils.isEmpty(sticker.getStickerImageFile())) {
-            throw new IllegalStateException("no file path for sticker, sticker pack identifier:" + identifier);
+            throw new IllegalStateException("no file path for sticker, sticker pack identifier:" + packIdentifier);
         }
-        validateStickerFile(context, identifier, sticker.getStickerImageFile(), animatedStickerPack);
+        validateStickerFile(packIdentifier, sticker.getStickerImageFile(), animatedStickerPack, sticker.getStickerImageFileInBytes());
     }
 
-    private static void validateStickerFile(@NonNull Context context, @NonNull String identifier, @NonNull final String fileName, final boolean animatedStickerPack) throws IllegalStateException {
+    private void validateStickerFile(@NonNull Integer packIdentifier,
+                                     @NonNull final String fileName,
+                                     final boolean animatedStickerPack,
+                                     final byte[] stickerImageFileInBytes) throws IllegalStateException {
         try {
-            final byte[] stickerInBytes = StickerService.fetchStickerAsset(identifier, fileName, context.getContentResolver());
-            if (!animatedStickerPack && stickerInBytes.length > STATIC_STICKER_FILE_LIMIT_KB * KB_IN_BYTES) {
-                throw new IllegalStateException("static sticker should be less than " + STATIC_STICKER_FILE_LIMIT_KB + "KB, current file is " + stickerInBytes.length / KB_IN_BYTES + " KB, sticker pack identifier: " + identifier + ", filename: " + fileName);
+            if (!animatedStickerPack && stickerImageFileInBytes.length > STATIC_STICKER_FILE_LIMIT_KB * KB_IN_BYTES) {
+                throw new IllegalStateException("static sticker should be less than " + STATIC_STICKER_FILE_LIMIT_KB + "KB, current file is " + stickerImageFileInBytes.length / KB_IN_BYTES + " KB, sticker pack identifier: " + packIdentifier + ", filename: " + fileName);
             }
-            if (animatedStickerPack && stickerInBytes.length > ANIMATED_STICKER_FILE_LIMIT_KB * KB_IN_BYTES) {
-                throw new IllegalStateException("animated sticker should be less than " + ANIMATED_STICKER_FILE_LIMIT_KB + "KB, current file is " + stickerInBytes.length / KB_IN_BYTES + " KB, sticker pack identifier: " + identifier + ", filename: " + fileName);
+            if (animatedStickerPack && stickerImageFileInBytes.length > ANIMATED_STICKER_FILE_LIMIT_KB * KB_IN_BYTES) {
+                throw new IllegalStateException("animated sticker should be less than " + ANIMATED_STICKER_FILE_LIMIT_KB + "KB, current file is " + stickerImageFileInBytes.length / KB_IN_BYTES + " KB, sticker pack identifier: " + packIdentifier + ", filename: " + fileName);
             }
             try {
-                final WebPImage webPImage = WebPImage.createFromByteArray(stickerInBytes, ImageDecodeOptions.defaults());
+                final WebPImage webPImage = WebPImage.createFromByteArray(stickerImageFileInBytes, ImageDecodeOptions.defaults());
                 if (webPImage.getHeight() != IMAGE_HEIGHT) {
-                    throw new IllegalStateException("sticker height should be " + IMAGE_HEIGHT + ", current height is " + webPImage.getHeight() + ", sticker pack identifier: " + identifier + ", filename: " + fileName);
+                    throw new IllegalStateException("sticker height should be " + IMAGE_HEIGHT + ", current height is " + webPImage.getHeight() + ", sticker pack identifier: " + packIdentifier + ", filename: " + fileName);
                 }
                 if (webPImage.getWidth() != IMAGE_WIDTH) {
-                    throw new IllegalStateException("sticker width should be " + IMAGE_WIDTH + ", current width is " + webPImage.getWidth() + ", sticker pack identifier: " + identifier + ", filename: " + fileName);
+                    throw new IllegalStateException("sticker width should be " + IMAGE_WIDTH + ", current width is " + webPImage.getWidth() + ", sticker pack identifier: " + packIdentifier + ", filename: " + fileName);
                 }
                 if (animatedStickerPack) {
                     if (webPImage.getFrameCount() <= 1) {
-                        throw new IllegalStateException("this pack is marked as animated sticker pack, all stickers should animate, sticker pack identifier: " + identifier + ", filename: " + fileName);
+                        throw new IllegalStateException("this pack is marked as animated sticker pack, all stickers should animate, sticker pack identifier: " + packIdentifier + ", filename: " + fileName);
                     }
-                    checkFrameDurationsForAnimatedSticker(webPImage.getFrameDurations(), identifier, fileName);
+                    checkFrameDurationsForAnimatedSticker(webPImage.getFrameDurations(), packIdentifier, fileName);
                     if (webPImage.getDuration() > ANIMATED_STICKER_TOTAL_DURATION_MAX) {
-                        throw new IllegalStateException("sticker animation max duration is: " + ANIMATED_STICKER_TOTAL_DURATION_MAX + " ms, current duration is: " + webPImage.getDuration() + " ms, sticker pack identifier: " + identifier + ", filename: " + fileName);
+                        throw new IllegalStateException("sticker animation max duration is: " + ANIMATED_STICKER_TOTAL_DURATION_MAX + " ms, current duration is: " + webPImage.getDuration() + " ms, sticker pack identifier: " + packIdentifier + ", filename: " + fileName);
                     }
                 } else if (webPImage.getFrameCount() > 1) {
-                    throw new IllegalStateException("this pack is not marked as animated sticker pack, all stickers should be static stickers, sticker pack identifier: " + identifier + ", filename: " + fileName);
+                    throw new IllegalStateException("this pack is not marked as animated sticker pack, all stickers should be static stickers, sticker pack identifier: " + packIdentifier + ", filename: " + fileName);
                 }
             } catch (IllegalArgumentException e) {
-                throw new IllegalStateException("Error parsing webp image, sticker pack identifier: " + identifier + ", filename: " + fileName, e);
+                throw new IllegalStateException("Error parsing webp image, sticker pack identifier: " + packIdentifier + ", filename: " + fileName, e);
             }
-        } catch (IOException e) {
-            throw new IllegalStateException("cannot open sticker file: sticker pack identifier: " + identifier + ", filename: " + fileName, e);
         } catch (IllegalStateException ex) {
             if (EntryActivity.SAFE_MODE) {
                 System.err.println(ex.getMessage());
@@ -199,7 +216,7 @@ public class StickerPackValidator {
         }
     }
 
-    private static void checkFrameDurationsForAnimatedSticker(@NonNull final int[] frameDurations, @NonNull final String identifier, @NonNull final String fileName) {
+    private void checkFrameDurationsForAnimatedSticker(@NonNull final int[] frameDurations, @NonNull final Integer identifier, @NonNull final String fileName) {
         for (int frameDuration : frameDurations) {
             if (frameDuration < ANIMATED_STICKER_FRAME_DURATION_MIN) {
                 throw new IllegalStateException("animated sticker frame duration limit is " + ANIMATED_STICKER_FRAME_DURATION_MIN + ", sticker pack identifier: " + identifier + ", filename: " + fileName);
@@ -207,7 +224,7 @@ public class StickerPackValidator {
         }
     }
 
-    private static void checkStringValidity(@NonNull String string) {
+    private void checkStringValidity(@NonNull String string) {
         String pattern = "[\\w-.,'\\s]+"; // [a-zA-Z0-9_-.' ]
         if (!string.matches(pattern)) {
             throw new IllegalStateException(string + " contains invalid characters, allowed characters are a to z, A to Z, _ , ' - . and space character");
@@ -218,7 +235,7 @@ public class StickerPackValidator {
     }
 
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")
-    private static boolean isValidWebsiteUrl(String websiteUrl) throws IllegalStateException {
+    private boolean isValidWebsiteUrl(String websiteUrl) throws IllegalStateException {
         try {
             new URL(websiteUrl);
         } catch (MalformedURLException e) {
@@ -230,7 +247,7 @@ public class StickerPackValidator {
     }
 
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")
-    private static boolean isURLInCorrectDomain(String urlString, String domain) throws IllegalStateException {
+    private boolean isURLInCorrectDomain(String urlString, String domain) throws IllegalStateException {
         try {
             URL url = new URL(urlString);
             if (domain.equals(url.getHost())) {

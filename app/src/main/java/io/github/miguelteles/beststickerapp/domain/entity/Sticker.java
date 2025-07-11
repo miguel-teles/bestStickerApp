@@ -12,23 +12,26 @@ import android.content.ContentValues;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Sticker implements Parcelable {
-    public final static String NM_TABELA = "stickers";
+import kotlin.jvm.Transient;
 
+public class Sticker implements Parcelable, Cloneable {
+    public final static String NM_TABELA = "stickers";
     public static String IDENTIFIER = "identifier";
     public static String PACK_IDENTIFIER = "packIdentifier";
     public static String STICKER_IMAGE_FILE = "stickerImageFile";
     public static String EMOJIS = "emojis";
 
 
-    private Integer identifier; //PK
-    private Integer packIdentifier; //FK
+    private Integer identifier;
+    private Integer packIdentifier;
     private final String stickerImageFile;
     private final List<String> emojis;
     private long size;
+    private byte[] stickerImageFileInBytes;
 
     public Sticker(Integer identifier,
                    Integer packIdentifier,
@@ -41,11 +44,12 @@ public class Sticker implements Parcelable {
 
     public Sticker(String stickerImageFile,
                    Integer packIdentifier,
-                   long size) {
+                   byte[] stickerImageFileInBytes) {
         this.stickerImageFile = stickerImageFile;
         this.emojis = new ArrayList<>();
         this.packIdentifier = packIdentifier;
-        this.size = size;
+        this.stickerImageFileInBytes = stickerImageFileInBytes;
+        this.size = this.stickerImageFileInBytes.length;
     }
 
     private Sticker(Parcel in) {
@@ -122,5 +126,24 @@ public class Sticker implements Parcelable {
 
     public void setPackIdentifier(Integer packIdentifier) {
         this.packIdentifier = packIdentifier;
+    }
+
+    @Override
+    public Sticker clone() {
+        try {
+            Sticker clone = (Sticker) super.clone();
+            // TODO: copy mutable state here, so the clone can't change the internals of the original
+            return clone;
+        } catch (CloneNotSupportedException e) {
+            throw new AssertionError();
+        }
+    }
+
+    public byte[] getStickerImageFileInBytes() {
+        return stickerImageFileInBytes;
+    }
+
+    public void setStickerImageFileInBytes(byte[] stickerImageFileInBytes) {
+        this.stickerImageFileInBytes = stickerImageFileInBytes;
     }
 }

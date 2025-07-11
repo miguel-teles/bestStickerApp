@@ -7,6 +7,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import io.github.miguelteles.beststickerapp.exception.StickerDataBaseException;
 import io.github.miguelteles.beststickerapp.exception.StickerException;
 import io.github.miguelteles.beststickerapp.exception.enums.StickerDataBaseExceptionEnum;
+import io.github.miguelteles.beststickerapp.utils.Utils;
 
 public class MyDatabase extends SQLiteOpenHelper {
 
@@ -36,9 +37,9 @@ public class MyDatabase extends SQLiteOpenHelper {
         onCreate(db);
     }
 
-    public static MyDatabase getInstance(Context context) throws StickerException {
+    public static MyDatabase getInstance() throws StickerException {
         if (instance == null) {
-            instance = new MyDatabase(context);
+            instance = new MyDatabase(Utils.getApplicationContext());
         }
         return instance;
     }

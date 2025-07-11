@@ -73,7 +73,7 @@ public class StickerPackListAdapter extends RecyclerView.Adapter<StickerPackList
         int actualNumberOfStickersToShow = Math.min(maxNumberOfStickersInARow, pack.getStickers().size());
         for (int i = 0; i < actualNumberOfStickersToShow; i++) {
             final SimpleDraweeView rowImage = (SimpleDraweeView) LayoutInflater.from(context).inflate(R.layout.sticker_packs_list_image_item, viewHolder.imageRowView, false);
-            rowImage.setImageURI(StickerUriProvider.getStickerAssetUri(pack.getIdentifier().toString(), pack.getStickers().get(i).getStickerImageFile()));
+            rowImage.setImageURI(StickerUriProvider.getInstance().getStickerAssetUri(pack.getIdentifier(), pack.getStickers().get(i).getStickerImageFile()));
             final LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams) rowImage.getLayoutParams();
             final int marginBetweenImages = minMarginBetweenImages - lp.leftMargin - lp.rightMargin;
             if (i != actualNumberOfStickersToShow - 1 && marginBetweenImages > 0) { //do not set the margin for the last image

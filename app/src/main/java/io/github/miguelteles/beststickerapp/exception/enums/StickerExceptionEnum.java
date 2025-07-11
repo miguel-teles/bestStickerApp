@@ -7,7 +7,9 @@ public enum StickerExceptionEnum {
 
     CSP(R.string.CREATE_STICKER_PACK),
     CS(R.string.CREATE_STICKER),
-    ESP(R.string.EDIT_STICKER_PACK);
+    ESP(R.string.EDIT_STICKER_PACK),
+    FS(R.string.FETCH_STICKER),
+    FSP(R.string.FETCH_STICKER_PACK);
 
 
     final int resourceId;
@@ -17,6 +19,6 @@ public enum StickerExceptionEnum {
     }
 
     public String toString(){
-        return Utils.getContext().getString(resourceId);
+        return Utils.getApplicationContext().getString(resourceId);
     }
 }

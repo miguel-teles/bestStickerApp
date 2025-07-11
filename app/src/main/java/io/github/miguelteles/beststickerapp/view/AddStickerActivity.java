@@ -36,7 +36,7 @@ public class AddStickerActivity extends AppCompatActivity {
         declaraCampos();
 
         try {
-            stickerService = StickerServiceImpl.getInstance(this);
+            stickerService = StickerServiceImpl.getInstance();
         } catch (StickerException ex) {
             StickerExceptionHandler.handleException(ex, this);
         }
@@ -72,8 +72,7 @@ public class AddStickerActivity extends AppCompatActivity {
             public void onClick(View v) {
                 try {
                     Sticker sticker = stickerService.createSticker(stickerPack,
-                            uriStickerImage,
-                            context);
+                            uriStickerImage);
                     if (sticker.getIdentifier() != null) {
                         finish(); //fecha a activity
                     }

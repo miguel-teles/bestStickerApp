@@ -69,4 +69,6 @@
     <string name="ADD_STICKER" translatable="false">Adicionar figurinha</string>
     <string name="ADD_PACK" translatable="false">CRIAR PACOTE</string>
     <string name="title_activity_exception">ExceptionActivity</string>
+    <string name="FETCH_STICKER">Erro ao buscar figurinhas</string>
+    <string name="FETCH_STICKER_PACK">Erro ao buscar pacote de figurinhas</string>
 </resources>

@@ -66,8 +66,8 @@ public class StickerPackDetailsActivity extends AddStickerPackToWhatsappActivity
 
         declareGlobalComponents();
         try {
-            stickerPackService = StickerPackServiceImpl.getInstace(getApplicationContext());
-            stickerService = StickerServiceImpl.getInstance(getApplicationContext());
+            stickerPackService = StickerPackServiceImpl.getInstance();
+            stickerService = StickerServiceImpl.getInstance();
         } catch (StickerException ex) {
             StickerExceptionHandler.handleException(ex, this);
         }
@@ -90,7 +90,7 @@ public class StickerPackDetailsActivity extends AddStickerPackToWhatsappActivity
 
         packNameTextView.setText(stickerPack.getName());
         packPublisherTextView.setText("Autor: " + stickerPack.getPublisher());
-        packTrayIcon.setImageURI(StickerUriProvider.getStickerResizedAssetUri(stickerPack.getIdentifier().toString(), stickerPack.getResizedTrayImageFile()));
+        packTrayIcon.setImageURI(StickerUriProvider.getInstance().getStickerPackResizedAssetUri(stickerPack.getIdentifier().toString(), stickerPack.getResizedTrayImageFile()));
         packSizeTextView.setText(Formatter.formatShortFileSize(this, stickerPack.getTotalSize()));
     }
 
@@ -112,7 +112,7 @@ public class StickerPackDetailsActivity extends AddStickerPackToWhatsappActivity
     protected void onResume() {
         super.onResume();
         try {
-            stickerPack = stickerPackService.fetchUpdatedStickerPack(stickerPack);
+            stickerPack = stickerPackService.fetchStickerPackByIdWithAssets(stickerPack);
             whiteListCheckAsyncTask = new WhiteListCheckAsyncTask(this);
             whiteListCheckAsyncTask.execute(stickerPack);
             loadStickersOnScreen();
@@ -249,9 +249,9 @@ public class StickerPackDetailsActivity extends AddStickerPackToWhatsappActivity
         }
     }
 
-    public void deleteSticker(Sticker sticker, StickerPack stickerPack, Context context) {
+    public void deleteSticker(Sticker sticker, StickerPack stickerPack) {
         try {
-            this.stickerService.deleteSticker(sticker, stickerPack, context);
+            this.stickerService.deleteSticker(sticker, stickerPack);
             stickerPack.getStickers().remove(sticker);
             this.loadStickersOnScreen();
         } catch (StickerException ex) {

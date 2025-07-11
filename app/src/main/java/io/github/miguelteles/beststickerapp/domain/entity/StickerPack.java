@@ -52,6 +52,7 @@ public class StickerPack implements Parcelable {
     private long totalSize;
     private String androidPlayStoreLink;
     private boolean isWhitelisted;
+    private byte[] resizedTrayImageFileInBytes;
 
 
     /*
@@ -371,5 +372,13 @@ public class StickerPack implements Parcelable {
 
     public void setResizedTrayImageFile(String resizedTrayImageFile) {
         this.resizedTrayImageFile = resizedTrayImageFile;
+    }
+
+    public byte[] getResizedTrayImageFileInBytes() {
+        return resizedTrayImageFileInBytes;
+    }
+
+    public void setResizedTrayImageFileInBytes(byte[] resizedTrayImageFileInBytes) {
+        this.resizedTrayImageFileInBytes = resizedTrayImageFileInBytes;
     }
 }

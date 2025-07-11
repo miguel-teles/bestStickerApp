@@ -28,10 +28,11 @@ import io.github.miguelteles.beststickerapp.exception.StickerException;
 import io.github.miguelteles.beststickerapp.exception.enums.StickerFolderExceptionEnum;
 import io.github.miguelteles.beststickerapp.domain.entity.Sticker;
 import io.github.miguelteles.beststickerapp.domain.entity.StickerPack;
-import io.github.miguelteles.beststickerapp.repository.MyDatabase;
-import io.github.miguelteles.beststickerapp.repository.StickerPackCommonRepository;
-import io.github.miguelteles.beststickerapp.repository.StickerCommonRepository;
-import io.github.miguelteles.beststickerapp.foldersManagement.Folders;
+import io.github.miguelteles.beststickerapp.services.FoldersManagementServiceImpl;
+import io.github.miguelteles.beststickerapp.services.StickerPackServiceImpl;
+import io.github.miguelteles.beststickerapp.services.interfaces.FoldersManagementService;
+import io.github.miguelteles.beststickerapp.services.interfaces.StickerPackService;
+import io.github.miguelteles.beststickerapp.utils.Utils;
 
 import java.io.File;
 import java.io.IOException;
@@ -94,8 +95,8 @@ public class StickerContentProvider extends ContentProvider {
     private static final int DELETE_STICKER_PACKPACK = 9;
 
     private List<StickerPack> stickerPackList;
-    private StickerCommonRepository stickerRepository;
-    private StickerPackCommonRepository stickerPackRepository;
+    private StickerPackService stickerPackService;
+    private FoldersManagementService foldersManagementService;
     boolean isStickerPackListOutdated = true;
 
     /**
@@ -104,8 +105,9 @@ public class StickerContentProvider extends ContentProvider {
     @Override
     public boolean onCreate() {
         try {
-            stickerRepository = new StickerCommonRepository(MyDatabase.getInstance(getContext()).getSqLiteDatabase());
-            stickerPackRepository = new StickerPackCommonRepository(MyDatabase.getInstance(getContext()).getSqLiteDatabase());
+            Utils.setApplicationContext(getContext());
+            stickerPackService = StickerPackServiceImpl.getInstance();
+            foldersManagementService = FoldersManagementServiceImpl.getInstance();
 
             AUTHORITY = BuildConfig.CONTENT_PROVIDER_AUTHORITY;
             if (!AUTHORITY.startsWith(Objects.requireNonNull(getContext()).getPackageName())) {
@@ -203,7 +205,7 @@ public class StickerContentProvider extends ContentProvider {
     private List<StickerPack> getStickerPackList() {
         try {
             if (stickerPackList == null || isStickerPackListOutdated) {
-                stickerPackList = stickerPackRepository.findAll();
+                stickerPackList = stickerPackService.fetchAllStickerPacksWithoutAssets();
                 isStickerPackListOutdated = false;
             }
             return stickerPackList;
@@ -326,7 +328,7 @@ public class StickerContentProvider extends ContentProvider {
 
     private ParcelFileDescriptor fetchFile(@NonNull String fileName, @NonNull String folder) throws StickerException {
         try {
-            return ParcelFileDescriptor.open(new File(Folders.getPackFolderByFolderName(folder, getContext()), fileName), ParcelFileDescriptor.MODE_READ_ONLY);
+            return ParcelFileDescriptor.open(new File(foldersManagementService.getPackFolderByFolderName(folder), fileName), ParcelFileDescriptor.MODE_READ_ONLY);
         } catch (IOException e) {
             throw new StickerFolderException(e, StickerFolderExceptionEnum.GET_FILE, "Erro ao abrir arquivo " + folder + "/" + fileName);
         }

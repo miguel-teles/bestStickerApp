@@ -13,20 +13,20 @@ import io.github.miguelteles.beststickerapp.domain.entity.Sticker;
 import java.util.ArrayList;
 import java.util.List;
 
-public class StickerCommonRepository extends CommonRepository<Sticker> {
+public class StickerRepository extends CommonRepository implements io.github.miguelteles.beststickerapp.repository.interfaces.Repository<Sticker> {
 
     private String SAVE = "INSERT INTO stickers VALUES (null, ?, ?, ?, ?)";
     private String FIND_ALL_BY_PACKIDENTIFIER = "SELECT * FROM stickers WHERE packIdentifier=%d";
 
     private SQLiteDatabase sqLiteDatabase;
 
-    public StickerCommonRepository(SQLiteDatabase sqLiteDatabase) {
+    public StickerRepository(SQLiteDatabase sqLiteDatabase) {
         super(Sticker.NM_TABELA);
         this.sqLiteDatabase = sqLiteDatabase;
     }
 
     @Override
-    public Sticker save(Sticker sticker, Context context) throws StickerException {
+    public Sticker save(Sticker sticker) throws StickerException {
         try {
             SQLiteStatement stmt = sqLiteDatabase.compileStatement(SAVE);
 
@@ -64,17 +64,17 @@ public class StickerCommonRepository extends CommonRepository<Sticker> {
     }
 
     @Override
-    public Sticker update(Sticker obj, Context context) throws StickerException {
+    public Sticker update(Sticker obj) throws StickerException {
         return null;
     }
 
     @Override
-    public Integer remove(Sticker sticker, Context context) throws StickerException {
-        return this.remove(sticker.getIdentifier(), context);
+    public Integer remove(Sticker sticker) throws StickerException {
+        return this.remove(sticker.getIdentifier());
     }
 
     @Override
-    public Integer remove(Integer identifier, Context context) throws StickerException {
+    public Integer remove(Integer identifier) throws StickerException {
         try {
             String deleteStickers = "DELETE FROM stickers WHERE identifier=?";
             SQLiteStatement stmt = sqLiteDatabase.compileStatement(deleteStickers);
@@ -86,12 +86,11 @@ public class StickerCommonRepository extends CommonRepository<Sticker> {
         }
     }
 
-    public Integer removeByPackIdentifier(Integer packIdentifier, Context context) throws StickerException {
+    public void removeByPackIdentifier(Integer packIdentifier) throws StickerException {
         try {
             SQLiteStatement stmt = sqLiteDatabase.compileStatement(DELETE_BY_ID);
             stmt.bindLong(1, packIdentifier);
             stmt.executeUpdateDelete();
-            return null;
         } catch (Exception ex) {
             throw new StickerDataBaseException(ex, StickerDataBaseExceptionEnum.DELETE, "Erro ao deletar figurinhas do pacote");
         }

@@ -53,8 +53,8 @@ public class StickerPackListActivity extends AddStickerPackToWhatsappActivity {
         btnCreateNewStickerPack.setOnClickListener(createNewStickerPack());
 
         try {
-            stickerPackService = StickerPackServiceImpl.getInstace(this);
-            stickerPackList = new ArrayList<>(stickerPackService.fetchAllStickerPacks());
+            stickerPackService = StickerPackServiceImpl.getInstance();
+            stickerPackList = new ArrayList<>(stickerPackService.fetchAllStickerPacksWithAssets());
         } catch (StickerException ex) {
             StickerExceptionHandler.handleException(ex, this);
         }
@@ -69,7 +69,7 @@ public class StickerPackListActivity extends AddStickerPackToWhatsappActivity {
     protected void onResume() {
         super.onResume();
         try {
-            stickerPackList = new ArrayList<>(stickerPackService.fetchAllStickerPacks());
+            stickerPackList = new ArrayList<>(stickerPackService.fetchAllStickerPacksWithAssets());
             whiteListCheckAsyncTask = new WhiteListCheckAsyncTask(this);
             whiteListCheckAsyncTask.execute(stickerPackList.toArray(new StickerPack[0]));
         } catch (StickerException ex) {

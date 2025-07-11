@@ -24,7 +24,7 @@ import io.github.miguelteles.beststickerapp.repository.MyDatabase;
 import io.github.miguelteles.beststickerapp.exception.StickerException;
 import io.github.miguelteles.beststickerapp.exception.StickerExceptionHandler;
 import io.github.miguelteles.beststickerapp.domain.entity.StickerPack;
-import io.github.miguelteles.beststickerapp.foldersManagement.Folders;
+import io.github.miguelteles.beststickerapp.services.FoldersManagementServiceImpl;
 import io.github.miguelteles.beststickerapp.services.StickerPackServiceImpl;
 import io.github.miguelteles.beststickerapp.services.interfaces.StickerPackService;
 import io.github.miguelteles.beststickerapp.utils.Utils;
@@ -37,7 +37,7 @@ public class EntryActivity extends BaseActivity {
     private View progressBar;
     private LoadListAsyncTask loadListAsyncTask;
     private static StickerPackService stickerPackService;
-
+    private static StickerPackValidator stickerPackValidator;
     public static final boolean SAFE_MODE = true;
 
     @Override
@@ -48,11 +48,12 @@ public class EntryActivity extends BaseActivity {
         if (getSupportActionBar() != null) {
             getSupportActionBar().hide();
         }
-        Utils.setContext(getBaseContext());
+        Utils.setApplicationContext(getApplicationContext());
         try {
-            Folders.makeAllDirs(this);
-            MyDatabase.getInstance(getApplicationContext());
-            stickerPackService = StickerPackServiceImpl.getInstace(getApplicationContext());
+            stickerPackValidator = StickerPackValidator.getInstance();
+            MyDatabase.getInstance();
+            stickerPackService = StickerPackServiceImpl.getInstance();
+            FoldersManagementServiceImpl.getInstance().makeAllDirs();
         } catch (StickerException ex) {
             StickerExceptionHandler.handleException(ex, this);
         }
@@ -100,9 +101,9 @@ public class EntryActivity extends BaseActivity {
                 System.out.println("doInBackground");
                 final Context context = contextWeakReference.get();
                 if (context != null) {
-                    stickerPackList = new ArrayList<>(stickerPackService.fetchAllStickerPacks());
+                    stickerPackList = new ArrayList<>(stickerPackService.fetchAllStickerPacksWithAssets());
                     for (StickerPack stickerPack : stickerPackList) {
-                        StickerPackValidator.verifyStickerPackValidity(context, stickerPack);
+                        stickerPackValidator.verifyStickerPackValidity(stickerPack);
                     }
                     return new Pair<>(null, stickerPackList);
                 } else {

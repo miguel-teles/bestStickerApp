@@ -37,35 +37,19 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
-    compileOptions {
-        sourceCompatibility = "11"
-        targetCompatibility = "11"
-    }
-
-    packagingOptions {
-
-    }
-
     dependencies {
         implementation 'com.google.code.gson:gson:2.10.1'
-    }
-    kotlinOptions {
-        jvmTarget = '11'
     }
     buildFeatures {
         compose true
     }
-    // Configures multiple APKs based on ABI.
-    // see https://developer.android.com/studio/build/configure-apk-splits#configure-abi-split
-//    splits {
-//        abi {
-//            enable true // Enables building multiple APKs per ABI.
-//            universalApk true // Specifies that we want to also generate a universal APK that includes all ABIs.
-//        }
-//    }
+
+    testOptions {
+        unitTests.returnDefaultValues = true
+    }
 }
 
-task checkDebug {
+tasks.register('checkDebug') {
     doLast {
         println("checkDebug")
         if (android.defaultConfig.applicationId.startsWith("com.whatsapp")) {
@@ -89,7 +73,7 @@ private void checkApplicationIdInDebug() {
 }
 
 
-task checkRelease {
+tasks.register('checkRelease') {
     doLast {
         println("checkRelease")
         if (android.defaultConfig.applicationId.startsWith("com.best")) {
@@ -120,7 +104,6 @@ dependencies {
     implementation 'androidx.compose.ui:ui-graphics'
     implementation 'androidx.compose.ui:ui-tooling-preview'
     implementation 'androidx.compose.material3:material3'
-    testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test:runner:1.6.2'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.6.1'
     implementation 'androidx.recyclerview:recyclerview:1.4.0'
@@ -135,4 +118,13 @@ dependencies {
     implementation "com.facebook.fresco:animated-webp:$fresco_version"
     implementation "com.facebook.fresco:animated-base:$fresco_version"
     implementation 'androidx.cardview:cardview:1.0.0'
+    testImplementation 'junit:junit:4.13.2'
+    // Dependência principal do Mockito
+    testImplementation 'org.mockito:mockito-core:5.14.2'
+    // Dependência do Mockito para testes no Android
+    androidTestImplementation 'org.mockito:mockito-android:2.28.2'
+    // Dependência do Mockito para ser possível mockar classes e métodos constantes
+    testImplementation 'org.mockito:mockito-inline:2.28.2'
+
+    testImplementation "org.robolectric:robolectric:3.4.2"
 }

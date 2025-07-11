@@ -33,7 +33,7 @@ public enum StickerFolderExceptionEnum {
     }
 
     public String toString(){
-        return Utils.getContext().getString(mResourceId);
+        return Utils.getApplicationContext().getString(mResourceId);
     }
 
 }

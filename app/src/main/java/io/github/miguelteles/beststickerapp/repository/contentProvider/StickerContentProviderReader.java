@@ -66,7 +66,7 @@ public class StickerContentProviderReader {
         for (Sticker sticker : stickers) {
             final byte[] bytes;
             try {
-                bytes = fetchStickerAsset(stickerPack.getIdentifier().toString(),
+                bytes = fetchStickerAsset(stickerPack.getIdentifier(),
                         sticker.getStickerImageFile(),
                         context.getContentResolver());
                 if (bytes.length <= 0) {
@@ -121,7 +121,7 @@ public class StickerContentProviderReader {
 
     @NonNull
     private static List<Sticker> fetchFromContentProviderForStickers(Integer stickerPackIdentifier, ContentResolver contentResolver) {
-        Uri uri = StickerUriProvider.getStickerListUri(stickerPackIdentifier.toString());
+        Uri uri = StickerUriProvider.getInstance().getStickerListUri(stickerPackIdentifier.toString());
 
         final String[] projection = {STICKER_FILE_NAME_IN_QUERY, STICKER_IDENTIFIER, STICKER_PACK_IDENTIFIER};
         final Cursor cursor = contentResolver.query(uri, projection, null, null, null);
@@ -144,11 +144,11 @@ public class StickerContentProviderReader {
     /**
      * Busca um asset da pasta (imagem da figurinha ou da capa do sticker pack)
      * **/
-    private static byte[] fetchStickerAsset(@NonNull final String identifier,
+    private static byte[] fetchStickerAsset(@NonNull final Integer identifier,
                                     @NonNull final String stickerImageFileName,
                                     ContentResolver contentResolver) throws IOException {
         //o contentResolver.openInputStream vai pro método openAssetFile do contentProvider
-        try (final InputStream inputStream = contentResolver.openInputStream(StickerUriProvider.getStickerAssetUri(identifier, stickerImageFileName));
+        try (final InputStream inputStream = contentResolver.openInputStream(StickerUriProvider.getInstance().getStickerAssetUri(identifier, stickerImageFileName));
              final ByteArrayOutputStream buffer = new ByteArrayOutputStream()) {
             if (inputStream == null) {
                 throw new IOException("cannot read sticker asset id: " + identifier + "; name: " + stickerImageFileName);

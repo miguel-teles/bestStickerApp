@@ -1,4 +1,4 @@
-package io.github.miguelteles.beststickerapp.foldersManagement;
+package io.github.miguelteles.beststickerapp.services;
 
 import android.content.Context;
 import android.database.Cursor;
@@ -12,22 +12,94 @@ import android.provider.MediaStore;
 
 import io.github.miguelteles.beststickerapp.exception.StickerFolderException;
 import io.github.miguelteles.beststickerapp.exception.enums.StickerFolderExceptionEnum;
+import io.github.miguelteles.beststickerapp.services.interfaces.FoldersManagementService;
+import io.github.miguelteles.beststickerapp.utils.Utils;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
 
-public class Folders {
+public class FoldersManagementServiceImpl implements FoldersManagementService {
+
+    private static FoldersManagementServiceImpl instance;
 
     public static final int TRAY_IMAGE_MAX_FILE_SIZE = 50; //50KB
     public static final int STICKER_IMAGE_MAX_FILE_SIZE = 100; //50KB
     public static final int TRAY_IMAGE_SIZE = 96; //96pxs
     public static final int STICKER_IMAGE_SIZE = 512; //512pxs
 
-    private Folders() {
+    private final Context context;
+
+    private FoldersManagementServiceImpl() {
+        context = Utils.getApplicationContext();
     }
 
-    public static File getPackFolderByFolderName(String folderName, Context context) throws StickerFolderException {
+    public static FoldersManagementServiceImpl getInstance() {
+        if (instance == null) {
+            instance = new FoldersManagementServiceImpl();
+        }
+
+        return new FoldersManagementServiceImpl();
+    }
+
+    public void makeAllDirs() throws StickerFolderException {
+        if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
+            makeDirPacks();
+            makeDirLogs();
+            makeDirErrorsLogs();
+            makeDirCriticalErrorsLogs();
+        } else {
+            throw new StickerFolderException(null, StickerFolderExceptionEnum.MKDIR_ROOT, null);
+        }
+    }
+
+    public void makeDirLogs() throws StickerFolderException {
+        if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
+
+            File externalStorage = context.getExternalFilesDir(null);
+            File folderLogs = new File(externalStorage, DirectoryNames.LOGS);
+            if (!folderLogs.exists()) {
+                folderLogs.mkdir();
+            }
+        } else {
+            throw new StickerFolderException(null, StickerFolderExceptionEnum.MKDIR_LOG, null);
+        }
+    }
+
+    public void makeDirErrorsLogs() throws StickerFolderException {
+        if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
+
+            File externalStorage = context.getExternalFilesDir(null);
+            File folderErrorsLogs = new File(DirectoryNames.LOGS, DirectoryNames.Logs.ERROS);
+            File path = new File(externalStorage, folderErrorsLogs.getPath());
+            if (!path.exists()) {
+                path.mkdir();
+            }
+        } else {
+            throw new StickerFolderException(null, StickerFolderExceptionEnum.MKDIR_LOG_ERRORS, null);
+        }
+    }
+
+    public void makeDirCriticalErrorsLogs() throws StickerFolderException {
+        if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
+            makeDirLogs();
+
+            File externalStorage = context.getExternalFilesDir(null);
+            File folderCriticalErrorsLogs = new File(DirectoryNames.LOGS, DirectoryNames.Logs.CRITICAL_ERRORS);
+            File path = new File(externalStorage, folderCriticalErrorsLogs.getPath());
+            if (!path.exists()) {
+                path.mkdir();
+            }
+
+        } else {
+            throw new StickerFolderException(null, StickerFolderExceptionEnum.MKDIR_LOG_CRITICAL_ERRORS, null);
+        }
+    }
+
+    public File getPackFolderByFolderName(String folderName) throws StickerFolderException {
         if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
 
             File externalDir = context.getExternalFilesDir(null);
@@ -50,18 +122,7 @@ public class Folders {
         }
     }
 
-    public static void makeAllDirs(Context context) throws StickerFolderException {
-        if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
-            makeDirPacks(context);
-            makeDirLogs(context);
-            makeDirErrorsLogs(context);
-            makeDirCriticalErrorsLogs(context);
-        } else {
-            throw new StickerFolderException(null, StickerFolderExceptionEnum.MKDIR_ROOT, null);
-        }
-    }
-
-    public static File getStickerPackFolderByFolderName(String stickerPackFolderName, Context context) throws StickerFolderException {
+    public File getStickerPackFolderByFolderName(String stickerPackFolderName) throws StickerFolderException {
         try {
             if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
 
@@ -85,7 +146,7 @@ public class Folders {
         }
     }
 
-    public static void makeDirPacks(Context context) throws StickerFolderException {
+    public void makeDirPacks() throws StickerFolderException {
         if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
             File externalDir = context.getExternalFilesDir(null);
 
@@ -99,50 +160,7 @@ public class Folders {
         }
     }
 
-    public static void makeDirLogs(Context context) throws StickerFolderException {
-        if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
-
-            File externalStorage = context.getExternalFilesDir(null);
-            File folderLogs = new File(externalStorage, DirectoryNames.LOGS);
-            if (!folderLogs.exists()) {
-                folderLogs.mkdir();
-            }
-        } else {
-            throw new StickerFolderException(null, StickerFolderExceptionEnum.MKDIR_LOG, null);
-        }
-    }
-
-    public static void makeDirErrorsLogs(Context context) throws StickerFolderException {
-        if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
-
-            File externalStorage = context.getExternalFilesDir(null);
-            File folderErrorsLogs = new File(DirectoryNames.LOGS, DirectoryNames.Logs.ERROS);
-            File path = new File(externalStorage, folderErrorsLogs.getPath());
-            if (!path.exists()) {
-                path.mkdir();
-            }
-        } else {
-            throw new StickerFolderException(null, StickerFolderExceptionEnum.MKDIR_LOG_ERRORS, null);
-        }
-    }
-
-    public static void makeDirCriticalErrorsLogs(Context context) throws StickerFolderException {
-        if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
-            makeDirLogs(context);
-
-            File externalStorage = context.getExternalFilesDir(null);
-            File folderCriticalErrorsLogs = new File(DirectoryNames.LOGS, DirectoryNames.Logs.CRITICAL_ERRORS);
-            File path = new File(externalStorage, folderCriticalErrorsLogs.getPath());
-            if (!path.exists()) {
-                path.mkdir();
-            }
-
-        } else {
-            throw new StickerFolderException(null, StickerFolderExceptionEnum.MKDIR_LOG_CRITICAL_ERRORS, null);
-        }
-    }
-
-    public static String getAbsolutePathFromURI(Uri contentUri, Context context) {
+    public String getAbsolutePathFromURI(Uri contentUri) {
         String[] proj = {MediaStore.Images.Media.DATA};
         Cursor cursor = context.getContentResolver().query(contentUri, proj, null, null, null);
         int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
@@ -152,7 +170,7 @@ public class Folders {
         return path;
     }
 
-    public static String getFileExtension(File file, boolean withDot) {
+    public String getFileExtension(File file, boolean withDot) {
         String fileName = file.getName();
         String result = fileName.substring(fileName.lastIndexOf("."));
         if (!withDot) {
@@ -161,14 +179,26 @@ public class Folders {
         return result;
     }
 
-    public static Image generateStickerImages(File stickerPackFolder,
-                                              String sourceImagePath,
-                                              String destinationImageFileName,
-                                              Integer imageWidthAndHeight,
-                                              boolean keepOriginalCopy) throws StickerFolderException {
+    public Image generateStickerImages(File stickerPackFolder,
+                                       Uri selectedImageSourceUri,
+                                       String destinationImageFileName,
+                                       Integer imageWidthAndHeight,
+                                       boolean keepOriginalCopy) throws StickerFolderException {
+        return this.generateStickerImages(stickerPackFolder,
+                getAbsolutePathFromURI(selectedImageSourceUri),
+                destinationImageFileName,
+                imageWidthAndHeight,
+                keepOriginalCopy);
+    }
+
+    public Image generateStickerImages(File stickerPackFolder,
+                                       String selectedImageSourceAbsolutePath,
+                                       String destinationImageFileName,
+                                       Integer imageWidthAndHeight,
+                                       boolean keepOriginalCopy) throws StickerFolderException {
         try {
-            File sourceImage = new File(sourceImagePath);
-            int rotation = getImageOrientation(sourceImagePath);
+            File sourceImage = new File(selectedImageSourceAbsolutePath);
+            int rotation = getImageOrientation(selectedImageSourceAbsolutePath);
 
             String stickerPackImageFileName = destinationImageFileName + getFileExtension(sourceImage, true);
             String stickerPackImageResizedFileName = destinationImageFileName + "Rzd.webp"; //TEM QUE SER .webp se não o whatsapp não aceita
@@ -177,13 +207,17 @@ public class Folders {
             if (keepOriginalCopy) {
                 stickerPackOriginalImageAbsoluteFile = new File(stickerPackFolder, stickerPackImageFileName);
                 copyImageFromSourceToDestination(sourceImage, stickerPackOriginalImageAbsoluteFile);
-                resizeAndRotateImage(stickerPackOriginalImageAbsoluteFile, determineImageSmallerSide(stickerPackOriginalImageAbsoluteFile), Folders.TRAY_IMAGE_MAX_FILE_SIZE, rotation);
+                resizeAndRotateImage(stickerPackOriginalImageAbsoluteFile, determineImageSmallerSide(stickerPackOriginalImageAbsoluteFile), FoldersManagementServiceImpl.TRAY_IMAGE_MAX_FILE_SIZE, rotation);
             }
             File stickerPackResizedImageAbsoluteFile = new File(stickerPackFolder, stickerPackImageResizedFileName);
             copyImageFromSourceToDestination(sourceImage, stickerPackResizedImageAbsoluteFile);
-            resizeAndRotateImage(stickerPackResizedImageAbsoluteFile, imageWidthAndHeight, Folders.TRAY_IMAGE_MAX_FILE_SIZE, rotation);
+            resizeAndRotateImage(stickerPackResizedImageAbsoluteFile, imageWidthAndHeight, FoldersManagementServiceImpl.TRAY_IMAGE_MAX_FILE_SIZE, rotation);
 
-            return new Image(stickerPackOriginalImageAbsoluteFile, stickerPackResizedImageAbsoluteFile);
+            byte[] bytes = null;
+            try (InputStream inputStream = Files.newInputStream(stickerPackResizedImageAbsoluteFile.toPath())){
+                bytes = readBytesFromInputStream(inputStream, stickerPackResizedImageAbsoluteFile.getName());
+            }
+            return new Image(stickerPackOriginalImageAbsoluteFile, stickerPackResizedImageAbsoluteFile, bytes);
         } catch (StickerFolderException ste) {
             throw ste;
         } catch (Exception ex) {
@@ -191,7 +225,7 @@ public class Folders {
         }
     }
 
-    private static Bitmap applyRotationToBitmap(Bitmap bitmap, int rotate) {
+    private Bitmap applyRotationToBitmap(Bitmap bitmap, int rotate) {
         Matrix matrix = new Matrix();
         matrix.postRotate(rotate);
         return Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
@@ -199,8 +233,8 @@ public class Folders {
 
     /**
      * Por algum motivo, as imagens tiradas das câmeras da Samsung são viradas em 90 graus. Então quando copiamos a imagem
-     * **/
-    public static int getImageOrientation(String imagePath) {
+     **/
+    private int getImageOrientation(String imagePath) {
         int rotate = 0;
         try {
             ExifInterface exif = new ExifInterface(imagePath);
@@ -223,7 +257,7 @@ public class Folders {
     }
 
 
-    private static int determineImageSmallerSide(File stickerPackImageFile) {
+    private int determineImageSmallerSide(File stickerPackImageFile) {
         Bitmap bitmap = BitmapFactory.decodeFile(stickerPackImageFile.getAbsolutePath());
         int greaterSide = bitmap.getWidth();
         if (greaterSide < bitmap.getHeight()) {
@@ -232,8 +266,8 @@ public class Folders {
         return greaterSide;
     }
 
-    private static void copyImageFromSourceToDestination(File sourceFile, File destinationFile) throws StickerFolderException {
-        try(FileOutputStream out = new FileOutputStream(destinationFile)) {
+    private void copyImageFromSourceToDestination(File sourceFile, File destinationFile) throws StickerFolderException {
+        try (FileOutputStream out = new FileOutputStream(destinationFile)) {
 
             Bitmap bitmap = BitmapFactory.decodeFile(sourceFile.getAbsolutePath());
             bitmap.compress(Bitmap.CompressFormat.WEBP_LOSSY, 85, out);
@@ -243,10 +277,10 @@ public class Folders {
         }
     }
 
-    private static void resizeAndRotateImage(File imageToResize,
-                                             int imageWidthAndHeight,
-                                             int fileSize,
-                                             int rotation) throws StickerFolderException {
+    private void resizeAndRotateImage(File imageToResize,
+                                      int imageWidthAndHeight,
+                                      int fileSize,
+                                      int rotation) throws StickerFolderException {
         try {
             Bitmap bitmap = BitmapFactory.decodeFile(imageToResize.getAbsolutePath());
 
@@ -262,7 +296,7 @@ public class Folders {
         }
     }
 
-    public static void deleteFile(File stickerPackFolderName) throws StickerFolderException {
+    public void deleteFile(File stickerPackFolderName) throws StickerFolderException {
         try {
 
             if (stickerPackFolderName.isDirectory()) {
@@ -286,38 +320,28 @@ public class Folders {
         }
     }
 
-    public static void deleteStickerPackFolder(String folderName, Context applicationContext) throws StickerFolderException {
-        File folder = getPackFolderByFolderName(folderName, applicationContext);
+    public void deleteStickerPackFolder(String folderName) throws StickerFolderException {
+        File folder = getPackFolderByFolderName(folderName);
         deleteFile(folder);
     }
 
-    public static class Image {
+    @Override
+    public byte[] readBytesFromInputStream(InputStream inputStream, String imageFileName) throws StickerFolderException {
+        try (final ByteArrayOutputStream buffer = new ByteArrayOutputStream()) {
+            if (inputStream == null) {
+                throw new IOException("cannot read sticker asset name: " + imageFileName);
+            }
+            int read;
+            byte[] data = new byte[16384];
 
-        private final File originalImageFile;
-        private final File resizedImageFile;
-
-        public Image(File originalImageFile, File resizedImageFile) {
-            this.originalImageFile = originalImageFile;
-            this.resizedImageFile = resizedImageFile;
-        }
-
-        public File getOriginalImageFile() {
-            return originalImageFile;
-        }
-
-        public File getResizedImageFile() {
-            return resizedImageFile;
-        }
-    }
-
-    public static abstract class DirectoryNames {
-        public final static String ROOT = "appFigurinhas";
-        public final static String LOGS = "logs";
-        public final static String PACKS = "packs";
-
-        public static class Logs {
-            public final static String CRITICAL_ERRORS = "critical_erros";
-            public final static String ERROS = "errors";
+            while ((read = inputStream.read(data, 0, data.length)) != -1) {
+                buffer.write(data, 0, read);
+            }
+            return buffer.toByteArray();
+        } catch (IOException e) {
+            throw new StickerFolderException(e, StickerFolderExceptionEnum.GET_FILE, e.getMessage());
         }
     }
+
+
 }
