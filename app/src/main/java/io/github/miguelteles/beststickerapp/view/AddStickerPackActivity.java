@@ -1,12 +1,16 @@
 package io.github.miguelteles.beststickerapp.view;
 
+import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
+import android.view.animation.DecelerateInterpolator;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -214,7 +218,17 @@ public class AddStickerPackActivity extends AppCompatActivity {
 
             @Override
             public void onProgressUpdate(int process) {
+                runProgressBarAnimation(process);
                 creationProgressBar.setProgress(process);
+            }
+
+            private void runProgressBarAnimation(int process) {
+                new Handler(Looper.getMainLooper()).post(() -> {
+                    ObjectAnimator animation = ObjectAnimator.ofInt(creationProgressBar, "progress", creationProgressBar.getProgress(), process);
+                    animation.setDuration(500);
+                    animation.setInterpolator(new DecelerateInterpolator());
+                    animation.start();
+                });
             }
         };
     }

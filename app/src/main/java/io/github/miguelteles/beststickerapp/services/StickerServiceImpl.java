@@ -100,9 +100,6 @@ public class StickerServiceImpl implements StickerService {
                 stickerPackValidator.validateSticker(stickerPack.getIdentifier(), sticker, stickerPack.isAnimatedStickerPack());
                 stickerRepository.save(sticker);
 
-                if (true) {
-                    throw new NullPointerException();
-                }
                 callbackClass.onProgressUpdate(80);
                 insertStickerIntoContentProvider(sticker);
             } catch (StickerException ex) {
@@ -157,8 +154,10 @@ public class StickerServiceImpl implements StickerService {
                               StickerPack stickerPack) throws StickerException {
         validateParametersDeleteSticker(sticker, stickerPack);
 
+
         File stickerPackFolder = foldersManagementService.getStickerPackFolderByFolderName(stickerPack.getFolderName());
         foldersManagementService.deleteFile(new File(stickerPackFolder, sticker.getStickerImageFile()));
+        stickerRepository.remove(sticker);
 
         contentResolver.delete(stickerUriProvider.getStickerDeleteUri(), null);
     }
