@@ -6,8 +6,10 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -18,6 +20,7 @@ import io.github.miguelteles.beststickerapp.exception.StickerException;
 import io.github.miguelteles.beststickerapp.exception.StickerExceptionHandler;
 import io.github.miguelteles.beststickerapp.services.StickerServiceImpl;
 
+import io.github.miguelteles.beststickerapp.services.interfaces.EntityCreationCallback;
 import io.github.miguelteles.beststickerapp.services.interfaces.StickerService;
 import io.github.miguelteles.beststickerapp.utils.Utils;
 
@@ -28,6 +31,7 @@ public class AddStickerActivity extends AppCompatActivity {
     private TextView btnAdicionarSticker = null;
     private StickerService stickerService;
     private StickerPack stickerPack;
+    private ProgressBar creationProgressBar;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -63,6 +67,7 @@ public class AddStickerActivity extends AppCompatActivity {
     private void declaraCampos() {
         stickerImageView = findViewById(R.id.stickerImageView);
         btnAdicionarSticker = findViewById(R.id.adicionarSticker);
+        creationProgressBar = findViewById(R.id.pg_sticker_creation);
     }
 
     private View.OnClickListener adicionarSticker() {
@@ -70,15 +75,33 @@ public class AddStickerActivity extends AppCompatActivity {
         return new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                try {
-                    Sticker sticker = stickerService.createSticker(stickerPack,
-                            uriStickerImage);
-                    if (sticker.getIdentifier() != null) {
-                        finish(); //fecha a activity
-                    }
-                } catch (StickerException ex) {
-                    StickerExceptionHandler.handleException(ex, context);
+                creationProgressBar.setVisibility(View.VISIBLE);
+                stickerService.createSticker(stickerPack,
+                        uriStickerImage,
+                        createStickerCreationCallback(context));
+            }
+        };
+    }
+
+    @NonNull
+    private EntityCreationCallback<Sticker> createStickerCreationCallback(Context context) {
+        return new EntityCreationCallback<Sticker>() {
+
+            @Override
+            public void onCreationFinish(Sticker createdEntity, StickerException stickerException) {
+                if (createdEntity != null && createdEntity.getIdentifier() != null) {
+                    onProgressUpdate(100);
+                    finish();
+                } else {
+                    creationProgressBar.setProgress(0);
+                    creationProgressBar.setVisibility(View.GONE);
+                    StickerExceptionHandler.handleException(stickerException, context);
                 }
+            }
+
+            @Override
+            public void onProgressUpdate(int process) {
+                creationProgressBar.setProgress(process);
             }
         };
     }

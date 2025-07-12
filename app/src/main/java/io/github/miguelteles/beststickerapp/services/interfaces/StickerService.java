@@ -13,8 +13,9 @@ import io.github.miguelteles.beststickerapp.exception.StickerFolderException;
 
 public interface StickerService {
 
-    Sticker createSticker(StickerPack stickerPack,
-                          Uri uriStickerImage) throws StickerException;
+    void createSticker(StickerPack stickerPack,
+                       Uri selectedStickerImage,
+                       EntityCreationCallback<Sticker> callbackClass);
 
     void deleteSticker(Sticker sticker,
                        StickerPack stickerPack) throws StickerException;

@@ -26,6 +26,7 @@ import io.github.miguelteles.beststickerapp.exception.enums.StickerFolderExcepti
 import io.github.miguelteles.beststickerapp.repository.MyDatabase;
 import io.github.miguelteles.beststickerapp.repository.StickerPackRepository;
 import io.github.miguelteles.beststickerapp.repository.contentProvider.StickerUriProvider;
+import io.github.miguelteles.beststickerapp.services.interfaces.EntityCreationCallback;
 import io.github.miguelteles.beststickerapp.services.interfaces.FoldersManagementService;
 import io.github.miguelteles.beststickerapp.services.interfaces.StickerPackService;
 import io.github.miguelteles.beststickerapp.services.interfaces.StickerService;
@@ -91,20 +92,21 @@ public class StickerPackServiceImpl implements StickerPackService {
     public void createStickerPack(String authorNameInput,
                                   String packNameInput,
                                   Uri selectedImagemUri,
-                                  StickerPackCreationCallback callback) {
-        validateParametersCreateStickerPack(packNameInput, selectedImagemUri, callback);
+                                  EntityCreationCallback<StickerPack> callbackClass) {
+        validateParametersCreateStickerPack(packNameInput, selectedImagemUri, callbackClass);
         if (Utils.isNothing(authorNameInput)) {
             authorNameInput = resources.getString(R.string.defaultPublisher);
         }
         final String authorName = authorNameInput;
 
+        //esse cara aqui serve pra criar outra thread sem ser a principal pra processar
         executor.execute(() -> {
             StickerPack stickerPack = null;
             StickerException exception = null;
 
             File stickerPackFolder = null;
             try {
-                callback.onProgressUpdate(10);
+                callbackClass.onProgressUpdate(10);
                 String stickerPackFolderName = packNameInput + Utils.formatData(new Date(), "yyyy.MM.dd.HH.mm.ss");
                 stickerPackFolder = foldersManagementService.getStickerPackFolderByFolderName(stickerPackFolderName);
                 FoldersManagementServiceImpl.Image copiedImages = foldersManagementService.generateStickerImages(stickerPackFolder,
@@ -112,7 +114,7 @@ public class StickerPackServiceImpl implements StickerPackService {
                         generateStickerPackImageName(),
                         FoldersManagementServiceImpl.TRAY_IMAGE_SIZE,
                         true);
-                callback.onProgressUpdate(50);
+                callbackClass.onProgressUpdate(50);
                 stickerPack = new StickerPack(null,
                         packNameInput,
                         authorName,
@@ -124,24 +126,27 @@ public class StickerPackServiceImpl implements StickerPackService {
                         copiedImages.getResidezImageFileInBytes());
                 stickerPackValidator.verifyCreatedStickerPackValidity(stickerPack);
                 stickerPackRepository.save(stickerPack);
-                callback.onProgressUpdate(70);
+                callbackClass.onProgressUpdate(70);
                 addStickerPackToContentProvider(stickerPack);
             } catch (StickerException ex) {
                 deletePackFolderOnException(stickerPackFolder);
                 exception = ex;
+            } catch (Exception ex) {
+                deletePackFolderOnException(stickerPackFolder);
+                exception = new StickerException(ex, StickerExceptionEnum.CSP, null);
             }
-            callback.onProgressUpdate(90);
+            callbackClass.onProgressUpdate(90);
 
             StickerException finalException = exception;
             StickerPack finalStickerPack = stickerPack;
             threadResultPoster.post(() -> {
-                callback.onCreationFinish(finalStickerPack, finalException);
+                callbackClass.onCreationFinish(finalStickerPack, finalException);
             });
         });
 
     }
 
-    private void validateParametersCreateStickerPack(String packName, Uri packImageUri, StickerPackCreationCallback callback) {
+    private void validateParametersCreateStickerPack(String packName, Uri packImageUri, EntityCreationCallback<StickerPack> callback) {
         if (Utils.isNothing(packName)) {
             throw new IllegalArgumentException("Pack name cannot be null or empty");
         }
@@ -177,7 +182,7 @@ public class StickerPackServiceImpl implements StickerPackService {
     public void updateStickerPack(StickerPack stickerPack,
                                   String editedAuthorName,
                                   String editedPackName,
-                                  StickerPackCreationCallback callback) {
+                                  EntityCreationCallback callback) {
         if (Utils.isNothing(editedAuthorName)) {
             editedAuthorName = resources.getString(R.string.defaultPublisher);
         }

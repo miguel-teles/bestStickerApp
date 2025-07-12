@@ -1,5 +1,11 @@
 package io.github.miguelteles.beststickerapp.unit.service;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.res.Resources;
@@ -7,27 +13,23 @@ import android.net.Uri;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
+
+import java.io.File;
+import java.util.concurrent.Executor;
 
 import io.github.miguelteles.beststickerapp.domain.entity.StickerPack;
 import io.github.miguelteles.beststickerapp.exception.StickerException;
 import io.github.miguelteles.beststickerapp.repository.StickerPackRepository;
 import io.github.miguelteles.beststickerapp.repository.contentProvider.StickerUriProvider;
 import io.github.miguelteles.beststickerapp.services.StickerPackServiceImpl;
+import io.github.miguelteles.beststickerapp.services.interfaces.EntityCreationCallback;
 import io.github.miguelteles.beststickerapp.services.interfaces.FoldersManagementService;
 import io.github.miguelteles.beststickerapp.services.interfaces.StickerPackService;
 import io.github.miguelteles.beststickerapp.services.interfaces.StickerService;
 import io.github.miguelteles.beststickerapp.validator.StickerPackValidator;
-
-import static org.junit.Assert.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
-
-import java.io.File;
-import java.util.concurrent.Executor;
 
 public class StickerPackServiceTest {
 
@@ -40,10 +42,9 @@ public class StickerPackServiceTest {
 
     Resources resources = mock(Resources.class);
     Uri uri = mock(Uri.class);
+    Executor testExecutor = Runnable::run;
 
-    Executor executor = Runnable::run;
-
-    StickerPackService.StickerPackCreationCallback callback = new StickerPackService.StickerPackCreationCallback() {
+    EntityCreationCallback<StickerPack> callback = new EntityCreationCallback<>() {
         @Override
         public void onCreationFinish(StickerPack createdStickerPack, StickerException stickerException) {
             generatedStickerPack = createdStickerPack;
@@ -64,13 +65,13 @@ public class StickerPackServiceTest {
             stickerService,
             stickerPackValidator,
             resources,
-            executor);
+            testExecutor);
 
     StickerPack validStickerPack = new StickerPack(1,
             "teste",
             "teste",
-            "app/src/main/assets/testImage.jpg",
-            "app/src/main/assets/testImage.jpg",
+            "app/src/main/assets/test_image.jpg",
+            "app/src/main/assets/test_image.jpg",
             "teste",
             "teste",
             "teste",
@@ -85,14 +86,14 @@ public class StickerPackServiceTest {
         when(foldersManagementService.getStickerPackFolderByFolderName(any(String.class))).then(new Answer<File>() {
             @Override
             public File answer(InvocationOnMock invocation) throws Throwable {
-                return new File("/home/miguel/StudioProjects/stickersProjeto/app/src/main/assets/testImage.jpg");
+                return new File("/home/miguel/StudioProjects/stickersProjeto/app/src/main/assets/test_image.jpg");
             }
         });
         when(foldersManagementService.generateStickerImages(any(File.class), any(Uri.class), any(String.class), any(Integer.class), any(Boolean.class))).then(new Answer<FoldersManagementService.Image>() {
             @Override
             public FoldersManagementService.Image answer(InvocationOnMock invocation) throws Throwable {
-                return new FoldersManagementService.Image(new File("/home/miguel/StudioProjects/stickersProjeto/app/src/main/assets/testImage.jpg"),
-                        new File("/home/miguel/StudioProjects/stickersProjeto/app/src/main/assets/testImage.jpg"),
+                return new FoldersManagementService.Image(new File("/home/miguel/StudioProjects/stickersProjeto/app/src/main/assets/test_image.jpg"),
+                        new File("/home/miguel/StudioProjects/stickersProjeto/app/src/main/assets/test_image.jpg"),
                         new byte[]{1, 1, 1, 1, 1, 1, 1, 1});
             }
         });
@@ -127,7 +128,7 @@ public class StickerPackServiceTest {
     }
 
     @Test
-    public void testCreateStickerPack() throws StickerException {
+    public void testCreateStickerPack() {
         stickerPackService.createStickerPack("teste", "teste", uri, callback);
         assertNotNull(generatedStickerPack.getName());
         assertNotNull(generatedStickerPack.getIdentifier());
@@ -161,6 +162,9 @@ public class StickerPackServiceTest {
         assertThrows("IllegalArgumentException thrown when uri is null",
                 IllegalArgumentException.class,
                 () -> stickerPackService.createStickerPack("teste", "teste", null, callback));
+        assertThrows("IllegalArgumentException thrown when callbackClass is null",
+                IllegalArgumentException.class,
+                () -> stickerPackService.createStickerPack("teste", "teste", uri, null));
     }
 
     @Test

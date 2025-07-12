@@ -30,7 +30,8 @@ public class FoldersManagementServiceImpl implements FoldersManagementService {
     public static final int STICKER_IMAGE_MAX_FILE_SIZE = 100; //50KB
     public static final int TRAY_IMAGE_SIZE = 96; //96pxs
     public static final int STICKER_IMAGE_SIZE = 512; //512pxs
-    public static final String TESTE_IMAGE = "testImage.jpg";
+    public static final String TESTE_IMAGE = "test_image.jpg";
+    public static final String STICKER_ERROR_IMAGE = "sticker_error_image.webp";
 
     private final Context context;
 
@@ -299,22 +300,23 @@ public class FoldersManagementServiceImpl implements FoldersManagementService {
 
     public void deleteFile(File stickerPackFolderName) throws StickerFolderException {
         try {
-
-            if (stickerPackFolderName.isDirectory()) {
-                for (String fileStr : stickerPackFolderName.list()) {
-                    File file = new File(stickerPackFolderName, fileStr);
-                    if (file.isDirectory()) {
-                        deleteFile(file);
-                    } else {
-                        if (!file.delete()) {
-                            throw new StickerFolderException(null, StickerFolderExceptionEnum.DELETE_FOLDER, "Erro ao deletar file " + file.getName());
+            if (stickerPackFolderName.exists()) {
+                if (stickerPackFolderName.isDirectory()) {
+                    for (String fileStr : stickerPackFolderName.list()) {
+                        File file = new File(stickerPackFolderName, fileStr);
+                        if (file.isDirectory()) {
+                            deleteFile(file);
+                        } else {
+                            if (!file.delete()) {
+                                throw new StickerFolderException(null, StickerFolderExceptionEnum.DELETE_FOLDER, "Erro ao deletar file " + file.getName());
+                            }
                         }
                     }
                 }
-            }
 
-            if (!stickerPackFolderName.delete()) {
-                throw new StickerFolderException(null, StickerFolderExceptionEnum.DELETE_FOLDER, "Erro ao deletar file " + stickerPackFolderName.getName());
+                if (!stickerPackFolderName.delete()) {
+                    throw new StickerFolderException(null, StickerFolderExceptionEnum.DELETE_FOLDER, "Erro ao deletar file " + stickerPackFolderName.getName());
+                }
             }
         } catch (Exception ex) {
             throw new StickerFolderException(ex, StickerFolderExceptionEnum.DELETE_FOLDER, "Pasta: " + stickerPackFolderName);

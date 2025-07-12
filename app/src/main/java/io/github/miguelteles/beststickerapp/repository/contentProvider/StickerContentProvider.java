@@ -35,7 +35,10 @@ import io.github.miguelteles.beststickerapp.services.interfaces.StickerPackServi
 import io.github.miguelteles.beststickerapp.utils.Utils;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -231,7 +234,7 @@ public class StickerContentProvider extends ContentProvider {
     }
 
     @NonNull
-    private Cursor  getStickerPackInfo(@NonNull Uri uri, @NonNull List<StickerPack> stickerPackList) {
+    private Cursor getStickerPackInfo(@NonNull Uri uri, @NonNull List<StickerPack> stickerPackList) {
         MatrixCursor cursor = new MatrixCursor(
                 new String[]{
                         STICKER_PACK_IDENTIFIER_IN_QUERY,
@@ -330,8 +333,37 @@ public class StickerContentProvider extends ContentProvider {
         try {
             return ParcelFileDescriptor.open(new File(foldersManagementService.getPackFolderByFolderName(folder), fileName), ParcelFileDescriptor.MODE_READ_ONLY);
         } catch (IOException e) {
-            throw new StickerFolderException(e, StickerFolderExceptionEnum.GET_FILE, "Erro ao abrir arquivo " + folder + "/" + fileName);
+            return fetchFileStickerErrorImage();
         }
+    }
+
+    private ParcelFileDescriptor fetchFileStickerErrorImage() throws StickerFolderException {
+        try {
+            return ParcelFileDescriptor.open(copyStickerErroImageAssetToCache(), ParcelFileDescriptor.MODE_READ_ONLY);
+        } catch (StickerException e) {
+            throw e;
+        } catch (IOException e) {
+            throw new StickerFolderException(e, StickerFolderExceptionEnum.GET_FILE, "Erro ao abrir arquivo sticker_error_image");
+        }
+    }
+
+    private File copyStickerErroImageAssetToCache() throws StickerFolderException {
+        File cacheFile = new File(getContext().getCacheDir(), FoldersManagementServiceImpl.STICKER_ERROR_IMAGE);
+
+        if (!cacheFile.exists()) {
+            try (InputStream in = getContext().getAssets().open(FoldersManagementServiceImpl.STICKER_ERROR_IMAGE);
+                 OutputStream out = new FileOutputStream(cacheFile)) {
+
+                byte[] buffer = new byte[4096];
+                int read;
+                while ((read = in.read(buffer)) != -1) {
+                    out.write(buffer, 0, read);
+                }
+            } catch (IOException e) {
+                throw new StickerFolderException(e, StickerFolderExceptionEnum.GET_FILE, "Erro ao copiar sticker_error.");
+            }
+        }
+        return cacheFile;
     }
 
 

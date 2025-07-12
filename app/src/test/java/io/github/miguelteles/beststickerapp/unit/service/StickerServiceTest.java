@@ -20,6 +20,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.concurrent.Executor;
 
 import io.github.miguelteles.beststickerapp.domain.entity.Sticker;
 import io.github.miguelteles.beststickerapp.domain.entity.StickerPack;
@@ -27,6 +28,7 @@ import io.github.miguelteles.beststickerapp.exception.StickerException;
 import io.github.miguelteles.beststickerapp.repository.StickerRepository;
 import io.github.miguelteles.beststickerapp.repository.contentProvider.StickerUriProvider;
 import io.github.miguelteles.beststickerapp.services.StickerServiceImpl;
+import io.github.miguelteles.beststickerapp.services.interfaces.EntityCreationCallback;
 import io.github.miguelteles.beststickerapp.services.interfaces.FoldersManagementService;
 import io.github.miguelteles.beststickerapp.services.interfaces.StickerService;
 import io.github.miguelteles.beststickerapp.utils.Utils;
@@ -41,12 +43,27 @@ public class StickerServiceTest {
     StickerPackValidator stickerPackValidator = mock(StickerPackValidator.class);
     StickerService stickerService = mock(StickerService.class);
     Uri uri = mock(Uri.class);
+    Executor testExecutor = Runnable::run;
+
+    EntityCreationCallback<Sticker> callback = new EntityCreationCallback<Sticker>() {
+        @Override
+        public void onCreationFinish(Sticker createdEntity, StickerException stickerException) {
+            generatedSticker = createdEntity;
+        }
+
+        @Override
+        public void onProgressUpdate(int process) {
+
+        }
+    };
+
+    Sticker generatedSticker = null;
 
     StickerPack validStickerPack = new StickerPack(1,
             "teste",
             "teste",
-            "app/src/main/assets/testImage.jpg",
-            "app/src/main/assets/testImage.jpg",
+            "app/src/main/assets/test_image.jpg",
+            "app/src/main/assets/test_image.jpg",
             "teste",
             "teste",
             "teste",
@@ -56,7 +73,7 @@ public class StickerServiceTest {
             true,
             false);
 
-    Sticker validSticker = new Sticker(1, 1, "/home/miguel/StudioProjects/stickersProjeto/app/src/main/assets/testImage.jpg");
+    Sticker validSticker = new Sticker(1, 1, "/home/miguel/StudioProjects/stickersProjeto/app/src/main/assets/test_image.jpg");
 
 
 
@@ -80,8 +97,8 @@ public class StickerServiceTest {
         when(foldersManagementService.generateStickerImages(any(File.class), any(Uri.class), any(String.class), any(Integer.class), any(Boolean.class))).then(new Answer<FoldersManagementService.Image>() {
             @Override
             public FoldersManagementService.Image answer(InvocationOnMock invocation) throws Throwable {
-                return new FoldersManagementService.Image(new File("/home/miguel/StudioProjects/stickersProjeto/app/src/main/assets/testImage.jpg"),
-                        new File("/home/miguel/StudioProjects/stickersProjeto/app/src/main/assets/testImage.jpg"),
+                return new FoldersManagementService.Image(new File("/home/miguel/StudioProjects/stickersProjeto/app/src/main/assets/test_image.jpg"),
+                        new File("/home/miguel/StudioProjects/stickersProjeto/app/src/main/assets/test_image.jpg"),
                         new byte[]{1,1,1,1,1,1,1,1});
             }
         });
@@ -129,22 +146,23 @@ public class StickerServiceTest {
             }
         });
 
-        stickerService = new StickerServiceImpl(stickerRepository, foldersManagementService, stickerUriProvider, contentResolver, stickerPackValidator);
+        stickerService = new StickerServiceImpl(stickerRepository, foldersManagementService, stickerUriProvider, contentResolver, stickerPackValidator, testExecutor);
     }
 
     @Test
-    public void testCreateSticker() throws StickerException {
-        Sticker sticker = stickerService.createSticker(validStickerPack, uri);
+    public void testCreateSticker() {
+        stickerService.createSticker(validStickerPack, uri, callback);
 
-        assertFalse("StickerImageFile is not null", Utils.isNothing(sticker.getStickerImageFile()));
-        assertNotNull("Sticker has identifier", sticker.getPackIdentifier());
-        assertTrue("Sticker size is greater then 0",sticker.getSize()>0);
+        assertFalse("StickerImageFile is not null", Utils.isNothing(generatedSticker.getStickerImageFile()));
+        assertNotNull("Sticker has identifier", generatedSticker.getPackIdentifier());
+        assertTrue("Sticker size is greater then 0",generatedSticker.getSize()>0);
     }
 
     @Test
-    public void testCreateStickerInputInput() throws StickerException {
-        assertThrows("IllegalArgumentException thrown when stickerPack is null", IllegalArgumentException.class, () -> stickerService.createSticker(null, uri));
-        assertThrows("IllegalArgumentException thrown when selectedUriImage is null", IllegalArgumentException.class, () -> stickerService.createSticker(validStickerPack, null));
+    public void testCreateStickerInputInput() {
+        assertThrows("IllegalArgumentException thrown when stickerPack is null", IllegalArgumentException.class, () -> stickerService.createSticker(null, uri, callback));
+        assertThrows("IllegalArgumentException thrown when selectedUriImage is null", IllegalArgumentException.class, () -> stickerService.createSticker(validStickerPack, null, callback));
+        assertThrows("IllegalArgumentException thrown when callbackClass is null", IllegalArgumentException.class, () -> stickerService.createSticker(validStickerPack, uri, null));
     }
 
     @Test

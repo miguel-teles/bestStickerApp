@@ -21,6 +21,7 @@ import io.github.miguelteles.beststickerapp.exception.enums.StickerExceptionEnum
 import io.github.miguelteles.beststickerapp.domain.entity.StickerPack;
 import io.github.miguelteles.beststickerapp.repository.contentProvider.StickerUriProvider;
 import io.github.miguelteles.beststickerapp.services.StickerPackServiceImpl;
+import io.github.miguelteles.beststickerapp.services.interfaces.EntityCreationCallback;
 import io.github.miguelteles.beststickerapp.services.interfaces.StickerPackService;
 import io.github.miguelteles.beststickerapp.utils.Utils;
 import com.google.android.material.textfield.TextInputEditText;
@@ -180,33 +181,30 @@ public class AddStickerPackActivity extends AppCompatActivity {
                 String nomePacoteInput = txtNomePacote.getText().toString();
 
                 creationProgressBar.setVisibility(View.VISIBLE);
-                try {
-                    if (stickerPackBeingEdited == null) {
-                        stickerPackService.createStickerPack(nmAutorInput,
-                                nomePacoteInput,
-                                uriImagemStickerPack,
-                                generateStickerPackCreationCallback());
-                    } else {
-                        stickerPackService.updateStickerPack(stickerPackBeingEdited,
-                                nmAutorInput,
-                                nomePacoteInput,
-                                generateStickerPackCreationCallback());
-                    }
-                } catch (StickerException ex) {
-                    StickerExceptionHandler.handleException(ex, context);
+                if (stickerPackBeingEdited == null) {
+                    stickerPackService.createStickerPack(nmAutorInput,
+                            nomePacoteInput,
+                            uriImagemStickerPack,
+                            createStickerPackCreationCallback());
+                } else {
+                    stickerPackService.updateStickerPack(stickerPackBeingEdited,
+                            nmAutorInput,
+                            nomePacoteInput,
+                            createStickerPackCreationCallback());
                 }
             }
         };
     }
 
-    private StickerPackService.StickerPackCreationCallback generateStickerPackCreationCallback() {
+    private EntityCreationCallback<StickerPack> createStickerPackCreationCallback() {
         Context context = this;
-        return new StickerPackService.StickerPackCreationCallback() {
+        return new EntityCreationCallback<>() {
             @Override
             public void onCreationFinish(StickerPack createdStickerPack, StickerException stickerException) {
                 stickerPackBeingEdited = createdStickerPack;
                 if (stickerException != null) {
                     creationProgressBar.setVisibility(View.GONE);
+                    creationProgressBar.setProgress(0);
                     StickerExceptionHandler.handleException(stickerException, context);
                 } else {
                     onProgressUpdate(100);
