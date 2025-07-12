@@ -15,6 +15,7 @@ import io.github.miguelteles.beststickerapp.exception.enums.StickerFolderExcepti
 import io.github.miguelteles.beststickerapp.repository.MyDatabase;
 import io.github.miguelteles.beststickerapp.repository.StickerRepository;
 import io.github.miguelteles.beststickerapp.repository.contentProvider.StickerUriProvider;
+import io.github.miguelteles.beststickerapp.services.client.ImageConverterWebpWebService;
 import io.github.miguelteles.beststickerapp.services.interfaces.EntityCreationCallback;
 import io.github.miguelteles.beststickerapp.services.interfaces.FoldersManagementService;
 import io.github.miguelteles.beststickerapp.services.interfaces.StickerService;
@@ -40,9 +41,9 @@ public class StickerServiceImpl implements StickerService {
     private final StickerUriProvider stickerUriProvider;
     private final ContentResolver contentResolver;
     private final StickerPackValidator stickerPackValidator;
-
     private final Executor executor;
     private final UiThreadPoster threadResultPoster;
+    private final ImageConverterWebpWebService converterWebService =
 
     private StickerServiceImpl(Context context) throws StickerException {
         this.stickerRepository = new StickerRepository(MyDatabase.getInstance().getSqLiteDatabase());

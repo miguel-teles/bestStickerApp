@@ -27,17 +27,17 @@ public interface FoldersManagementService {
 
     String getFileExtension(File file, boolean withDot);
 
-    Image generateStickerImages(File stickerPackFolder,
-                                Uri selectedImageSourceUri,
-                                String destinationImageFileName,
-                                Integer imageWidthAndHeight,
-                                boolean keepOriginalCopy) throws StickerFolderException;
-
-    Image generateStickerImages(File stickerPackFolder,
-                                String selectedImageSourceAbsolutePath,
-                                String destinationImageFileName,
-                                Integer imageWidthAndHeight,
-                                boolean keepOriginalCopy) throws StickerFolderException;
+//    Image generateStickerImages(File stickerPackFolder,
+//                                Uri selectedImageSourceUri,
+//                                String destinationImageFileName,
+//                                Integer imageWidthAndHeight,
+//                                boolean keepOriginalCopy) throws StickerFolderException;
+//
+//    Image generateStickerImages(File stickerPackFolder,
+//                                String selectedImageSourceAbsolutePath,
+//                                String destinationImageFileName,
+//                                Integer imageWidthAndHeight,
+//                                boolean keepOriginalCopy) throws StickerFolderException;
 
     void deleteFile(File stickerPackFolderName) throws StickerFolderException;
 
