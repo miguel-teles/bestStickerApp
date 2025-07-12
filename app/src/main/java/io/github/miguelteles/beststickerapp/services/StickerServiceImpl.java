@@ -111,9 +111,7 @@ public class StickerServiceImpl implements StickerService {
             }
             Sticker finalSticker = sticker;
             StickerException finalException = exception;
-            threadResultPoster.post(() -> {
-                callbackClass.onCreationFinish(finalSticker, finalException);
-            });
+            threadResultPoster.post(() -> callbackClass.onCreationFinish(finalSticker, finalException));
         });
     }
 
@@ -186,7 +184,7 @@ public class StickerServiceImpl implements StickerService {
             try {
                 bytes = fetchStickerAsset(packIdentifier,
                         sticker.getStickerImageFile());
-                if (bytes.length <= 0) {
+                if (bytes.length == 0) {
                     throw new IllegalStateException("Asset file is empty, pack identifier: " + packIdentifier + ", sticker: " + sticker.getStickerImageFile());
                 }
                 sticker.setSize(bytes.length);

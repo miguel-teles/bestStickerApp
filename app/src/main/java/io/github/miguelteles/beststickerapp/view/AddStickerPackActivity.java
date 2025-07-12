@@ -17,6 +17,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.res.ResourcesCompat;
 
 import io.github.miguelteles.beststickerapp.R;
 import io.github.miguelteles.beststickerapp.exception.StickerException;
@@ -28,6 +29,7 @@ import io.github.miguelteles.beststickerapp.services.StickerPackServiceImpl;
 import io.github.miguelteles.beststickerapp.services.interfaces.EntityCreationCallback;
 import io.github.miguelteles.beststickerapp.services.interfaces.StickerPackService;
 import io.github.miguelteles.beststickerapp.utils.Utils;
+
 import com.google.android.material.textfield.TextInputEditText;
 
 
@@ -122,34 +124,27 @@ public class AddStickerPackActivity extends AppCompatActivity {
         };
     }
 
-    private View.OnFocusChangeListener onFocusChangeListener() throws StickerException {
-        return new View.OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View view, boolean b) {
-                verifyMandatoryFields();
-            }
+    private View.OnFocusChangeListener onFocusChangeListener() {
+        return (view, b) -> {
+            verifyMandatoryFields();
         };
     }
 
     private void verifyMandatoryFields() {
         if (!Utils.isNothing(txtNomePacote.getText()) && stickerPackImageView.getTag() != null && stickerPackImageView.getTag().equals("modified")) {
             btnAdicionarStickerPack.setEnabled(true);
-            btnAdicionarStickerPack.setBackground(getResources().getDrawable(R.drawable.shape_btn_default));
+            btnAdicionarStickerPack.setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.shape_btn_default, null));
         } else {
             btnAdicionarStickerPack.setEnabled(false);
-            btnAdicionarStickerPack.setBackground(getResources().getDrawable(R.drawable.shape_btn_default_disabled));
+            btnAdicionarStickerPack.setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.shape_btn_default_disabled, null));
         }
     }
 
     public View.OnClickListener pacoteImageViewOnClick() {
-        Context context = this;
-        return new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-                intent.setType("image/*");
-                startActivityForResult(intent, Utils.PICK_IMAGE_REQUEST_CODE);
-            }
+        return v -> {
+            Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+            intent.setType("image/*");
+            startActivityForResult(intent, Utils.PICK_IMAGE_REQUEST_CODE);
         };
     }
 
@@ -175,27 +170,21 @@ public class AddStickerPackActivity extends AppCompatActivity {
     }
 
     private View.OnClickListener createOrUpdateStickerPackOnClick() {
-        Context context = this;
-        return new View.OnClickListener() {
+        return v -> {
+            String nmAutorInput = txtAutor.getText().toString();
+            String nomePacoteInput = txtNomePacote.getText().toString();
 
-            @Override
-            public void onClick(View view) {
-
-                String nmAutorInput = txtAutor.getText().toString();
-                String nomePacoteInput = txtNomePacote.getText().toString();
-
-                creationProgressBar.setVisibility(View.VISIBLE);
-                if (stickerPackBeingEdited == null) {
-                    stickerPackService.createStickerPack(nmAutorInput,
-                            nomePacoteInput,
-                            uriImagemStickerPack,
-                            createStickerPackCreationCallback());
-                } else {
-                    stickerPackService.updateStickerPack(stickerPackBeingEdited,
-                            nmAutorInput,
-                            nomePacoteInput,
-                            createStickerPackCreationCallback());
-                }
+            creationProgressBar.setVisibility(View.VISIBLE);
+            if (stickerPackBeingEdited == null) {
+                stickerPackService.createStickerPack(nmAutorInput,
+                        nomePacoteInput,
+                        uriImagemStickerPack,
+                        createStickerPackCreationCallback());
+            } else {
+                stickerPackService.updateStickerPack(stickerPackBeingEdited,
+                        nmAutorInput,
+                        nomePacoteInput,
+                        createStickerPackCreationCallback());
             }
         };
     }

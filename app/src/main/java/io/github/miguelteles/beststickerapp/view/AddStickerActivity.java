@@ -16,6 +16,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.res.ResourcesCompat;
 
 import io.github.miguelteles.beststickerapp.R;
 import io.github.miguelteles.beststickerapp.domain.entity.Sticker;
@@ -76,20 +77,17 @@ public class AddStickerActivity extends AppCompatActivity {
 
     private View.OnClickListener adicionarSticker() {
         Context context = this;
-        return new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                creationProgressBar.setVisibility(View.VISIBLE);
-                stickerService.createSticker(stickerPack,
-                        uriStickerImage,
-                        createStickerCreationCallback(context));
-            }
+        return v -> {
+            creationProgressBar.setVisibility(View.VISIBLE);
+            stickerService.createSticker(stickerPack,
+                    uriStickerImage,
+                    createStickerCreationCallback(context));
         };
     }
 
     @NonNull
     private EntityCreationCallback<Sticker> createStickerCreationCallback(Context context) {
-        return new EntityCreationCallback<Sticker>() {
+        return new EntityCreationCallback<>() {
 
             @Override
             public void onCreationFinish(Sticker createdEntity, StickerException stickerException) {
@@ -121,14 +119,10 @@ public class AddStickerActivity extends AppCompatActivity {
     }
 
     private View.OnClickListener selecionaImagem() {
-        Context context = this;
-        return new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-                intent.setType("image/*");
-                startActivityForResult(intent, Utils.PICK_IMAGE_REQUEST_CODE);
-            }
+        return view -> {
+            Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+            intent.setType("image/*");
+            startActivityForResult(intent, Utils.PICK_IMAGE_REQUEST_CODE);
         };
     }
 
@@ -153,10 +147,10 @@ public class AddStickerActivity extends AppCompatActivity {
     private void verificaCamposObrigatorios() {
         if (stickerImageView.getTag() != null && stickerImageView.getTag().equals("modified")) {
             btnAdicionarSticker.setEnabled(true);
-            btnAdicionarSticker.setBackground(getResources().getDrawable(R.drawable.shape_btn_default));
+            btnAdicionarSticker.setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.shape_btn_default, null));
         } else {
             btnAdicionarSticker.setEnabled(false);
-            btnAdicionarSticker.setBackground(getResources().getDrawable(R.drawable.shape_btn_default_disabled));
+            btnAdicionarSticker.setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.shape_btn_default_disabled, null));
         }
     }
 }
