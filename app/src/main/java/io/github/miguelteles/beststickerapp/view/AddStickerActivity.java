@@ -23,10 +23,8 @@ import io.github.miguelteles.beststickerapp.domain.entity.Sticker;
 import io.github.miguelteles.beststickerapp.domain.entity.StickerPack;
 import io.github.miguelteles.beststickerapp.exception.StickerException;
 import io.github.miguelteles.beststickerapp.exception.StickerExceptionHandler;
-import io.github.miguelteles.beststickerapp.services.StickerServiceImpl;
-
+import io.github.miguelteles.beststickerapp.services.StickerPackService;
 import io.github.miguelteles.beststickerapp.services.interfaces.EntityOperationCallback;
-import io.github.miguelteles.beststickerapp.services.interfaces.StickerService;
 import io.github.miguelteles.beststickerapp.utils.Utils;
 
 public class AddStickerActivity extends AppCompatActivity {
@@ -34,7 +32,7 @@ public class AddStickerActivity extends AppCompatActivity {
     private ImageView stickerImageView = null;
     private Uri uriStickerImage = null;
     private TextView btnAdicionarSticker = null;
-    private StickerService stickerService;
+    private StickerPackService stickerPackService;
     private StickerPack stickerPack;
     private ProgressBar creationProgressBar;
 
@@ -45,7 +43,7 @@ public class AddStickerActivity extends AppCompatActivity {
         declaraCampos();
 
         try {
-            stickerService = StickerServiceImpl.getInstance();
+            stickerPackService = StickerPackService.getInstance();
         } catch (StickerException ex) {
             StickerExceptionHandler.handleException(ex, this);
         }
@@ -79,7 +77,7 @@ public class AddStickerActivity extends AppCompatActivity {
         Context context = this;
         return v -> {
             creationProgressBar.setVisibility(View.VISIBLE);
-            stickerService.createSticker(stickerPack,
+            stickerPackService.createSticker(stickerPack,
                     uriStickerImage,
                     createStickerCreationCallback(context));
         };

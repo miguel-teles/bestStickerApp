@@ -37,6 +37,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import io.github.miguelteles.beststickerapp.BuildConfig;
 import io.github.miguelteles.beststickerapp.domain.entity.Sticker;
@@ -86,7 +87,7 @@ public class StickerContentProviderReader {
         ArrayList<StickerPack> stickerPackList = new ArrayList<>();
         cursor.moveToFirst();
         while (!cursor.isAfterLast()) {
-            final int identifier = cursor.getInt(cursor.getColumnIndexOrThrow(STICKER_PACK_IDENTIFIER_IN_QUERY));
+            final UUID identifier = UUID.fromString(cursor.getString(cursor.getColumnIndexOrThrow(STICKER_PACK_IDENTIFIER_IN_QUERY)));
             final String name = cursor.getString(cursor.getColumnIndexOrThrow(STICKER_PACK_NAME_IN_QUERY));
             final String publisher = cursor.getString(cursor.getColumnIndexOrThrow(STICKER_PACK_PUBLISHER_IN_QUERY));
             final String originalTrayImage = cursor.getString(cursor.getColumnIndexOrThrow(STICKER_PACK_ICON_ORIGINAL_IMAGE_FILE));
@@ -96,7 +97,7 @@ public class StickerContentProviderReader {
             final String publisherWebsite = cursor.getString(cursor.getColumnIndexOrThrow(PUBLISHER_WEBSITE));
             final String privacyPolicyWebsite = cursor.getString(cursor.getColumnIndexOrThrow(PRIVACY_POLICY_WEBSITE));
             final String licenseAgreementWebsite = cursor.getString(cursor.getColumnIndexOrThrow(LICENSE_AGREEMENT_WEBSITE));
-            final String imageDataVersion = cursor.getString(cursor.getColumnIndexOrThrow(IMAGE_DATA_VERSION));
+            final Integer imageDataVersion = cursor.getInt(cursor.getColumnIndexOrThrow(IMAGE_DATA_VERSION));
             final boolean avoidCache = cursor.getShort(cursor.getColumnIndexOrThrow(AVOID_CACHE)) > 0;
             final boolean animatedStickerPack = cursor.getShort(cursor.getColumnIndexOrThrow(ANIMATED_STICKER_PACK)) > 0;
             final StickerPack stickerPack = new StickerPack(identifier,
@@ -120,8 +121,8 @@ public class StickerContentProviderReader {
     }
 
     @NonNull
-    private static List<Sticker> fetchFromContentProviderForStickers(Integer stickerPackIdentifier, ContentResolver contentResolver) {
-        Uri uri = StickerUriProvider.getInstance().getStickerListUri(stickerPackIdentifier.toString());
+    private static List<Sticker> fetchFromContentProviderForStickers(UUID stickerPackIdentifier, ContentResolver contentResolver) {
+        Uri uri = StickerUriProvider.getInstance().getStickerListUri(stickerPackIdentifier);
 
         final String[] projection = {STICKER_FILE_NAME_IN_QUERY, STICKER_IDENTIFIER, STICKER_PACK_IDENTIFIER};
         final Cursor cursor = contentResolver.query(uri, projection, null, null, null);
@@ -130,8 +131,8 @@ public class StickerContentProviderReader {
             cursor.moveToFirst();
             do {
                 final String imgFile = cursor.getString(cursor.getColumnIndexOrThrow(STICKER_FILE_NAME_IN_QUERY));
-                final Integer identifier = cursor.getInt(cursor.getColumnIndexOrThrow(STICKER_IDENTIFIER));
-                final Integer packIdentifier = cursor.getInt(cursor.getColumnIndexOrThrow(STICKER_PACK_IDENTIFIER));
+                final UUID identifier = UUID.fromString(cursor.getString(cursor.getColumnIndexOrThrow(STICKER_IDENTIFIER)));
+                final UUID packIdentifier =  UUID.fromString(cursor.getString(cursor.getColumnIndexOrThrow(STICKER_PACK_IDENTIFIER)));
                 stickers.add(new Sticker(identifier, packIdentifier, imgFile));
             } while (cursor.moveToNext());
         }
@@ -144,7 +145,7 @@ public class StickerContentProviderReader {
     /**
      * Busca um asset da pasta (imagem da figurinha ou da capa do sticker pack)
      * **/
-    private static byte[] fetchStickerAsset(@NonNull final Integer identifier,
+    private static byte[] fetchStickerAsset(@NonNull final UUID identifier,
                                     @NonNull final String stickerImageFileName,
                                     ContentResolver contentResolver) throws IOException {
         //o contentResolver.openInputStream vai pro método openAssetFile do contentProvider

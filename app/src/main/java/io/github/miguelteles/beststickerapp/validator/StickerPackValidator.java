@@ -35,6 +35,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashSet;
 import java.util.List;
+import java.util.UUID;
 
 public class StickerPackValidator {
 
@@ -174,7 +175,7 @@ public class StickerPackValidator {
         }
     }
 
-    public void validateSticker(@NonNull final Integer packIdentifier,
+    public void validateSticker(@NonNull final UUID packIdentifier,
                                 @NonNull final Sticker sticker,
                                 final boolean animatedStickerPack) throws IllegalStateException, StickerFolderException {
         if (sticker.getEmojis().size() > EMOJI_MAX_LIMIT) {
@@ -189,7 +190,7 @@ public class StickerPackValidator {
         validateStickerFile(packIdentifier, sticker.getStickerImageFile(), animatedStickerPack, sticker.getStickerImageFileInBytes());
     }
 
-    private void validateStickerFile(@NonNull Integer packIdentifier,
+    private void validateStickerFile(@NonNull UUID packIdentifier,
                                      @NonNull final String fileName,
                                      final boolean animatedStickerPack,
                                      final byte[] stickerImageFileInBytes) throws IllegalStateException {
@@ -231,7 +232,7 @@ public class StickerPackValidator {
         }
     }
 
-    private void checkFrameDurationsForAnimatedSticker(@NonNull final int[] frameDurations, @NonNull final Integer identifier, @NonNull final String fileName) {
+    private void checkFrameDurationsForAnimatedSticker(@NonNull final int[] frameDurations, @NonNull final UUID identifier, @NonNull final String fileName) {
         for (int frameDuration : frameDurations) {
             if (frameDuration < ANIMATED_STICKER_FRAME_DURATION_MIN) {
                 throw new IllegalStateException("animated sticker frame duration limit is " + ANIMATED_STICKER_FRAME_DURATION_MIN + ", sticker pack identifier: " + identifier + ", filename: " + fileName);

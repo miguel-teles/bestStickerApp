@@ -29,9 +29,8 @@ import io.github.miguelteles.beststickerapp.exception.enums.StickerFolderExcepti
 import io.github.miguelteles.beststickerapp.domain.entity.Sticker;
 import io.github.miguelteles.beststickerapp.domain.entity.StickerPack;
 import io.github.miguelteles.beststickerapp.services.FoldersManagementServiceImpl;
-import io.github.miguelteles.beststickerapp.services.StickerPackServiceImpl;
+import io.github.miguelteles.beststickerapp.services.StickerPackService;
 import io.github.miguelteles.beststickerapp.services.interfaces.FoldersManagementService;
-import io.github.miguelteles.beststickerapp.services.interfaces.StickerPackService;
 import io.github.miguelteles.beststickerapp.utils.Utils;
 
 import java.io.File;
@@ -109,7 +108,7 @@ public class StickerContentProvider extends ContentProvider {
     public boolean onCreate() {
         try {
             Utils.setApplicationContext(getContext());
-            stickerPackService = StickerPackServiceImpl.getInstance();
+            stickerPackService = StickerPackService.getInstance();
             foldersManagementService = FoldersManagementServiceImpl.getInstance();
 
             AUTHORITY = BuildConfig.CONTENT_PROVIDER_AUTHORITY;
@@ -148,8 +147,8 @@ public class StickerContentProvider extends ContentProvider {
     }
 
     private void insertStickerPackUri(String authority, StickerPack stickerPack) {
-        MATCHER.addURI(authority, STICKERS_ASSET + "/" + stickerPack.getIdentifier() + "/" + stickerPack.getResizedTrayImageFile(), STICKER_PACK_TRAY_ICON_CODE); //this returns the binary information of the sticker: `AssetFileDescriptor`, which points to the asset file for the sticker.
-        MATCHER.addURI(authority, STICKERS_ASSET_ORIGINAL + "/" + stickerPack.getIdentifier() + "/" + stickerPack.getOriginalTrayImageFile(), STICKER_PACK_TRAY_ICON_CODE); //this returns the binary information of the sticker: `AssetFileDescriptor`, which points to the asset file for the sticker.
+        MATCHER.addURI(authority, STICKERS_ASSET + "/" + stickerPack.getIdentifier().toString() + "/" + stickerPack.getResizedTrayImageFile(), STICKER_PACK_TRAY_ICON_CODE); //this returns the binary information of the sticker: `AssetFileDescriptor`, which points to the asset file for the sticker.
+        MATCHER.addURI(authority, STICKERS_ASSET_ORIGINAL + "/" + stickerPack.getIdentifier().toString() + "/" + stickerPack.getOriginalTrayImageFile(), STICKER_PACK_TRAY_ICON_CODE); //this returns the binary information of the sticker: `AssetFileDescriptor`, which points to the asset file for the sticker.
     }
 
     private void insertStickerUri(String authority, Sticker sticker) {
@@ -180,6 +179,8 @@ public class StickerContentProvider extends ContentProvider {
                 return getImageAsset(uri);
             } catch (StickerException ex) {
                 throw new RuntimeException(ex);
+            } catch (Exception ex) {
+                throw new RuntimeException(ex.getMessage());
             }
         }
         return null;

@@ -16,6 +16,7 @@ import androidx.annotation.NonNull;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class StickerPack implements Parcelable {
 
@@ -34,7 +35,7 @@ public class StickerPack implements Parcelable {
     public static final String AVOID_CACHE = "avoidCache";
     public static final String ANIMATED_STICKER_PACK = "animatedStickerPack";
 
-    private Integer identifier;
+    private UUID identifier;
     private String name;
     private String publisher;
     private String originalTrayImageFile;
@@ -43,7 +44,7 @@ public class StickerPack implements Parcelable {
     private final String publisherWebsite;
     private final String privacyPolicyWebsite;
     private final String licenseAgreementWebsite;
-    private final String imageDataVersion;
+    private Integer imageDataVersion;
     private final String folderName;
     private final boolean avoidCache;
     private final boolean animatedStickerPack;
@@ -69,7 +70,7 @@ public class StickerPack implements Parcelable {
       "stickers":
     * */
 
-    public StickerPack(@NonNull Integer identifier,
+    public StickerPack(@NonNull UUID identifier,
                        @NonNull String name,
                        @NonNull String publisher,
                        @NonNull String originalTrayImageFile,
@@ -89,7 +90,7 @@ public class StickerPack implements Parcelable {
         this.originalTrayImageFile = originalTrayImageFile;
         this.resizedTrayImageFile = resizedTrayImageFile;
         this.folderName = folderName;
-        this.imageDataVersion = imageDataVersion+"";
+        this.imageDataVersion = imageDataVersion;
         this.avoidCache = avoidCache;
         this.publisherEmail = publisherEmail;
         this.publisherWebsite = publisherWebsite;
@@ -99,7 +100,7 @@ public class StickerPack implements Parcelable {
         this.stickers = stickerList;
     }
 
-    public StickerPack(Integer identifier,
+    public StickerPack(UUID identifier,
                        String name,
                        String publisher,
                        String originalTrayImageFile,
@@ -109,7 +110,7 @@ public class StickerPack implements Parcelable {
                        String publisherWebsite,
                        String privacyPolicyWebsite,
                        String licenseAgreementWebsite,
-                       String imageDataVersion,
+                       Integer imageDataVersion,
                        boolean avoidCache,
                        boolean animatedStickerPack) {
         this.identifier = identifier;
@@ -127,13 +128,13 @@ public class StickerPack implements Parcelable {
         this.animatedStickerPack = animatedStickerPack;
     }
 
-    public StickerPack(Integer identifier,
+    public StickerPack(UUID identifier,
                        String name,
                        String publisher,
                        String originalTrayImageFile,
                        String resizedTrayImageFile,
                        String folderName,
-                       String imageDataVersion,
+                       Integer imageDataVersion,
                        boolean animatedStickerPack,
                        byte[] resizedTrayImageFileInBytes) {
         this.identifier = identifier;
@@ -153,7 +154,7 @@ public class StickerPack implements Parcelable {
     }
 
     public static StickerPack fromContentValues(ContentValues values) {
-        return new StickerPack(values.getAsInteger(IDENTIFIER),
+        return new StickerPack(UUID.fromString(values.getAsString(IDENTIFIER)),
                 values.getAsString(NAME),
                 values.getAsString(PUBLISHER),
                 values.getAsString(ORIGINAL_TRAY_IMAGE_FILE),
@@ -171,7 +172,7 @@ public class StickerPack implements Parcelable {
 
     public ContentValues toContentValues() {
         ContentValues contentValues = new ContentValues();
-        contentValues.put(IDENTIFIER, this.getIdentifier());
+        contentValues.put(IDENTIFIER, this.getIdentifier().toString());
         contentValues.put(NAME, this.getName());
         contentValues.put(PUBLISHER, this.getPublisher());
         contentValues.put(ORIGINAL_TRAY_IMAGE_FILE, this.getOriginalTrayImageFile());
@@ -196,7 +197,7 @@ public class StickerPack implements Parcelable {
     }
 
     private StickerPack(Parcel in) {
-        identifier = in.readInt();
+        identifier = UUID.fromString(in.readString());
         name = in.readString();
         publisher = in.readString();
         originalTrayImageFile = in.readString();
@@ -211,7 +212,7 @@ public class StickerPack implements Parcelable {
         totalSize = in.readLong();
         androidPlayStoreLink = in.readString();
         isWhitelisted = in.readByte() != 0;
-        imageDataVersion = in.readString();
+        imageDataVersion = in.readInt();
         avoidCache = in.readByte() != 0;
         animatedStickerPack = in.readByte() != 0;
     }
@@ -262,7 +263,7 @@ public class StickerPack implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeInt(identifier);
+        dest.writeString(identifier.toString());
         dest.writeString(name);
         dest.writeString(publisher);
         dest.writeString(originalTrayImageFile);
@@ -277,12 +278,12 @@ public class StickerPack implements Parcelable {
         dest.writeLong(totalSize);
         dest.writeString(androidPlayStoreLink);
         dest.writeByte((byte) (isWhitelisted ? 1 : 0));
-        dest.writeString(imageDataVersion);
+        dest.writeInt(imageDataVersion);
         dest.writeByte((byte) (avoidCache ? 1 : 0));
         dest.writeByte((byte) (animatedStickerPack ? 1 : 0));
     }
 
-    public Integer getIdentifier() {
+    public UUID getIdentifier() {
         return identifier;
     }
 
@@ -314,8 +315,12 @@ public class StickerPack implements Parcelable {
         return licenseAgreementWebsite;
     }
 
-    public String getImageDataVersion() {
+    public Integer getImageDataVersion() {
         return imageDataVersion;
+    }
+
+    public void addImageDataVersionNumber() {
+        this.imageDataVersion = this.imageDataVersion + 1;
     }
 
     public boolean isAvoidCache() {
@@ -354,7 +359,7 @@ public class StickerPack implements Parcelable {
         return resizedTrayImageFile;
     }
 
-    public void setIdentifier(Integer identifier) {
+    public void setIdentifier(UUID identifier) {
         if (this.identifier == null) {
             this.identifier = identifier;
         }

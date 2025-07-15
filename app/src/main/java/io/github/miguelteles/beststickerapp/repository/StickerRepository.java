@@ -12,11 +12,12 @@ import io.github.miguelteles.beststickerapp.domain.entity.Sticker;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class StickerRepository extends CommonRepository implements io.github.miguelteles.beststickerapp.repository.interfaces.Repository<Sticker> {
 
-    private String SAVE = "INSERT INTO stickers VALUES (null, ?, ?, ?, ?)";
-    private String FIND_ALL_BY_PACKIDENTIFIER = "SELECT * FROM stickers WHERE packIdentifier=%d";
+    private String SAVE = "INSERT INTO stickers VALUES (?, ?, ?, ?, ?)";
+    private String FIND_ALL_BY_PACKIDENTIFIER = "SELECT * FROM stickers WHERE packIdentifier='%s'";
 
     private SQLiteDatabase sqLiteDatabase;
 
@@ -40,16 +41,16 @@ public class StickerRepository extends CommonRepository implements io.github.mig
                     ")";
             * */
 
-            stmt.bindString(1, "");
-            stmt.bindString(2, sticker.getStickerImageFile());
-            stmt.bindLong(3, sticker.getPackIdentifier());
-            stmt.bindLong(4, sticker.getSize());
+            UUID id = UUID.randomUUID();
+            stmt.bindString(1, id.toString());
+            stmt.bindString(2, "");
+            stmt.bindString(3, sticker.getStickerImageFile());
+            stmt.bindString(4, sticker.getPackIdentifier().toString());
+            stmt.bindLong(5, sticker.getSize());
 
             long result = stmt.executeInsert();
             if (result != -1) {
-                Cursor cursor = sqLiteDatabase.rawQuery("select last_insert_rowid()", null);
-                cursor.moveToFirst();
-                sticker.setIdentifier(cursor.getInt(0));
+                sticker.setIdentifier(id);
 
                 return sticker;
             } else {
@@ -74,11 +75,11 @@ public class StickerRepository extends CommonRepository implements io.github.mig
     }
 
     @Override
-    public Integer remove(Integer identifier) throws StickerException {
+    public Integer remove(UUID identifier) throws StickerException {
         try {
             String deleteStickers = "DELETE FROM stickers WHERE identifier=?";
             SQLiteStatement stmt = sqLiteDatabase.compileStatement(deleteStickers);
-            stmt.bindLong(1, identifier);
+            stmt.bindString(1, identifier.toString());
             stmt.executeUpdateDelete();
             return null;
         } catch (Exception ex) {
@@ -86,10 +87,10 @@ public class StickerRepository extends CommonRepository implements io.github.mig
         }
     }
 
-    public void removeByPackIdentifier(Integer packIdentifier) throws StickerException {
+    public void removeByPackIdentifier(UUID packIdentifier) throws StickerException {
         try {
             SQLiteStatement stmt = sqLiteDatabase.compileStatement(DELETE_BY_ID);
-            stmt.bindLong(1, packIdentifier);
+            stmt.bindString(1, packIdentifier.toString());
             stmt.executeUpdateDelete();
         } catch (Exception ex) {
             throw new StickerDataBaseException(ex, StickerDataBaseExceptionEnum.DELETE, "Erro ao deletar figurinhas do pacote");
@@ -97,7 +98,7 @@ public class StickerRepository extends CommonRepository implements io.github.mig
     }
 
     @Override
-    public Sticker findById(Integer id) throws StickerException {
+    public Sticker findById(UUID id) throws StickerException {
         return null;
     }
 
@@ -106,17 +107,17 @@ public class StickerRepository extends CommonRepository implements io.github.mig
         return null;
     }
 
-    public List<Sticker> findByPackIdentifier(int packIdentifier) throws StickerDataBaseException {
+    public List<Sticker> findByPackIdentifier(UUID packIdentifier) throws StickerDataBaseException {
         Cursor cursor = null;
         try {
-            String selectStickersQuery = String.format(FIND_ALL_BY_PACKIDENTIFIER, packIdentifier);
+            String selectStickersQuery = String.format(FIND_ALL_BY_PACKIDENTIFIER, packIdentifier.toString());
             cursor = sqLiteDatabase.rawQuery(selectStickersQuery, null);
             cursor.moveToFirst();
 
             List<Sticker> stickersList = new ArrayList<>();
             while (!cursor.isAfterLast()) {
-                stickersList.add(new Sticker(cursor.getInt(cursor.getColumnIndexOrThrow(Sticker.IDENTIFIER)),
-                        cursor.getInt(cursor.getColumnIndexOrThrow(Sticker.PACK_IDENTIFIER)),
+                stickersList.add(new Sticker(UUID.fromString(cursor.getString(cursor.getColumnIndexOrThrow(Sticker.IDENTIFIER))),
+                        UUID.fromString(cursor.getString(cursor.getColumnIndexOrThrow(Sticker.PACK_IDENTIFIER))),
                         cursor.getString(cursor.getColumnIndexOrThrow(Sticker.STICKER_IMAGE_FILE))));
                 cursor.moveToNext();
             }

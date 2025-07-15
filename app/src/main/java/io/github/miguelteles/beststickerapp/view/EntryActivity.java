@@ -25,8 +25,7 @@ import io.github.miguelteles.beststickerapp.exception.StickerException;
 import io.github.miguelteles.beststickerapp.exception.StickerExceptionHandler;
 import io.github.miguelteles.beststickerapp.domain.entity.StickerPack;
 import io.github.miguelteles.beststickerapp.services.FoldersManagementServiceImpl;
-import io.github.miguelteles.beststickerapp.services.StickerPackServiceImpl;
-import io.github.miguelteles.beststickerapp.services.interfaces.StickerPackService;
+import io.github.miguelteles.beststickerapp.services.StickerPackService;
 import io.github.miguelteles.beststickerapp.utils.Utils;
 import io.github.miguelteles.beststickerapp.validator.StickerPackValidator;
 
@@ -52,7 +51,7 @@ public class EntryActivity extends BaseActivity {
         try {
             stickerPackValidator = StickerPackValidator.getInstance();
             MyDatabase.getInstance();
-            stickerPackService = StickerPackServiceImpl.getInstance();
+            stickerPackService = StickerPackService.getInstance();
             FoldersManagementServiceImpl.getInstance().makeAllDirs();
         } catch (StickerException ex) {
             StickerExceptionHandler.handleException(ex, this);

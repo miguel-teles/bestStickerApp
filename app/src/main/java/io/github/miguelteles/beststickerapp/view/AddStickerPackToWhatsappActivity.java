@@ -22,6 +22,8 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.DialogFragment;
 
+import java.util.UUID;
+
 import io.github.miguelteles.beststickerapp.BuildConfig;
 import io.github.miguelteles.beststickerapp.R;
 import io.github.miguelteles.beststickerapp.validator.WhitelistCheck;
@@ -30,7 +32,7 @@ public abstract class AddStickerPackToWhatsappActivity extends BaseActivity {
     private static final int ADD_PACK = 200;
     private static final String TAG = "AddStickerPackActivity";
 
-    protected void addStickerPackToWhatsApp(String identifier, String stickerPackName) {
+    protected void addStickerPackToWhatsApp(UUID identifier, String stickerPackName) {
         try {
             //if neither WhatsApp Consumer or WhatsApp Business is installed, then tell user to install the apps.
             if (!WhitelistCheck.isWhatsAppConsumerAppInstalled(getPackageManager()) && !WhitelistCheck.isWhatsAppSmbAppInstalled(getPackageManager())) {
@@ -56,7 +58,7 @@ public abstract class AddStickerPackToWhatsappActivity extends BaseActivity {
 
     }
 
-    private void launchIntentToAddPackToSpecificPackage(String identifier, String stickerPackName, String whatsappPackageName) {
+    private void launchIntentToAddPackToSpecificPackage(UUID identifier, String stickerPackName, String whatsappPackageName) {
         Intent intent = createIntentToAddStickerPack(identifier, stickerPackName);
         intent.setPackage(whatsappPackageName);
         try {
@@ -67,7 +69,7 @@ public abstract class AddStickerPackToWhatsappActivity extends BaseActivity {
     }
 
     //Handle cases either of WhatsApp are set as default app to handle this intent. We still want users to see both options.
-    private void launchIntentToAddPackToChooser(String identifier, String stickerPackName) {
+    private void launchIntentToAddPackToChooser(UUID identifier, String stickerPackName) {
         Intent intent = createIntentToAddStickerPack(identifier, stickerPackName);
         try {
             startActivityForResult(Intent.createChooser(intent, getString(R.string.add_to_whatsapp)), ADD_PACK);
@@ -77,10 +79,10 @@ public abstract class AddStickerPackToWhatsappActivity extends BaseActivity {
     }
 
     @NonNull
-    private Intent createIntentToAddStickerPack(String identifier, String stickerPackName) {
+    private Intent createIntentToAddStickerPack(UUID identifier, String stickerPackName) {
         Intent intent = new Intent();
         intent.setAction("com.whatsapp.intent.action.ENABLE_STICKER_PACK");
-        intent.putExtra(StickerPackDetailsActivity.Extras.EXTRA_STICKER_PACK_ID, identifier);
+        intent.putExtra(StickerPackDetailsActivity.Extras.EXTRA_STICKER_PACK_ID, identifier.toString());
         intent.putExtra(StickerPackDetailsActivity.Extras.EXTRA_STICKER_PACK_AUTHORITY, BuildConfig.CONTENT_PROVIDER_AUTHORITY);
         intent.putExtra(StickerPackDetailsActivity.Extras.EXTRA_STICKER_PACK_NAME, stickerPackName);
         return intent;

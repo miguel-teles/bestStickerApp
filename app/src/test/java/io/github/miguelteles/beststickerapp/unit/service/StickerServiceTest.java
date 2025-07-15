@@ -20,6 +20,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.Executor;
 
 import io.github.miguelteles.beststickerapp.domain.entity.Sticker;
@@ -28,10 +29,9 @@ import io.github.miguelteles.beststickerapp.exception.StickerException;
 import io.github.miguelteles.beststickerapp.repository.StickerRepository;
 import io.github.miguelteles.beststickerapp.repository.contentProvider.StickerUriProvider;
 import io.github.miguelteles.beststickerapp.services.StickerImageConvertionService;
-import io.github.miguelteles.beststickerapp.services.StickerServiceImpl;
+import io.github.miguelteles.beststickerapp.services.StickerService;
 import io.github.miguelteles.beststickerapp.services.interfaces.EntityOperationCallback;
 import io.github.miguelteles.beststickerapp.services.interfaces.FoldersManagementService;
-import io.github.miguelteles.beststickerapp.services.interfaces.StickerService;
 import io.github.miguelteles.beststickerapp.utils.Utils;
 import io.github.miguelteles.beststickerapp.validator.StickerPackValidator;
 
@@ -66,7 +66,7 @@ public class StickerServiceTest {
 
     Sticker generatedSticker = null;
 
-    StickerPack validStickerPack = new StickerPack(1,
+    StickerPack validStickerPack = new StickerPack(UUID.randomUUID(),
             "teste",
             "teste",
             "app/src/main/assets/test_image.jpg",
@@ -76,11 +76,11 @@ public class StickerServiceTest {
             "teste",
             "teste",
             "teste",
-            "1",
+            1,
             true,
             false);
 
-    Sticker validSticker = new Sticker(1, 1, "/home/miguel/StudioProjects/stickersProjeto/app/src/main/assets/test_image.jpg");
+    Sticker validSticker = new Sticker(UUID.randomUUID(), UUID.randomUUID(), "/home/miguel/StudioProjects/stickersProjeto/app/src/main/assets/test_image.jpg");
 
 
 
@@ -90,8 +90,8 @@ public class StickerServiceTest {
             @Override
             public Sticker answer(InvocationOnMock invocation) {
                 Sticker sticker = invocation.getArgument(0);
-                sticker.setIdentifier(1);
-                sticker.setPackIdentifier(1);
+                sticker.setIdentifier(UUID.randomUUID());
+                sticker.setPackIdentifier(UUID.randomUUID());
                 return sticker;
             }
         });
@@ -121,9 +121,9 @@ public class StickerServiceTest {
                 return null;
             }
         });
-        Mockito.doNothing().when(stickerPackValidator).validateSticker(any(Integer.class), any(Sticker.class), any(Boolean.class));
+        Mockito.doNothing().when(stickerPackValidator).validateSticker(any(UUID.class), any(Sticker.class), any(Boolean.class));
         
-        when(stickerRepository.findByPackIdentifier(any(Integer.class))).then(new Answer<List<Sticker>>() {
+        when(stickerRepository.findByPackIdentifier(any(UUID.class))).then(new Answer<List<Sticker>>() {
             @Override
             public List<Sticker> answer(InvocationOnMock invocation) throws Throwable {
                 return List.of(validSticker.clone(), validSticker.clone(), validSticker.clone(), validSticker.clone());
@@ -139,7 +139,7 @@ public class StickerServiceTest {
         } catch (FileNotFoundException ex) {
             throw new RuntimeException(ex);
         }
-        when(stickerUriProvider.getStickerAssetUri(any(Integer.class), any(String.class))).then(new Answer<Uri>() {
+        when(stickerUriProvider.getStickerAssetUri(any(UUID.class), any(String.class))).then(new Answer<Uri>() {
             @Override
             public Uri answer(InvocationOnMock invocation) throws Throwable {
                 return uri;
@@ -153,11 +153,11 @@ public class StickerServiceTest {
             }
         });
 
-        stickerService = new StickerServiceImpl(stickerRepository, foldersManagementService, stickerUriProvider, contentResolver, stickerPackValidator, stickerImageConvertionService, testExecutor);
+        stickerService = new StickerService(stickerRepository, foldersManagementService, stickerUriProvider, contentResolver, stickerPackValidator, stickerImageConvertionService, testExecutor);
     }
 
     @Test
-    public void testCreateSticker() {
+    public void testCreateSticker() throws StickerException {
         stickerService.createSticker(validStickerPack, uri, callback);
 
         assertFalse("StickerImageFile is not null", Utils.isNothing(generatedSticker.getStickerImageFile()));

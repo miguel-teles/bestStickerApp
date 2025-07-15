@@ -18,6 +18,7 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
 import java.io.File;
+import java.util.UUID;
 import java.util.concurrent.Executor;
 
 import io.github.miguelteles.beststickerapp.domain.entity.StickerPack;
@@ -25,11 +26,9 @@ import io.github.miguelteles.beststickerapp.exception.StickerException;
 import io.github.miguelteles.beststickerapp.repository.StickerPackRepository;
 import io.github.miguelteles.beststickerapp.repository.contentProvider.StickerUriProvider;
 import io.github.miguelteles.beststickerapp.services.StickerImageConvertionService;
-import io.github.miguelteles.beststickerapp.services.StickerPackServiceImpl;
+import io.github.miguelteles.beststickerapp.services.StickerPackService;
 import io.github.miguelteles.beststickerapp.services.interfaces.EntityOperationCallback;
 import io.github.miguelteles.beststickerapp.services.interfaces.FoldersManagementService;
-import io.github.miguelteles.beststickerapp.services.interfaces.StickerPackService;
-import io.github.miguelteles.beststickerapp.services.interfaces.StickerService;
 import io.github.miguelteles.beststickerapp.validator.StickerPackValidator;
 
 public class StickerPackServiceTest {
@@ -65,7 +64,7 @@ public class StickerPackServiceTest {
 
     StickerPack generatedStickerPack = null;
 
-    StickerPackService stickerPackService = new StickerPackServiceImpl(foldersManagementService,
+    StickerPackService stickerPackService = new StickerPackService(foldersManagementService,
             stickerUriProvider,
             stickerPackRepository,
             contentResolver,
@@ -110,7 +109,7 @@ public class StickerPackServiceTest {
             @Override
             public StickerPack answer(InvocationOnMock invocation) throws Throwable {
                 StickerPack pack = invocation.getArgument(0);
-                pack.setIdentifier(1);
+                pack.setIdentifier(UUID.randomUUID());
                 return pack;
             }
         });

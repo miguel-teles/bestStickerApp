@@ -15,6 +15,7 @@ import android.os.Parcelable;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import kotlin.jvm.Transient;
 
@@ -26,15 +27,15 @@ public class Sticker implements Parcelable, Cloneable {
     public static String EMOJIS = "emojis";
 
 
-    private Integer identifier;
-    private Integer packIdentifier;
+    private UUID identifier;
+    private UUID packIdentifier;
     private final String stickerImageFile;
     private final List<String> emojis;
     private long size;
     private byte[] stickerImageFileInBytes;
 
-    public Sticker(Integer identifier,
-                   Integer packIdentifier,
+    public Sticker(UUID identifier,
+                   UUID packIdentifier,
                    String stickerImageFile) {
         this.identifier = identifier;
         this.packIdentifier = packIdentifier;
@@ -43,7 +44,7 @@ public class Sticker implements Parcelable, Cloneable {
     }
 
     public Sticker(String stickerImageFile,
-                   Integer packIdentifier,
+                   UUID packIdentifier,
                    byte[] stickerImageFileInBytes) {
         this.stickerImageFile = stickerImageFile;
         this.emojis = new ArrayList<>();
@@ -71,15 +72,15 @@ public class Sticker implements Parcelable, Cloneable {
     };
 
     public static Sticker fromContentValues(ContentValues values) {
-        return new Sticker(values.getAsInteger(IDENTIFIER),
-                values.getAsInteger(PACK_IDENTIFIER),
+        return new Sticker(UUID.fromString(values.getAsString(IDENTIFIER)),
+                UUID.fromString(values.getAsString(PACK_IDENTIFIER)),
                 values.getAsString(STICKER_IMAGE_FILE));
     }
 
     public ContentValues toContentValues() {
         ContentValues contentValues = new ContentValues();
-        contentValues.put(IDENTIFIER, this.getIdentifier());
-        contentValues.put(PACK_IDENTIFIER, this.getPackIdentifier());
+        contentValues.put(IDENTIFIER, this.getIdentifier().toString());
+        contentValues.put(PACK_IDENTIFIER, this.getPackIdentifier().toString());
         contentValues.put(STICKER_IMAGE_FILE, this.getStickerImageFile());
         return contentValues;
     }
@@ -112,20 +113,24 @@ public class Sticker implements Parcelable, Cloneable {
         return size;
     }
 
-    public Integer getIdentifier() {
+    public UUID getIdentifier() {
         return identifier;
     }
 
-    public void setIdentifier(Integer identifier) {
-        this.identifier = identifier;
+    public void setIdentifier(UUID identifier) {
+        if (this.identifier == null) {
+            this.identifier = identifier;
+        }
     }
 
-    public Integer getPackIdentifier() {
+    public UUID getPackIdentifier() {
         return packIdentifier;
     }
 
-    public void setPackIdentifier(Integer packIdentifier) {
-        this.packIdentifier = packIdentifier;
+    public void setPackIdentifier(UUID packIdentifier) {
+        if (this.packIdentifier == null) {
+            this.packIdentifier = packIdentifier;
+        }
     }
 
     @Override

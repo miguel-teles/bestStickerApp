@@ -25,9 +25,8 @@ import io.github.miguelteles.beststickerapp.exception.StickerExceptionHandler;
 import io.github.miguelteles.beststickerapp.exception.enums.StickerExceptionEnum;
 import io.github.miguelteles.beststickerapp.domain.entity.StickerPack;
 import io.github.miguelteles.beststickerapp.repository.contentProvider.StickerUriProvider;
-import io.github.miguelteles.beststickerapp.services.StickerPackServiceImpl;
+import io.github.miguelteles.beststickerapp.services.StickerPackService;
 import io.github.miguelteles.beststickerapp.services.interfaces.EntityOperationCallback;
-import io.github.miguelteles.beststickerapp.services.interfaces.StickerPackService;
 import io.github.miguelteles.beststickerapp.utils.Utils;
 
 import com.google.android.material.textfield.TextInputEditText;
@@ -52,7 +51,7 @@ public class AddStickerPackActivity extends AppCompatActivity {
         populateFieldsWithStickerPackBeingEdited();
         try {
             setaOnClickListeners();
-            stickerPackService = StickerPackServiceImpl.getInstance();
+            stickerPackService = StickerPackService.getInstance();
         } catch (StickerException ex) {
             StickerExceptionHandler.handleException(ex, this);
         }
@@ -71,7 +70,7 @@ public class AddStickerPackActivity extends AppCompatActivity {
             this.stickerPackBeingEdited = (StickerPack) intent.getExtras().get(Extras.STICKER_PACK);
             txtNomePacote.setText(stickerPackBeingEdited.getName());
             txtAutor.setText(stickerPackBeingEdited.getPublisher());
-            uriImagemStickerPack = StickerUriProvider.getInstance().getStickerPackOriginalAssetUri(stickerPackBeingEdited.getIdentifier().toString(), stickerPackBeingEdited.getOriginalTrayImageFile());
+            uriImagemStickerPack = StickerUriProvider.getInstance().getStickerPackOriginalAssetUri(stickerPackBeingEdited.getIdentifier(), stickerPackBeingEdited.getOriginalTrayImageFile());
             stickerPackImageView.setImageURI(uriImagemStickerPack);
             stickerPackImageView.setScaleType(ImageView.ScaleType.FIT_XY);
             stickerPackImageView.setTag("modified");

@@ -16,7 +16,7 @@ public class MyDatabase extends SQLiteOpenHelper {
     final private static String dbName = "stickersDB.db";
 
     private MyDatabase(Context context) throws StickerException {
-        super(context, dbName, null, 5);
+        super(context, dbName, null, 8);
         sqLiteDatabase = getWritableDatabase();
         criaTabelas(sqLiteDatabase);
     }
@@ -61,7 +61,7 @@ public class MyDatabase extends SQLiteOpenHelper {
 //            getMyDB(context).execSQL(deleta); //TODO: tirar isso
 
             String tbPack = "CREATE TABLE IF NOT EXISTS packs(" +
-                    "identifier INTEGER PRIMARY KEY AUTOINCREMENT," +
+                    "identifier UUID PRIMARY KEY NOT NULL," +
                     "name TEXT NOT NULL," +
                     "publisher TEXT NOT NULL," +
                     "originalTrayImageFile TEXT NOT NULL," +
@@ -85,10 +85,10 @@ public class MyDatabase extends SQLiteOpenHelper {
     private void criaTabelaSticker(SQLiteDatabase db) throws StickerException {
         try {
             String tbPack = "CREATE TABLE IF NOT EXISTS stickers(" +
-                    "identifier INTEGER PRIMARY KEY AUTOINCREMENT," +
+                    "identifier UUID PRIMARY KEY NOT NULL," +
                     "emoji TEXT NOT NULL," +
                     "stickerImageFile TEXT NOT NULL," +
-                    "packIdentifier INTEGER, " +
+                    "packIdentifier UUID, " +
                     "size INTEGER, " +
                     "FOREIGN KEY (packIdentifier) REFERENCES packs(identifier)" +
                     ")";

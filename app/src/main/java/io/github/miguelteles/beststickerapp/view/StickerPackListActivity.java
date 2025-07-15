@@ -22,8 +22,7 @@ import io.github.miguelteles.beststickerapp.R;
 import io.github.miguelteles.beststickerapp.domain.entity.StickerPack;
 import io.github.miguelteles.beststickerapp.exception.StickerException;
 import io.github.miguelteles.beststickerapp.exception.StickerExceptionHandler;
-import io.github.miguelteles.beststickerapp.services.StickerPackServiceImpl;
-import io.github.miguelteles.beststickerapp.services.interfaces.StickerPackService;
+import io.github.miguelteles.beststickerapp.services.StickerPackService;
 import io.github.miguelteles.beststickerapp.validator.WhitelistCheck;
 
 import java.lang.ref.WeakReference;
@@ -53,7 +52,7 @@ public class StickerPackListActivity extends AddStickerPackToWhatsappActivity {
         btnCreateNewStickerPack.setOnClickListener(createNewStickerPack());
 
         try {
-            stickerPackService = StickerPackServiceImpl.getInstance();
+            stickerPackService = StickerPackService.getInstance();
             stickerPackList = new ArrayList<>(stickerPackService.fetchAllStickerPacksWithAssets());
         } catch (StickerException ex) {
             StickerExceptionHandler.handleException(ex, this);
@@ -95,7 +94,7 @@ public class StickerPackListActivity extends AddStickerPackToWhatsappActivity {
     }
 
 
-    private final StickerPackListAdapter.OnAddButtonClickedListener onAddButtonClickedListener = pack -> addStickerPackToWhatsApp(pack.getIdentifier().toString(), pack.getName());
+    private final StickerPackListAdapter.OnAddButtonClickedListener onAddButtonClickedListener = pack -> addStickerPackToWhatsApp(pack.getIdentifier(), pack.getName());
 
 
     private void recalculateColumnCount() {
@@ -136,7 +135,7 @@ public class StickerPackListActivity extends AddStickerPackToWhatsappActivity {
                 return Arrays.asList(stickerPackArray);
             }
             for (StickerPack stickerPack : stickerPackArray) {
-                stickerPack.setIsWhitelisted(WhitelistCheck.isWhitelisted(stickerPackListActivity, stickerPack.getIdentifier().toString()));
+                stickerPack.setIsWhitelisted(WhitelistCheck.isWhitelisted(stickerPackListActivity, stickerPack.getIdentifier()));
             }
             return Arrays.asList(stickerPackArray);
         }

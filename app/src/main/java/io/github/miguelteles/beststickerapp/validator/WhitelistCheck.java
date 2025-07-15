@@ -18,6 +18,8 @@ import android.net.Uri;
 
 import androidx.annotation.NonNull;
 
+import java.util.UUID;
+
 import io.github.miguelteles.beststickerapp.BuildConfig;
 
 
@@ -31,7 +33,7 @@ public class WhitelistCheck {
     private static final String QUERY_PATH = "is_whitelisted";
     private static final String QUERY_RESULT_COLUMN_NAME = "result";
 
-    public static boolean isWhitelisted(@NonNull Context context, @NonNull String identifier) {
+    public static boolean isWhitelisted(@NonNull Context context, @NonNull UUID identifier) {
         try {
             if (!isWhatsAppConsumerAppInstalled(context.getPackageManager()) && !isWhatsAppSmbAppInstalled(context.getPackageManager())) {
                 return false;
@@ -44,7 +46,7 @@ public class WhitelistCheck {
         }
     }
 
-    private static boolean isWhitelistedFromProvider(@NonNull Context context, @NonNull String identifier, String whatsappPackageName) {
+    private static boolean isWhitelistedFromProvider(@NonNull Context context, @NonNull UUID identifier, String whatsappPackageName) {
         final PackageManager packageManager = context.getPackageManager();
         if (isPackageInstalled(whatsappPackageName, packageManager)) {
             final String whatsappProviderAuthority = whatsappPackageName + CONTENT_PROVIDER;
@@ -53,18 +55,11 @@ public class WhitelistCheck {
             if (providerInfo == null) {
                 return false;
             }
-            final Uri queryUri = new Uri.Builder().scheme(ContentResolver.SCHEME_CONTENT).authority(whatsappProviderAuthority).appendPath(QUERY_PATH).appendQueryParameter(AUTHORITY_QUERY_PARAM, STICKER_APP_AUTHORITY).appendQueryParameter(IDENTIFIER_QUERY_PARAM, identifier).build();
-            try (final Cursor cursor = context.getContentResolver().query(queryUri, null, null, null, null)) {
-                if (cursor != null && cursor.moveToFirst()) {
-                    final int whiteListResult = cursor.getInt(cursor.getColumnIndexOrThrow(QUERY_RESULT_COLUMN_NAME));
-                    return whiteListResult == 1;
-                }
-            }
+            return false;
         } else {
             //if app is not installed, then don't need to take into its whitelist info into account.
             return true;
         }
-        return false;
     }
 
     public static boolean isPackageInstalled(String packageName, PackageManager packageManager) {
@@ -89,11 +84,11 @@ public class WhitelistCheck {
         return WhitelistCheck.isPackageInstalled(SMB_WHATSAPP_PACKAGE_NAME, packageManager);
     }
 
-    public static boolean isStickerPackWhitelistedInWhatsAppConsumer(@NonNull Context context, @NonNull String identifier) {
+    public static boolean isStickerPackWhitelistedInWhatsAppConsumer(@NonNull Context context, @NonNull UUID identifier) {
         return isWhitelistedFromProvider(context, identifier, CONSUMER_WHATSAPP_PACKAGE_NAME);
     }
 
-    public static boolean isStickerPackWhitelistedInWhatsAppSmb(@NonNull Context context, @NonNull String identifier) {
+    public static boolean isStickerPackWhitelistedInWhatsAppSmb(@NonNull Context context, @NonNull UUID identifier) {
         return isWhitelistedFromProvider(context, identifier, SMB_WHATSAPP_PACKAGE_NAME);
     }
 }

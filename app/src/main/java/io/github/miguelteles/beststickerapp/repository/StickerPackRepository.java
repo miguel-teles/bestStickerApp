@@ -1,6 +1,5 @@
 package io.github.miguelteles.beststickerapp.repository;
 
-import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteStatement;
@@ -9,18 +8,16 @@ import io.github.miguelteles.beststickerapp.exception.StickerDataBaseException;
 import io.github.miguelteles.beststickerapp.exception.StickerException;
 import io.github.miguelteles.beststickerapp.exception.enums.StickerDataBaseExceptionEnum;
 import io.github.miguelteles.beststickerapp.domain.entity.StickerPack;
-import io.github.miguelteles.beststickerapp.repository.contentProvider.StickerUriProvider;
 import io.github.miguelteles.beststickerapp.repository.interfaces.Repository;
-import io.github.miguelteles.beststickerapp.services.StickerServiceImpl;
-import io.github.miguelteles.beststickerapp.services.interfaces.StickerService;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class StickerPackRepository extends CommonRepository implements Repository<StickerPack> {
 
-    private String PERSIST = "INSERT INTO packs VALUES (null, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-    private String UPDATE = "UPDATE packs SET name=?, publisher=?, imageDataVersion=imageDataVersion+1 WHERE identifier=?";
+    private String PERSIST = "INSERT INTO packs VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    private String UPDATE = "UPDATE packs SET name=?, publisher=?, imageDataVersion=(imageDataVersion+1) WHERE identifier=?";
 
     public StickerRepository stickerRepository;
     private final SQLiteDatabase sqLiteDatabase;
@@ -36,25 +33,24 @@ public class StickerPackRepository extends CommonRepository implements Repositor
         try {
             SQLiteStatement stmt = sqLiteDatabase.compileStatement(PERSIST);
 
-            stmt.bindString(1, stickerPack.getName());
-            stmt.bindString(2, stickerPack.getPublisher());
-            stmt.bindString(3, stickerPack.getOriginalTrayImageFile());
-            stmt.bindString(4, stickerPack.getResizedTrayImageFile());
-            stmt.bindString(5, stickerPack.getFolderName());
-            stmt.bindLong(6, Integer.parseInt(stickerPack.getImageDataVersion()));
-            stmt.bindLong(7, stickerPack.isAvoidCache() ? 1 : 0);
-            stmt.bindString(8, stickerPack.getPublisherEmail());
-            stmt.bindString(9, stickerPack.getPublisherWebsite());
-            stmt.bindString(10, stickerPack.getPrivacyPolicyWebsite());
-            stmt.bindString(11, stickerPack.getLicenseAgreementWebsite());
-            stmt.bindLong(12, stickerPack.isAnimatedStickerPack() ? 1 : 0);
+            UUID id = UUID.randomUUID();
+            stmt.bindString(1, id.toString());
+            stmt.bindString(2, stickerPack.getName());
+            stmt.bindString(3, stickerPack.getPublisher());
+            stmt.bindString(4, stickerPack.getOriginalTrayImageFile());
+            stmt.bindString(5, stickerPack.getResizedTrayImageFile());
+            stmt.bindString(6, stickerPack.getFolderName());
+            stmt.bindLong(7, stickerPack.getImageDataVersion());
+            stmt.bindLong(8, stickerPack.isAvoidCache() ? 1 : 0);
+            stmt.bindString(9, stickerPack.getPublisherEmail());
+            stmt.bindString(10, stickerPack.getPublisherWebsite());
+            stmt.bindString(11, stickerPack.getPrivacyPolicyWebsite());
+            stmt.bindString(12, stickerPack.getLicenseAgreementWebsite());
+            stmt.bindLong(13, stickerPack.isAnimatedStickerPack() ? 1 : 0);
 
             long result = stmt.executeInsert();
             if (result != -1) {
-                Cursor cursor = sqLiteDatabase.rawQuery("select last_insert_rowid()", null);
-                cursor.moveToFirst();
-                stickerPack.setIdentifier(cursor.getInt(0));
-                cursor.close();
+                stickerPack.setIdentifier(id);
 
                 return stickerPack;
             } else {
@@ -75,7 +71,7 @@ public class StickerPackRepository extends CommonRepository implements Repositor
 
             stmt.bindString(1, stickerPack.getName());
             stmt.bindString(2, stickerPack.getPublisher());
-            stmt.bindLong(3, stickerPack.getIdentifier());
+            stmt.bindString(3, stickerPack.getIdentifier().toString());
 
             long result = (long) stmt.executeUpdateDelete();
             if (result != -1) {
@@ -97,12 +93,12 @@ public class StickerPackRepository extends CommonRepository implements Repositor
     }
 
     @Override
-    public Integer remove(Integer identifier) throws StickerException {
+    public Integer remove(UUID identifier) throws StickerException {
         try {
             stickerRepository.removeByPackIdentifier(identifier);
 
             SQLiteStatement stmt = sqLiteDatabase.compileStatement(DELETE_BY_ID);
-            stmt.bindLong(1, identifier);
+            stmt.bindString(1, identifier.toString());
             stmt.executeUpdateDelete();
         } catch (StickerException ex) {
             throw ex;
@@ -113,19 +109,19 @@ public class StickerPackRepository extends CommonRepository implements Repositor
     }
 
     @Override
-    public StickerPack findById(Integer id) throws StickerException {
+    public StickerPack findById(UUID id) throws StickerException {
         Cursor cursor = null;
         try {
-            cursor = sqLiteDatabase.rawQuery(FIND_BY_ID.replace("?", id.toString()), null);
+            cursor = sqLiteDatabase.rawQuery(FIND_BY_ID.replace("?", "'" + id.toString() + "'"), null);
             cursor.moveToFirst();
 
-            return new StickerPack(cursor.getInt(0), //identifier
+            return new StickerPack(UUID.fromString(cursor.getString(0)), //identifier
                     cursor.getString(1), //name
                     cursor.getString(2), //publisher
                     cursor.getString(3), //originalTrayImageFile
                     cursor.getString(4), //resizedTrayImageFile
                     cursor.getString(5), //folder
-                    cursor.getInt(6) == 0 ? null : cursor.getInt(4), //imageDataVersion
+                    cursor.getInt(6), //imageDataVersion
                     cursor.getInt(7) == 1, //avoidCache
                     cursor.getString(8), //publisher_email
                     cursor.getString(9), //publisher_website
@@ -149,13 +145,13 @@ public class StickerPackRepository extends CommonRepository implements Repositor
             cursor.moveToFirst();
 
             while (!cursor.isAfterLast()) {
-                StickerPack stickerPack = new StickerPack(cursor.getInt(0), //identifier
+                StickerPack stickerPack = new StickerPack(UUID.fromString(cursor.getString(0)), //identifier
                         cursor.getString(1), //name
                         cursor.getString(2), //publisher
                         cursor.getString(3), //originalTrayImageFile
                         cursor.getString(4), //resizedTrayImageFile
                         cursor.getString(5), //folder
-                        cursor.getInt(6) == 0 ? null : Integer.valueOf(cursor.getInt(4)), //imageDataVersion
+                        cursor.getInt(6), //imageDataVersion
                         cursor.getInt(7) == 1, //avoidCache
                         cursor.getString(8), //publisher_email
                         cursor.getString(9), //publisher_website

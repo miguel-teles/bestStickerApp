@@ -6,33 +6,33 @@ import android.net.Uri;
 
 import androidx.annotation.NonNull;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+
+import io.github.miguelteles.beststickerapp.domain.entity.Sticker;
+import io.github.miguelteles.beststickerapp.domain.entity.StickerPack;
 import io.github.miguelteles.beststickerapp.exception.StickerException;
 import io.github.miguelteles.beststickerapp.exception.StickerFolderException;
 import io.github.miguelteles.beststickerapp.exception.enums.StickerExceptionEnum;
-import io.github.miguelteles.beststickerapp.domain.entity.Sticker;
-import io.github.miguelteles.beststickerapp.domain.entity.StickerPack;
 import io.github.miguelteles.beststickerapp.exception.enums.StickerFolderExceptionEnum;
 import io.github.miguelteles.beststickerapp.repository.MyDatabase;
 import io.github.miguelteles.beststickerapp.repository.StickerRepository;
 import io.github.miguelteles.beststickerapp.repository.contentProvider.StickerUriProvider;
 import io.github.miguelteles.beststickerapp.services.interfaces.EntityOperationCallback;
 import io.github.miguelteles.beststickerapp.services.interfaces.FoldersManagementService;
-import io.github.miguelteles.beststickerapp.services.interfaces.StickerService;
 import io.github.miguelteles.beststickerapp.utils.Utils;
 import io.github.miguelteles.beststickerapp.validator.StickerPackValidator;
 import io.github.miguelteles.beststickerapp.view.interfaces.UiThreadPoster;
 import io.github.miguelteles.beststickerapp.view.threadHandlers.AndroidUiThreadPoster;
 import io.github.miguelteles.beststickerapp.view.threadHandlers.ImmediateUiThreadPoster;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Date;
-import java.util.List;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
-
-public class StickerServiceImpl implements StickerService {
+public class StickerService {
 
     private static StickerService instance;
     private final FoldersManagementService foldersManagementService;
@@ -44,7 +44,7 @@ public class StickerServiceImpl implements StickerService {
     private final Executor executor;
     private final UiThreadPoster threadResultPoster;
 
-    private StickerServiceImpl(Context context) throws StickerException {
+    private StickerService(Context context) throws StickerException {
         this.stickerRepository = new StickerRepository(MyDatabase.getInstance().getSqLiteDatabase());
         this.stickerPackValidator = StickerPackValidator.getInstance();
         foldersManagementService = FoldersManagementServiceImpl.getInstance();
@@ -55,13 +55,13 @@ public class StickerServiceImpl implements StickerService {
         this.stickerImageConvertionService = StickerImageConvertionService.getInstance();
     }
 
-    public StickerServiceImpl(StickerRepository stickerRepository,
-                              FoldersManagementService foldersManagementService,
-                              StickerUriProvider stickerUriProvider,
-                              ContentResolver contentResolver,
-                              StickerPackValidator stickerPackValidator,
-                              StickerImageConvertionService stickerImageConvertionService,
-                              Executor executor) {
+    public StickerService(StickerRepository stickerRepository,
+                          FoldersManagementService foldersManagementService,
+                          StickerUriProvider stickerUriProvider,
+                          ContentResolver contentResolver,
+                          StickerPackValidator stickerPackValidator,
+                          StickerImageConvertionService stickerImageConvertionService,
+                          Executor executor) {
         this.stickerRepository = stickerRepository;
         this.foldersManagementService = foldersManagementService;
         this.stickerUriProvider = stickerUriProvider;
@@ -74,48 +74,40 @@ public class StickerServiceImpl implements StickerService {
 
     public static StickerService getInstance() throws StickerException {
         if (instance == null) {
-            instance = new StickerServiceImpl(Utils.getApplicationContext());
+            instance = new StickerService(Utils.getApplicationContext());
         }
         return instance;
     }
 
-    @Override
-    public void createSticker(StickerPack stickerPack,
-                              Uri selectedStickerImage,
-                              EntityOperationCallback<Sticker> callbackClass) {
+    public Sticker createSticker(StickerPack stickerPack,
+                                 Uri selectedStickerImage,
+                                 EntityOperationCallback<Sticker> callbackClass) throws StickerException {
         validateParametersCreateSticker(stickerPack, selectedStickerImage, callbackClass);
+        FoldersManagementServiceImpl.Image copiedImages = null;
+        try {
+            callbackClass.onProgressUpdate(10);
+            File stickerPackFolder = foldersManagementService.getStickerPackFolderByFolderName(stickerPack.getFolderName());
+            copiedImages = stickerImageConvertionService.generateStickerImages(stickerPackFolder,
+                    selectedStickerImage,
+                    generateStickerImageName(),
+                    FoldersManagementServiceImpl.STICKER_IMAGE_SIZE,
+                    false);
 
-        executor.execute(() -> {
-            Sticker sticker = null;
-            StickerException exception = null;
-            FoldersManagementServiceImpl.Image copiedImages = null;
-            try {
-                callbackClass.onProgressUpdate(10);
-                File stickerPackFolder = foldersManagementService.getStickerPackFolderByFolderName(stickerPack.getFolderName());
-                copiedImages = stickerImageConvertionService.generateStickerImages(stickerPackFolder,
-                        selectedStickerImage,
-                        generateStickerImageName(),
-                        FoldersManagementServiceImpl.STICKER_IMAGE_SIZE,
-                        false);
+            callbackClass.onProgressUpdate(50);
+            Sticker sticker = new Sticker(copiedImages.getResizedImageFile().getName(), stickerPack.getIdentifier(), copiedImages.getResidezImageFileInBytes());
+            stickerPackValidator.validateSticker(stickerPack.getIdentifier(), sticker, stickerPack.isAnimatedStickerPack());
+            stickerRepository.save(sticker);
 
-                callbackClass.onProgressUpdate(50);
-                sticker = new Sticker(copiedImages.getResizedImageFile().getName(), stickerPack.getIdentifier(), copiedImages.getResidezImageFileInBytes());
-                stickerPackValidator.validateSticker(stickerPack.getIdentifier(), sticker, stickerPack.isAnimatedStickerPack());
-                stickerRepository.save(sticker);
+            callbackClass.onProgressUpdate(70);
+            insertStickerIntoContentProvider(sticker);
+            return sticker;
+        } catch (StickerException ex) {
+            throw ex;
+        } catch (Exception ex) {
+            deleteStickerImages(copiedImages);
+            throw new StickerException(ex, StickerExceptionEnum.CSP, null);
+        }
 
-                callbackClass.onProgressUpdate(80);
-                insertStickerIntoContentProvider(sticker);
-            } catch (StickerException ex) {
-                exception = ex;
-                deleteStickerImages(copiedImages);
-            } catch (Exception ex) {
-                exception = new StickerException(ex, StickerExceptionEnum.CSP, null);
-                deleteStickerImages(copiedImages);
-            }
-            Sticker finalSticker = sticker;
-            StickerException finalException = exception;
-            threadResultPoster.post(() -> callbackClass.onCreationFinish(finalSticker, finalException));
-        });
     }
 
     private void insertStickerIntoContentProvider(Sticker sticker) throws StickerException {
@@ -145,12 +137,11 @@ public class StickerServiceImpl implements StickerService {
         if (selectedStickerImage == null) {
             throw new IllegalArgumentException("SelectedStickerImage parameter is mandatory");
         }
-        if (callbackClass==null) {
+        if (callbackClass == null) {
             throw new IllegalArgumentException("CallbackClass is mandatory");
         }
     }
 
-    @Override
     public void deleteSticker(Sticker sticker,
                               StickerPack stickerPack) throws StickerException {
         validateParametersDeleteSticker(sticker, stickerPack);
@@ -162,9 +153,7 @@ public class StickerServiceImpl implements StickerService {
 
         contentResolver.delete(stickerUriProvider.getStickerDeleteUri(), null);
     }
-
-    @Override
-    public void deleteStickersFromStickerPack(Integer packIdentifier) throws StickerException {
+    public void deleteStickersFromStickerPack(UUID packIdentifier) throws StickerException {
         this.stickerRepository.removeByPackIdentifier(packIdentifier);
     }
 
@@ -177,8 +166,7 @@ public class StickerServiceImpl implements StickerService {
         }
     }
 
-    @Override
-    public List<Sticker> fetchAllStickerFromPackWithAssets(Integer packIdentifier) throws StickerException {
+    public List<Sticker> fetchAllStickerFromPackWithAssets(UUID packIdentifier) throws StickerException {
         validateParametersFetchAllStickerFromPack(packIdentifier);
         List<Sticker> stickers = stickerRepository.findByPackIdentifier(packIdentifier);
 
@@ -200,12 +188,11 @@ public class StickerServiceImpl implements StickerService {
         return stickers;
     }
 
-    @Override
-    public List<Sticker> fetchAllStickerFromPackWithoutAssets(Integer packIdentifier) throws StickerException {
+    public List<Sticker> fetchAllStickerFromPackWithoutAssets(UUID packIdentifier) throws StickerException {
         return stickerRepository.findByPackIdentifier(packIdentifier);
     }
 
-    private void validateParametersFetchAllStickerFromPack(Integer packIdentifier) {
+    private void validateParametersFetchAllStickerFromPack(UUID packIdentifier) {
         if (packIdentifier == null) {
             throw new IllegalArgumentException("Sticker pack identifier cannot be null");
         }
@@ -214,8 +201,7 @@ public class StickerServiceImpl implements StickerService {
     /**
      * Busca um asset da pasta (imagem da figurinha ou da capa do sticker pack)
      **/
-    @Override
-    public byte[] fetchStickerAsset(@NonNull Integer packIdentifier, @NonNull String stickerImageFileName) throws StickerFolderException {
+    public byte[] fetchStickerAsset(@NonNull UUID packIdentifier, @NonNull String stickerImageFileName) throws StickerFolderException {
         //o contentResolver.openInputStream vai pro método openAssetFile do contentProvider
         try (final InputStream inputStream = contentResolver.openInputStream(stickerUriProvider.getStickerAssetUri(packIdentifier, stickerImageFileName))) {
             return foldersManagementService.readBytesFromInputStream(inputStream, stickerImageFileName);
