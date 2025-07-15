@@ -12,7 +12,7 @@ public abstract class HttpClient {
     private OkHttpClient okHttpClient;
 
     protected HttpClient(String baseUrl) {
-        this.baseUrl = "http://192.168.68.103:8080/" + baseUrl;
+        this.baseUrl = "http://192.168.16.23:8080/" + baseUrl; //TODO: pensar num jeito de mudar esse ip dinamicamente
         okHttpClient = new OkHttpClient();
     }
 
