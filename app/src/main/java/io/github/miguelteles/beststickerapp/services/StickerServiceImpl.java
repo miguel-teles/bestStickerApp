@@ -15,8 +15,7 @@ import io.github.miguelteles.beststickerapp.exception.enums.StickerFolderExcepti
 import io.github.miguelteles.beststickerapp.repository.MyDatabase;
 import io.github.miguelteles.beststickerapp.repository.StickerRepository;
 import io.github.miguelteles.beststickerapp.repository.contentProvider.StickerUriProvider;
-import io.github.miguelteles.beststickerapp.services.client.ImageConverterWebpWebService;
-import io.github.miguelteles.beststickerapp.services.interfaces.EntityCreationCallback;
+import io.github.miguelteles.beststickerapp.services.interfaces.EntityOperationCallback;
 import io.github.miguelteles.beststickerapp.services.interfaces.FoldersManagementService;
 import io.github.miguelteles.beststickerapp.services.interfaces.StickerService;
 import io.github.miguelteles.beststickerapp.utils.Utils;
@@ -37,13 +36,13 @@ public class StickerServiceImpl implements StickerService {
 
     private static StickerService instance;
     private final FoldersManagementService foldersManagementService;
+    private final StickerImageConvertionService stickerImageConvertionService;
     private final StickerRepository stickerRepository;
     private final StickerUriProvider stickerUriProvider;
     private final ContentResolver contentResolver;
     private final StickerPackValidator stickerPackValidator;
     private final Executor executor;
     private final UiThreadPoster threadResultPoster;
-    private final ImageConverterWebpWebService converterWebService =
 
     private StickerServiceImpl(Context context) throws StickerException {
         this.stickerRepository = new StickerRepository(MyDatabase.getInstance().getSqLiteDatabase());
@@ -53,6 +52,7 @@ public class StickerServiceImpl implements StickerService {
         contentResolver = context.getContentResolver();
         this.executor = Executors.newSingleThreadExecutor();
         this.threadResultPoster = new AndroidUiThreadPoster();
+        this.stickerImageConvertionService = StickerImageConvertionService.getInstance();
     }
 
     public StickerServiceImpl(StickerRepository stickerRepository,
@@ -60,6 +60,7 @@ public class StickerServiceImpl implements StickerService {
                               StickerUriProvider stickerUriProvider,
                               ContentResolver contentResolver,
                               StickerPackValidator stickerPackValidator,
+                              StickerImageConvertionService stickerImageConvertionService,
                               Executor executor) {
         this.stickerRepository = stickerRepository;
         this.foldersManagementService = foldersManagementService;
@@ -67,6 +68,7 @@ public class StickerServiceImpl implements StickerService {
         this.contentResolver = contentResolver;
         this.stickerPackValidator = stickerPackValidator;
         this.executor = executor;
+        this.stickerImageConvertionService = stickerImageConvertionService;
         this.threadResultPoster = new ImmediateUiThreadPoster();
     }
 
@@ -80,7 +82,7 @@ public class StickerServiceImpl implements StickerService {
     @Override
     public void createSticker(StickerPack stickerPack,
                               Uri selectedStickerImage,
-                              EntityCreationCallback<Sticker> callbackClass) {
+                              EntityOperationCallback<Sticker> callbackClass) {
         validateParametersCreateSticker(stickerPack, selectedStickerImage, callbackClass);
 
         executor.execute(() -> {
@@ -90,7 +92,7 @@ public class StickerServiceImpl implements StickerService {
             try {
                 callbackClass.onProgressUpdate(10);
                 File stickerPackFolder = foldersManagementService.getStickerPackFolderByFolderName(stickerPack.getFolderName());
-                copiedImages = foldersManagementService.generateStickerImages(stickerPackFolder,
+                copiedImages = stickerImageConvertionService.generateStickerImages(stickerPackFolder,
                         selectedStickerImage,
                         generateStickerImageName(),
                         FoldersManagementServiceImpl.STICKER_IMAGE_SIZE,
@@ -132,7 +134,7 @@ public class StickerServiceImpl implements StickerService {
         }
     }
 
-    private void validateParametersCreateSticker(StickerPack stickerPack, Uri selectedStickerImage, EntityCreationCallback<Sticker> callbackClass) {
+    private void validateParametersCreateSticker(StickerPack stickerPack, Uri selectedStickerImage, EntityOperationCallback<Sticker> callbackClass) {
         if (stickerPack == null) {
             throw new IllegalArgumentException("StickerPack parameter is mandatory");
         } else {

@@ -6,7 +6,6 @@ import androidx.annotation.NonNull;
 
 import java.util.List;
 
-import io.github.miguelteles.beststickerapp.domain.entity.Sticker;
 import io.github.miguelteles.beststickerapp.domain.entity.StickerPack;
 import io.github.miguelteles.beststickerapp.exception.StickerException;
 import io.github.miguelteles.beststickerapp.exception.StickerFolderException;
@@ -16,14 +15,14 @@ public interface StickerPackService {
     void createStickerPack(String authorNameInput,
                            String packNameInput,
                            Uri selectedImagemUri,
-                           EntityCreationCallback<StickerPack> callbackClass);
+                           EntityOperationCallback<StickerPack> callbackClass);
 
     void updateStickerPack(StickerPack stickerPack,
                            String editedAuthorName,
                            String editedPackName,
-                           EntityCreationCallback<StickerPack> callbackClass);
+                           EntityOperationCallback<StickerPack> callbackClass);
 
-    void deleteStickerPack(StickerPack stickerPack) throws StickerException;
+    void deleteStickerPack(StickerPack stickerPack, EntityOperationCallback<StickerPack> callbackClass) throws StickerException;
 
     StickerPack fetchStickerPackByIdWithAssets(StickerPack stickerPack) throws StickerException;
 

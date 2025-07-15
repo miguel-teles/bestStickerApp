@@ -43,9 +43,10 @@
     <string name="sticker_pack_animation_indicator" tools:ignore="MissingTranslation">Animated sticker pack</string>
     <!-- text we display at the end of sticker pack details page showing that users can tap sticker to see bigger version -->
     <string name="sticker_pack_details_tap_to_preview" tools:ignore="MissingTranslation">Tap to preview sticker</string>
-
     <string name="defaultPublisher" translatable="false">Aplicativo de figurinhas - Miguel Teles</string>
+    <string name="sticker_pack_image" translatable="false">Imagem do pacote</string>
 
+    <!-- Exception enums   -->
     <string name="MKDIR_ROOT" translatable="false">Erro ao criar pasta dos arquivos do aplicativo</string>
     <string name="MKDIR_LOG" translatable="false">Erro ao criar pasta de logs</string>
     <string name="MKDIR_LOG_ERRORS" translatable="false">Erro ao criar pasta de logs de erro</string>
@@ -58,6 +59,7 @@
     <string name="COPY" translatable="false">Erro ao copiar arquivo ao destino novo</string>
     <string name="RESIZE" translatable="false">Erro ao mudar tamanho da imagem</string>
     <string name="DELETE_FOLDER" translatable="false">Erro ao apagar pasta</string>
+    <string name="CONVERT_FILE" translatable="false">Erro ao converter arquivo</string>
     <string name="CREATE_STICKER_PACK" translatable="false">Erro criar novo pacote de figurinhas</string>
     <string name="CREATE_STICKER" translatable="false">Erro criar nova figurinha</string>
     <string name="EDIT_STICKER_PACK" translatable="false">Erro ao editar pacote de figurinhas</string>
@@ -69,10 +71,8 @@
     <string name="ADD_STICKER" translatable="false">ADICIONAR FIGURINHAS</string>
     <string name="ADD_PACK" translatable="false">CRIAR PACOTE</string>
     <string name="SAVE_PACK" translatable="false">SALVAR PACOTE</string>
-    <string name="title_activity_exception">ExceptionActivity</string>
-    <string name="FETCH_STICKER">Erro ao buscar figurinhas</string>
-    <string name="FETCH_STICKER_PACK">Erro ao buscar pacote de figurinhas</string>
-    <string name="sticker_pack_image">Imagem do pacote</string>
-    <string name="INVALID_STICKER_PACK">Invalid sticker pack</string>
-    <string name="title_activity_loading">LoadingActivity</string>
+    <string name="FETCH_STICKER" translatable="false">Erro ao buscar figurinhas</string>
+    <string name="FETCH_STICKER_PACK" translatable="false">Erro ao buscar pacote de figurinhas</string>
+    <string name="INVALID_STICKER_PACK" translatable="false">Invalid sticker pack</string>
+    <string name="POST" translatable="false">Erro ao executar HTTP POST</string>
 </resources>

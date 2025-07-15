@@ -25,7 +25,7 @@ import io.github.miguelteles.beststickerapp.exception.StickerException;
 import io.github.miguelteles.beststickerapp.exception.StickerExceptionHandler;
 import io.github.miguelteles.beststickerapp.services.StickerServiceImpl;
 
-import io.github.miguelteles.beststickerapp.services.interfaces.EntityCreationCallback;
+import io.github.miguelteles.beststickerapp.services.interfaces.EntityOperationCallback;
 import io.github.miguelteles.beststickerapp.services.interfaces.StickerService;
 import io.github.miguelteles.beststickerapp.utils.Utils;
 
@@ -86,8 +86,8 @@ public class AddStickerActivity extends AppCompatActivity {
     }
 
     @NonNull
-    private EntityCreationCallback<Sticker> createStickerCreationCallback(Context context) {
-        return new EntityCreationCallback<>() {
+    private EntityOperationCallback<Sticker> createStickerCreationCallback(Context context) {
+        return new EntityOperationCallback<>() {
 
             @Override
             public void onCreationFinish(Sticker createdEntity, StickerException stickerException) {
@@ -107,7 +107,8 @@ public class AddStickerActivity extends AppCompatActivity {
                 creationProgressBar.setProgress(process);
             }
 
-            private void runProgressBarAnimation(int process) {
+            @Override
+            public void runProgressBarAnimation(int process) {
                 new Handler(Looper.getMainLooper()).post(() -> {
                     ObjectAnimator animation = ObjectAnimator.ofInt(creationProgressBar, "progress", creationProgressBar.getProgress(), process);
                     animation.setDuration(800);

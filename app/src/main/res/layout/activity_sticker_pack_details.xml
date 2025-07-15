@@ -230,7 +230,13 @@
             tools:visibility="visible" />
 
     </FrameLayout>
-
+    <ProgressBar
+        android:id="@+id/pg_sticker_pack_edit"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:max="100"
+        android:visibility="invisible" />
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

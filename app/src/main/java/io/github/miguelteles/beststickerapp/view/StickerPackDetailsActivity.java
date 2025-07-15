@@ -8,17 +8,22 @@
 
 package io.github.miguelteles.beststickerapp.view;
 
+import android.animation.ObjectAnimator;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.text.format.Formatter;
 import android.view.Menu;
 import android.view.View;
 import android.view.ViewTreeObserver;
+import android.view.animation.DecelerateInterpolator;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -35,6 +40,7 @@ import io.github.miguelteles.beststickerapp.exception.StickerExceptionHandler;
 import io.github.miguelteles.beststickerapp.repository.contentProvider.StickerUriProvider;
 import io.github.miguelteles.beststickerapp.services.StickerPackServiceImpl;
 import io.github.miguelteles.beststickerapp.services.StickerServiceImpl;
+import io.github.miguelteles.beststickerapp.services.interfaces.EntityOperationCallback;
 import io.github.miguelteles.beststickerapp.services.interfaces.StickerPackService;
 import io.github.miguelteles.beststickerapp.services.interfaces.StickerService;
 import io.github.miguelteles.beststickerapp.validator.WhitelistCheck;
@@ -56,6 +62,7 @@ public class StickerPackDetailsActivity extends AddStickerPackToWhatsappActivity
     private WhiteListCheckAsyncTask whiteListCheckAsyncTask;
     private StickerPackService stickerPackService;
     private StickerService stickerService;
+    private ProgressBar progressBar;
     private int stickerBytes;
 
     @Override
@@ -150,6 +157,7 @@ public class StickerPackDetailsActivity extends AddStickerPackToWhatsappActivity
         alreadyAddedText = findViewById(R.id.already_added_text);
         recyclerView = findViewById(R.id.sticker_list);
         divider = findViewById(R.id.divider);
+        progressBar = findViewById(R.id.pg_sticker_pack_edit);
     }
 
     private void setaOnClickListeners() {
@@ -178,7 +186,8 @@ public class StickerPackDetailsActivity extends AddStickerPackToWhatsappActivity
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         try {
-                            stickerPackService.deleteStickerPack(stickerPack);
+                            progressBar.setVisibility(View.VISIBLE);
+                            stickerPackService.deleteStickerPack(stickerPack, createStickerPackDeletionCallback(context));
                             Intent intent = new Intent(context, StickerPackListActivity.class);
                             startActivity(intent);
                         } catch (StickerException ex) {
@@ -191,6 +200,38 @@ public class StickerPackDetailsActivity extends AddStickerPackToWhatsappActivity
                     public void onClick(DialogInterface dialog, int which) {
                     }
                 }).create().show();
+    }
+
+    private EntityOperationCallback<StickerPack> createStickerPackDeletionCallback(Context context) {
+        return new EntityOperationCallback<StickerPack>() {
+            @Override
+            public void onCreationFinish(StickerPack createdEntity, StickerException stickerException) {
+                if (stickerException == null) {
+                    onProgressUpdate(100);
+                    finish();
+                } else {
+                    progressBar.setProgress(0);
+                    progressBar.setVisibility(View.GONE);
+                    StickerExceptionHandler.handleException(stickerException, context);
+                }
+            }
+
+            @Override
+            public void onProgressUpdate(int process) {
+                runProgressBarAnimation(process);
+                progressBar.setProgress(process);
+            }
+
+            @Override
+            public void runProgressBarAnimation(int process) {
+                new Handler(Looper.getMainLooper()).post(() -> {
+                    ObjectAnimator animation = ObjectAnimator.ofInt(progressBar, "progress", progressBar.getProgress(), process);
+                    animation.setDuration(800);
+                    animation.setInterpolator(new DecelerateInterpolator());
+                    animation.start();
+                });
+            }
+        };
     }
 
     private void editStickerPack() {

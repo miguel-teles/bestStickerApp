@@ -15,7 +15,7 @@ public interface StickerService {
 
     void createSticker(StickerPack stickerPack,
                        Uri selectedStickerImage,
-                       EntityCreationCallback<Sticker> callbackClass);
+                       EntityOperationCallback<Sticker> callbackClass);
 
     void deleteSticker(Sticker sticker,
                        StickerPack stickerPack) throws StickerException;

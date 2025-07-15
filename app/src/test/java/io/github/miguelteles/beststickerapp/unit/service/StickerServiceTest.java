@@ -27,8 +27,9 @@ import io.github.miguelteles.beststickerapp.domain.entity.StickerPack;
 import io.github.miguelteles.beststickerapp.exception.StickerException;
 import io.github.miguelteles.beststickerapp.repository.StickerRepository;
 import io.github.miguelteles.beststickerapp.repository.contentProvider.StickerUriProvider;
+import io.github.miguelteles.beststickerapp.services.StickerImageConvertionService;
 import io.github.miguelteles.beststickerapp.services.StickerServiceImpl;
-import io.github.miguelteles.beststickerapp.services.interfaces.EntityCreationCallback;
+import io.github.miguelteles.beststickerapp.services.interfaces.EntityOperationCallback;
 import io.github.miguelteles.beststickerapp.services.interfaces.FoldersManagementService;
 import io.github.miguelteles.beststickerapp.services.interfaces.StickerService;
 import io.github.miguelteles.beststickerapp.utils.Utils;
@@ -41,11 +42,12 @@ public class StickerServiceTest {
     StickerUriProvider stickerUriProvider = mock(StickerUriProvider.class);
     ContentResolver contentResolver = mock(ContentResolver.class);
     StickerPackValidator stickerPackValidator = mock(StickerPackValidator.class);
+    StickerImageConvertionService stickerImageConvertionService = mock(StickerImageConvertionService.class);
     StickerService stickerService = mock(StickerService.class);
     Uri uri = mock(Uri.class);
     Executor testExecutor = Runnable::run;
 
-    EntityCreationCallback<Sticker> callback = new EntityCreationCallback<Sticker>() {
+    EntityOperationCallback<Sticker> callback = new EntityOperationCallback<Sticker>() {
         @Override
         public void onCreationFinish(Sticker createdEntity, StickerException stickerException) {
             generatedSticker = createdEntity;
@@ -53,6 +55,11 @@ public class StickerServiceTest {
 
         @Override
         public void onProgressUpdate(int process) {
+
+        }
+
+        @Override
+        public void runProgressBarAnimation(int process) {
 
         }
     };
@@ -94,7 +101,7 @@ public class StickerServiceTest {
                 return new File("hey");
             }
         });
-        when(foldersManagementService.generateStickerImages(any(File.class), any(Uri.class), any(String.class), any(Integer.class), any(Boolean.class))).then(new Answer<FoldersManagementService.Image>() {
+        when(stickerImageConvertionService.generateStickerImages(any(File.class), any(Uri.class), any(String.class), any(Integer.class), any(Boolean.class))).then(new Answer<FoldersManagementService.Image>() {
             @Override
             public FoldersManagementService.Image answer(InvocationOnMock invocation) throws Throwable {
                 return new FoldersManagementService.Image(new File("/home/miguel/StudioProjects/stickersProjeto/app/src/main/assets/test_image.jpg"),
@@ -146,7 +153,7 @@ public class StickerServiceTest {
             }
         });
 
-        stickerService = new StickerServiceImpl(stickerRepository, foldersManagementService, stickerUriProvider, contentResolver, stickerPackValidator, testExecutor);
+        stickerService = new StickerServiceImpl(stickerRepository, foldersManagementService, stickerUriProvider, contentResolver, stickerPackValidator, stickerImageConvertionService, testExecutor);
     }
 
     @Test

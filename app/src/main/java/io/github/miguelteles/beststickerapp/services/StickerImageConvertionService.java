@@ -6,7 +6,6 @@ import android.graphics.Matrix;
 import android.media.ExifInterface;
 import android.net.Uri;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -14,18 +13,23 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.util.Base64;
 
+import io.github.miguelteles.beststickerapp.domain.pojo.ResponseAPIConvertedWebpDTO;
+import io.github.miguelteles.beststickerapp.exception.StickerException;
 import io.github.miguelteles.beststickerapp.exception.StickerFolderException;
 import io.github.miguelteles.beststickerapp.exception.enums.StickerFolderExceptionEnum;
+import io.github.miguelteles.beststickerapp.services.client.ImageConverterWebpAPI;
 import io.github.miguelteles.beststickerapp.services.interfaces.FoldersManagementService;
+import io.github.miguelteles.beststickerapp.utils.Utils;
 
 public class StickerImageConvertionService {
 
     private static StickerImageConvertionService instance;
-
     private final FoldersManagementService foldersManagementService;
+    private final ImageConverterWebpAPI imageConverterWebpAPI;
 
     private StickerImageConvertionService() {
         foldersManagementService = FoldersManagementServiceImpl.getInstance();
+        imageConverterWebpAPI = new ImageConverterWebpAPI();
     }
 
     public static StickerImageConvertionService getInstance() {
@@ -33,15 +37,6 @@ public class StickerImageConvertionService {
             instance = new StickerImageConvertionService();
         }
         return instance;
-    }
-
-    public String getFileExtension(File file, boolean withDot) {
-        String fileName = file.getName();
-        String result = fileName.substring(fileName.lastIndexOf("."));
-        if (!withDot) {
-            result = result.replace(".", "");
-        }
-        return result;
     }
 
     public FoldersManagementService.Image generateStickerImages(File stickerPackFolder,
@@ -61,32 +56,37 @@ public class StickerImageConvertionService {
                                                                 String destinationImageFileName,
                                                                 Integer imageWidthAndHeight,
                                                                 boolean keepOriginalCopy) throws StickerFolderException {
+        File originalImage = null;
+        File resizedImageOriginalFormat = null;
         try {
             File sourceImage = new File(selectedImageSourceAbsolutePath);
             int rotation = getImageOrientation(selectedImageSourceAbsolutePath);
 
-            String stickerPackImageFileName = destinationImageFileName + getFileExtension(sourceImage, true);
-            String stickerPackImageResizedFileName = destinationImageFileName + "Rzd.webp"; //TEM QUE SER .webp se não o whatsapp não aceita
+            String stickerPackImageFileName = destinationImageFileName + this.foldersManagementService.getFileExtension(sourceImage, true);
+            String stickerPackImageResizedFileName = destinationImageFileName + this.foldersManagementService.getFileExtension(sourceImage, true); //TEM QUE SER .webp se não o whatsapp não aceita
 
-            File stickerPackOriginalImageAbsoluteFile = null;
             if (keepOriginalCopy) {
-                stickerPackOriginalImageAbsoluteFile = new File(stickerPackFolder, stickerPackImageFileName);
-                copyImageFromSourceToDestination(sourceImage, stickerPackOriginalImageAbsoluteFile);
-                resizeAndRotateImage(stickerPackOriginalImageAbsoluteFile, determineImageSmallerSide(stickerPackOriginalImageAbsoluteFile), FoldersManagementServiceImpl.TRAY_IMAGE_MAX_FILE_SIZE, rotation);
+                originalImage = new File(stickerPackFolder, stickerPackImageFileName);
+                copyImageFromSourceToDestination(sourceImage, originalImage);
+                rotateImage(originalImage, rotation);
             }
-            File stickerPackResizedImageAbsoluteFile = new File(stickerPackFolder, stickerPackImageResizedFileName);
-            copyImageFromSourceToDestination(sourceImage, stickerPackResizedImageAbsoluteFile);
-            resizeAndRotateImage(stickerPackResizedImageAbsoluteFile, imageWidthAndHeight, FoldersManagementServiceImpl.TRAY_IMAGE_MAX_FILE_SIZE, rotation);
+            resizedImageOriginalFormat = new File(Utils.getApplicationContext().getCacheDir(), stickerPackImageResizedFileName);
+            copyImageFromSourceToDestination(sourceImage, resizedImageOriginalFormat);
+            resizeImage(resizedImageOriginalFormat, imageWidthAndHeight);
+            rotateImage(resizedImageOriginalFormat, rotation);
+            File resizedImageWebp = convertImageToWebp(resizedImageOriginalFormat, stickerPackFolder);
 
             byte[] bytes = null;
-            try (InputStream inputStream = Files.newInputStream(stickerPackResizedImageAbsoluteFile.toPath())) {
-                bytes = foldersManagementService.readBytesFromInputStream(inputStream, stickerPackResizedImageAbsoluteFile.getName());
+            try (InputStream inputStream = Files.newInputStream(resizedImageWebp.toPath())) {
+                bytes = foldersManagementService.readBytesFromInputStream(inputStream, resizedImageOriginalFormat.getName());
             }
-            return new FoldersManagementService.Image(stickerPackOriginalImageAbsoluteFile, stickerPackResizedImageAbsoluteFile, bytes);
+            return new FoldersManagementService.Image(originalImage, resizedImageWebp, bytes);
         } catch (StickerFolderException ste) {
             throw ste;
         } catch (Exception ex) {
             throw new StickerFolderException(ex, StickerFolderExceptionEnum.COPY, "Erro ao copiar foto do pacote para a pasta do pacote " + stickerPackFolder.getName());
+        } finally {
+            foldersManagementService.deleteFile(resizedImageOriginalFormat);
         }
     }
 
@@ -121,16 +121,6 @@ public class StickerImageConvertionService {
         return rotate;
     }
 
-
-    private int determineImageSmallerSide(File stickerPackImageFile) {
-        Bitmap bitmap = BitmapFactory.decodeFile(stickerPackImageFile.getAbsolutePath());
-        int greaterSide = bitmap.getWidth();
-        if (greaterSide < bitmap.getHeight()) {
-            greaterSide = bitmap.getHeight();
-        }
-        return greaterSide;
-    }
-
     private void copyImageFromSourceToDestination(File sourceFile, File destinationFile) throws StickerFolderException {
         try {
             Files.copy(sourceFile.toPath(), destinationFile.toPath());
@@ -139,34 +129,53 @@ public class StickerImageConvertionService {
         }
     }
 
-    private void resizeAndRotateImage(File imageToResize,
-                                      int imageWidthAndHeight,
-                                      int fileSize,
-                                      int rotation) throws StickerFolderException {
-        try {
-            Bitmap bitmap = BitmapFactory.decodeFile(imageToResize.getAbsolutePath());
-
+    private void rotateImage(File imageToRotate,
+                             int rotation) throws StickerFolderException {
+        Bitmap bitmap = BitmapFactory.decodeFile(imageToRotate.getAbsolutePath());
+        try (FileOutputStream out = new FileOutputStream(imageToRotate)){
             bitmap = applyRotationToBitmap(bitmap, rotation);
-            bitmap = Bitmap.createScaledBitmap(bitmap, imageWidthAndHeight, imageWidthAndHeight, false);
-
-            FileOutputStream out = new FileOutputStream(imageToResize);
             bitmap.compress(Bitmap.CompressFormat.JPEG, 90, out);
             out.flush();
-            out.close();
+        } catch (Exception ex) {
+            throw new StickerFolderException(ex, StickerFolderExceptionEnum.RESIZE, "Rotacionando imagem: " + imageToRotate.getName());
+        }
+    }
+
+    private void resizeImage(File imageToResize,
+                             int imageWidthAndHeight) throws StickerFolderException {
+        Bitmap bitmap = BitmapFactory.decodeFile(imageToResize.getAbsolutePath());
+        try (FileOutputStream out = new FileOutputStream(imageToResize)) {
+            bitmap = Bitmap.createScaledBitmap(bitmap, imageWidthAndHeight, imageWidthAndHeight, false);
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 90, out);
+            out.flush();
         } catch (Exception ex) {
             throw new StickerFolderException(ex, StickerFolderExceptionEnum.RESIZE, "Imagem: " + imageToResize.getName());
         }
     }
 
-    public File convertImage(File file) {
+    public File convertImageToWebp(File file, File destinationFolder) throws StickerException {
+        String originalFormatImageBase64 = convertFileIntoBase64(file);
+        ResponseAPIConvertedWebpDTO responseAPIConvertedWebpDTO = this.imageConverterWebpAPI.convertImageToWebp(originalFormatImageBase64);
 
-        try (InputStream inputStream = Files.newInputStream(file.toPath())) {
-
-            byte[] encodedImageInBase64 = foldersManagementService.readBytesFromInputStream(inputStream, file.getName());
-            String = Base64.getEncoder().encodeToString(encodedImageInBase64);
-
+        byte[] webpImageInByteArray = Base64.getDecoder().decode(responseAPIConvertedWebpDTO.getWebpImageBase64());
+        File result = new File(destinationFolder, file.getName().replace(this.foldersManagementService.getFileExtension(file, true), ".webp"));
+        try (FileOutputStream out = new FileOutputStream(result)){
+            out.write(webpImageInByteArray);
+            return result;
+        } catch (IOException e) {
+            throw new StickerFolderException(e, StickerFolderExceptionEnum.CONVERT_FILE, "Erro ao converter imagem para .webp");
         }
+    }
 
+    private String convertFileIntoBase64(File file) throws StickerFolderException {
+        String originalFormatImageBase64;
+        try (InputStream inputStream = Files.newInputStream(file.toPath())) {
+            byte[] encodedImageInBase64 = foldersManagementService.readBytesFromInputStream(inputStream, file.getName());
+            originalFormatImageBase64 = Base64.getEncoder().encodeToString(encodedImageInBase64);
+        } catch (IOException e) {
+            throw new StickerFolderException(e, StickerFolderExceptionEnum.GET_FILE, "Erro ao ler imagem e converter para base64");
+        }
+        return originalFormatImageBase64;
     }
 
 }

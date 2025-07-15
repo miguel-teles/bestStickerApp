@@ -26,7 +26,7 @@ import io.github.miguelteles.beststickerapp.exception.enums.StickerExceptionEnum
 import io.github.miguelteles.beststickerapp.domain.entity.StickerPack;
 import io.github.miguelteles.beststickerapp.repository.contentProvider.StickerUriProvider;
 import io.github.miguelteles.beststickerapp.services.StickerPackServiceImpl;
-import io.github.miguelteles.beststickerapp.services.interfaces.EntityCreationCallback;
+import io.github.miguelteles.beststickerapp.services.interfaces.EntityOperationCallback;
 import io.github.miguelteles.beststickerapp.services.interfaces.StickerPackService;
 import io.github.miguelteles.beststickerapp.utils.Utils;
 
@@ -189,9 +189,9 @@ public class AddStickerPackActivity extends AppCompatActivity {
         };
     }
 
-    private EntityCreationCallback<StickerPack> createStickerPackCreationCallback() {
+    private EntityOperationCallback<StickerPack> createStickerPackCreationCallback() {
         Context context = this;
-        return new EntityCreationCallback<>() {
+        return new EntityOperationCallback<>() {
             @Override
             public void onCreationFinish(StickerPack createdStickerPack, StickerException stickerException) {
                 stickerPackBeingEdited = createdStickerPack;
@@ -211,7 +211,8 @@ public class AddStickerPackActivity extends AppCompatActivity {
                 creationProgressBar.setProgress(process);
             }
 
-            private void runProgressBarAnimation(int process) {
+            @Override
+            public void runProgressBarAnimation(int process) {
                 new Handler(Looper.getMainLooper()).post(() -> {
                     ObjectAnimator animation = ObjectAnimator.ofInt(creationProgressBar, "progress", creationProgressBar.getProgress(), process);
                     animation.setDuration(500);

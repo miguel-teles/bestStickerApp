@@ -202,6 +202,15 @@ public class FoldersManagementServiceImpl implements FoldersManagementService {
         deleteFile(folder);
     }
 
+    public String getFileExtension(File file, boolean withDot) {
+        String fileName = file.getName();
+        String result = fileName.substring(fileName.lastIndexOf("."));
+        if (!withDot) {
+            result = result.replace(".", "");
+        }
+        return result;
+    }
+
     @Override
     public byte[] readBytesFromInputStream(InputStream inputStream, String imageFileName) throws StickerFolderException {
         try (final ByteArrayOutputStream buffer = new ByteArrayOutputStream()) {
