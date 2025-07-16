@@ -19,18 +19,18 @@ import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 
+import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+
 import io.github.miguelteles.beststickerapp.R;
-import io.github.miguelteles.beststickerapp.repository.MyDatabase;
+import io.github.miguelteles.beststickerapp.domain.entity.StickerPack;
 import io.github.miguelteles.beststickerapp.exception.StickerException;
 import io.github.miguelteles.beststickerapp.exception.StickerExceptionHandler;
-import io.github.miguelteles.beststickerapp.domain.entity.StickerPack;
+import io.github.miguelteles.beststickerapp.repository.MyDatabase;
 import io.github.miguelteles.beststickerapp.services.FoldersManagementServiceImpl;
 import io.github.miguelteles.beststickerapp.services.StickerPackService;
 import io.github.miguelteles.beststickerapp.utils.Utils;
 import io.github.miguelteles.beststickerapp.validator.StickerPackValidator;
-
-import java.lang.ref.WeakReference;
-import java.util.ArrayList;
 
 public class EntryActivity extends BaseActivity {
     private View progressBar;

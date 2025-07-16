@@ -24,6 +24,9 @@ android {
         buildConfigField("String",
                 "CONTENT_PROVIDER_AUTHORITY",
                 "\"${contentProviderAuthority}\"")
+
+        buildConfigField "String", "API_PRODUCTION_URL", "\"https://tjmoup5015.execute-api.us-east-1.amazonaws.com/prod/\""
+
     }
     buildTypes {
         debug {
@@ -95,8 +98,6 @@ tasks.whenTaskAdded { task ->
         task.dependsOn checkRelease
     }
 }
-
-
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation 'androidx.appcompat:appcompat:1.7.1'
@@ -133,6 +134,5 @@ dependencies {
     androidTestImplementation 'org.mockito:mockito-android:2.28.2'
     // Dependência do Mockito para ser possível mockar classes e métodos constantes
     testImplementation 'org.mockito:mockito-inline:2.28.2'
-
     testImplementation "org.robolectric:robolectric:3.4.2"
 }

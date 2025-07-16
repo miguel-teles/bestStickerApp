@@ -8,11 +8,11 @@ import okhttp3.RequestBody;
 
 public abstract class HttpClient {
     public static final MediaType JSON = MediaType.parse("application/json");
-    private String baseUrl;
+    private final String baseUrl;
     private OkHttpClient okHttpClient;
 
     protected HttpClient(String baseUrl) {
-        this.baseUrl = "http://192.168.16.23:8080/" + baseUrl; //TODO: pensar num jeito de mudar esse ip dinamicamente
+        this.baseUrl = baseUrl; //TODO: pensar num jeito de mudar esse ip dinamicamente
         okHttpClient = new OkHttpClient();
     }
 

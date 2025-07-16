@@ -156,6 +156,9 @@ public class StickerImageConvertionService {
     public File convertImageToWebp(File file, File destinationFolder) throws StickerException {
         String originalFormatImageBase64 = convertFileIntoBase64(file);
         ResponseAPIConvertedWebpDTO responseAPIConvertedWebpDTO = this.imageConverterWebpAPI.convertImageToWebp(originalFormatImageBase64);
+        if (responseAPIConvertedWebpDTO.getMessage() != null) {
+            throw new StickerFolderException(null, StickerFolderExceptionEnum.CONVERT_FILE, responseAPIConvertedWebpDTO.getMessage());
+        }
 
         byte[] webpImageInByteArray = Base64.getDecoder().decode(responseAPIConvertedWebpDTO.getWebpImageBase64());
         File result = new File(destinationFolder, file.getName().replace(this.foldersManagementService.getFileExtension(file, true), ".webp"));
