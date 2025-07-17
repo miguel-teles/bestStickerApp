@@ -24,8 +24,10 @@ import android.view.animation.DecelerateInterpolator;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.res.ResourcesCompat;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -46,7 +48,6 @@ public class StickerPackDetailsActivity extends AddStickerPackToWhatsappActivity
     private StickerPreviewAdapter stickerPreviewAdapter;
     private int numColumns;
     private View btnAddToWhatsapp;
-    private View alreadyAddedText;
     private StickerPack stickerPack;
     private View divider;
     private ImageView btnAddNewSticker;
@@ -56,7 +57,8 @@ public class StickerPackDetailsActivity extends AddStickerPackToWhatsappActivity
     private StickerPackService stickerPackService;
     private StickerService stickerService;
     private ProgressBar progressBar;
-    private int stickerBytes;
+
+    private TextView txtNotEnoughStickers;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,11 +77,39 @@ public class StickerPackDetailsActivity extends AddStickerPackToWhatsappActivity
         assembleRecyclerView();
         loadStickersOnScreen();
         loadStickerPackInfoOnComponents();
-        setaOnClickListeners();
+        setOnClickListeners();
+        setBtnAddToWhatsappProperties();
         if (getSupportActionBar() != null) {
             getSupportActionBar().hide();
         }
         findViewById(R.id.sticker_pack_animation_indicator).setVisibility(stickerPack.isAnimatedStickerPack() ? View.VISIBLE : View.GONE);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        try {
+            stickerPack = stickerPackService.fetchStickerPackByIdWithAssets(stickerPack);
+            loadStickersOnScreen();
+            setBtnAddToWhatsappProperties();
+        } catch (StickerException ex) {
+            StickerExceptionHandler.handleException(ex, this);
+        }
+    }
+
+    private void setBtnAddToWhatsappProperties() {
+        Context context = this;
+        if (stickerPack.getStickers() != null && stickerPack.getStickers().size() < 3) {
+            btnAddToWhatsapp.setOnClickListener( v -> Toast.makeText(context, R.string.not_enough_stickers_to_add_to_whatsapp, Toast.LENGTH_LONG).show());
+            btnAddToWhatsapp.setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.shape_btn_default_disabled, null));
+
+            txtNotEnoughStickers.setVisibility(View.VISIBLE);
+        } else {
+            setAddStickerPackToWhatsappListener();
+            btnAddToWhatsapp.setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.shape_btn_default, null));
+
+            txtNotEnoughStickers.setVisibility(View.GONE);
+        }
     }
 
     private void loadStickerPackInfoOnComponents() {
@@ -109,17 +139,6 @@ public class StickerPackDetailsActivity extends AddStickerPackToWhatsappActivity
 
 
     @Override
-    protected void onResume() {
-        super.onResume();
-        try {
-            stickerPack = stickerPackService.fetchStickerPackByIdWithAssets(stickerPack);
-            loadStickersOnScreen();
-        } catch (StickerException ex) {
-            StickerExceptionHandler.handleException(ex, this);
-        }
-    }
-
-    @Override
     protected void onPause() {
         super.onPause();
     }
@@ -142,18 +161,21 @@ public class StickerPackDetailsActivity extends AddStickerPackToWhatsappActivity
         btnDeleteStickerPack = findViewById(R.id.btn_delete_pack);
         btnAddToWhatsapp = findViewById(R.id.add_to_whatsapp_button);
         btnGoBack = findViewById(R.id.btn_sticker_pack_details_go_back);
-        alreadyAddedText = findViewById(R.id.already_added_text);
         recyclerView = findViewById(R.id.sticker_list);
         divider = findViewById(R.id.divider);
         progressBar = findViewById(R.id.pg_sticker_pack_edit);
+        txtNotEnoughStickers = findViewById(R.id.txtNotEnoughStickers);
     }
 
-    private void setaOnClickListeners() {
-        btnAddToWhatsapp.setOnClickListener(v -> addStickerPackToWhatsApp(stickerPack.getIdentifier(), stickerPack.getName()));
+    private void setOnClickListeners() {
         btnEditStickerPack.setOnClickListener(btn -> editStickerPack());
         btnDeleteStickerPack.setOnClickListener(btn -> deleteStickerPack());
         btnAddNewSticker.setOnClickListener(btn -> addNewSticker());
         btnGoBack.setOnClickListener(btn -> addGoBack());
+    }
+
+    private void setAddStickerPackToWhatsappListener() {
+        btnAddToWhatsapp.setOnClickListener(v -> addStickerPackToWhatsApp(stickerPack.getIdentifier(), stickerPack.getName()));
     }
 
     private void addGoBack() {
@@ -266,7 +288,8 @@ public class StickerPackDetailsActivity extends AddStickerPackToWhatsappActivity
         try {
             this.stickerService.deleteSticker(sticker, stickerPack);
             stickerPack.getStickers().remove(sticker);
-            this.loadStickersOnScreen();
+            loadStickersOnScreen();
+            setBtnAddToWhatsappProperties();
         } catch (StickerException ex) {
             StickerExceptionHandler.handleException(ex, this);
         }

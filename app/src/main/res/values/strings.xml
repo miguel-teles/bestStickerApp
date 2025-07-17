@@ -45,6 +45,7 @@
     <string name="sticker_pack_details_tap_to_preview" tools:ignore="MissingTranslation">Tap to preview sticker</string>
     <string name="defaultPublisher" translatable="false">Aplicativo de figurinhas - Miguel Teles</string>
     <string name="sticker_pack_image" translatable="false">Imagem do pacote</string>
+    <string name="not_enough_stickers_to_add_to_whatsapp" translatable="false">É necessário que o pacote tenha pelo menos três figurinhas</string>
 
     <!-- Exception enums   -->
     <string name="MKDIR_ROOT" translatable="false">Erro ao criar pasta dos arquivos do aplicativo</string>

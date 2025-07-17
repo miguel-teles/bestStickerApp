@@ -263,6 +263,15 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
+            <TextView
+                android:id="@+id/txtNotEnoughStickers"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:textSize="10sp"
+                android:layout_marginBottom="4dp"
+                android:text="@string/not_enough_stickers_to_add_to_whatsapp" />
+
             <FrameLayout
                 android:id="@+id/add_to_whatsapp_button"
                 android:layout_width="match_parent"
