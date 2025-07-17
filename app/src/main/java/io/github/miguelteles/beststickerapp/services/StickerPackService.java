@@ -27,7 +27,6 @@ import io.github.miguelteles.beststickerapp.repository.MyDatabase;
 import io.github.miguelteles.beststickerapp.repository.StickerPackRepository;
 import io.github.miguelteles.beststickerapp.repository.contentProvider.StickerUriProvider;
 import io.github.miguelteles.beststickerapp.services.interfaces.EntityOperationCallback;
-import io.github.miguelteles.beststickerapp.services.interfaces.FoldersManagementService;
 import io.github.miguelteles.beststickerapp.utils.Utils;
 import io.github.miguelteles.beststickerapp.validator.StickerPackValidator;
 import io.github.miguelteles.beststickerapp.view.interfaces.UiThreadPoster;
@@ -51,7 +50,7 @@ public class StickerPackService {
 
     private StickerPackService() throws StickerException {
         this.stickerPackRepository = new StickerPackRepository(MyDatabase.getInstance().getSqLiteDatabase());
-        this.foldersManagementService = FoldersManagementServiceImpl.getInstance();
+        this.foldersManagementService = FoldersManagementService.getInstance();
         this.stickerUriProvider = StickerUriProvider.getInstance();
         this.contentResolver = Utils.getApplicationContext().getContentResolver();
         this.stickerPackValidator = StickerPackValidator.getInstance();
@@ -110,10 +109,10 @@ public class StickerPackService {
                 callbackClass.onProgressUpdate(10);
                 String stickerPackFolderName = packNameInput + Utils.formatData(new Date(), "yyyy.MM.dd.HH.mm.ss");
                 stickerPackFolder = foldersManagementService.getStickerPackFolderByFolderName(stickerPackFolderName);
-                FoldersManagementServiceImpl.Image copiedImages = stickerImageConvertionService.generateStickerImages(stickerPackFolder,
+                FoldersManagementService.Image copiedImages = stickerImageConvertionService.generateStickerImages(stickerPackFolder,
                         selectedImagemUri,
                         generateStickerPackImageName(),
-                        FoldersManagementServiceImpl.TRAY_IMAGE_SIZE,
+                        FoldersManagementService.TRAY_IMAGE_SIZE,
                         true);
                 callbackClass.onProgressUpdate(50);
                 stickerPack = new StickerPack(null,

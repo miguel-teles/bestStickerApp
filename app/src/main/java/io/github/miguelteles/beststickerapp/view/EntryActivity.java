@@ -25,9 +25,9 @@ import java.util.ArrayList;
 import io.github.miguelteles.beststickerapp.R;
 import io.github.miguelteles.beststickerapp.domain.entity.StickerPack;
 import io.github.miguelteles.beststickerapp.exception.StickerException;
-import io.github.miguelteles.beststickerapp.exception.StickerExceptionHandler;
+import io.github.miguelteles.beststickerapp.exception.handler.StickerExceptionHandler;
 import io.github.miguelteles.beststickerapp.repository.MyDatabase;
-import io.github.miguelteles.beststickerapp.services.FoldersManagementServiceImpl;
+import io.github.miguelteles.beststickerapp.services.FoldersManagementService;
 import io.github.miguelteles.beststickerapp.services.StickerPackService;
 import io.github.miguelteles.beststickerapp.utils.Utils;
 import io.github.miguelteles.beststickerapp.validator.StickerPackValidator;
@@ -52,7 +52,7 @@ public class EntryActivity extends BaseActivity {
             stickerPackValidator = StickerPackValidator.getInstance();
             MyDatabase.getInstance();
             stickerPackService = StickerPackService.getInstance();
-            FoldersManagementServiceImpl.getInstance().makeAllDirs();
+            FoldersManagementService.getInstance().makeAllDirs();
         } catch (StickerException ex) {
             StickerExceptionHandler.handleException(ex, this);
         }
@@ -60,6 +60,17 @@ public class EntryActivity extends BaseActivity {
         progressBar = findViewById(R.id.activity_progress_bar);
         loadListAsyncTask = new LoadListAsyncTask(this);
         loadListAsyncTask.execute();
+
+        Thread.setDefaultUncaughtExceptionHandler(createDefaultExceptionHandler());
+    }
+
+    private Thread.UncaughtExceptionHandler createDefaultExceptionHandler() {
+        return new Thread.UncaughtExceptionHandler() {
+            @Override
+            public void uncaughtException(Thread paramThread, Throwable paramThrowable) {
+
+            }
+        };
     }
 
     private void showStickerPack(ArrayList<StickerPack> stickerPackList) {

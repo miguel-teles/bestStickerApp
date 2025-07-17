@@ -18,7 +18,6 @@ import io.github.miguelteles.beststickerapp.exception.StickerException;
 import io.github.miguelteles.beststickerapp.exception.StickerFolderException;
 import io.github.miguelteles.beststickerapp.exception.enums.StickerFolderExceptionEnum;
 import io.github.miguelteles.beststickerapp.services.client.ImageConverterWebpAPI;
-import io.github.miguelteles.beststickerapp.services.interfaces.FoldersManagementService;
 import io.github.miguelteles.beststickerapp.utils.Utils;
 
 public class StickerImageConvertionService {
@@ -28,7 +27,7 @@ public class StickerImageConvertionService {
     private final ImageConverterWebpAPI imageConverterWebpAPI;
 
     private StickerImageConvertionService() {
-        foldersManagementService = FoldersManagementServiceImpl.getInstance();
+        foldersManagementService = FoldersManagementService.getInstance();
         imageConverterWebpAPI = new ImageConverterWebpAPI();
     }
 

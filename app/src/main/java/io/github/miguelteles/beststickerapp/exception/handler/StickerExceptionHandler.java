@@ -1,7 +1,9 @@
-package io.github.miguelteles.beststickerapp.exception;
+package io.github.miguelteles.beststickerapp.exception.handler;
 
 import android.app.AlertDialog;
 import android.content.Context;
+
+import io.github.miguelteles.beststickerapp.exception.StickerException;
 
 public class StickerExceptionHandler {
 

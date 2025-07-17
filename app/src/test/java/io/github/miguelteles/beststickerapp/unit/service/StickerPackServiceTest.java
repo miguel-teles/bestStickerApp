@@ -25,10 +25,11 @@ import io.github.miguelteles.beststickerapp.domain.entity.StickerPack;
 import io.github.miguelteles.beststickerapp.exception.StickerException;
 import io.github.miguelteles.beststickerapp.repository.StickerPackRepository;
 import io.github.miguelteles.beststickerapp.repository.contentProvider.StickerUriProvider;
+import io.github.miguelteles.beststickerapp.services.FoldersManagementService;
 import io.github.miguelteles.beststickerapp.services.StickerImageConvertionService;
 import io.github.miguelteles.beststickerapp.services.StickerPackService;
+import io.github.miguelteles.beststickerapp.services.StickerService;
 import io.github.miguelteles.beststickerapp.services.interfaces.EntityOperationCallback;
-import io.github.miguelteles.beststickerapp.services.interfaces.FoldersManagementService;
 import io.github.miguelteles.beststickerapp.validator.StickerPackValidator;
 
 public class StickerPackServiceTest {
@@ -74,7 +75,7 @@ public class StickerPackServiceTest {
             resources,
             testExecutor);
 
-    StickerPack validStickerPack = new StickerPack(1,
+    StickerPack validStickerPack = new StickerPack(UUID.randomUUID(),
             "teste",
             "teste",
             "app/src/main/assets/test_image.jpg",
@@ -84,7 +85,7 @@ public class StickerPackServiceTest {
             "teste",
             "teste",
             "teste",
-            "1",
+            1,
             true,
             false);
 

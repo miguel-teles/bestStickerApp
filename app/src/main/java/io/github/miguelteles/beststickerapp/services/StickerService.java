@@ -25,7 +25,6 @@ import io.github.miguelteles.beststickerapp.repository.MyDatabase;
 import io.github.miguelteles.beststickerapp.repository.StickerRepository;
 import io.github.miguelteles.beststickerapp.repository.contentProvider.StickerUriProvider;
 import io.github.miguelteles.beststickerapp.services.interfaces.EntityOperationCallback;
-import io.github.miguelteles.beststickerapp.services.interfaces.FoldersManagementService;
 import io.github.miguelteles.beststickerapp.utils.Utils;
 import io.github.miguelteles.beststickerapp.validator.StickerPackValidator;
 import io.github.miguelteles.beststickerapp.view.interfaces.UiThreadPoster;
@@ -47,7 +46,7 @@ public class StickerService {
     private StickerService(Context context) throws StickerException {
         this.stickerRepository = new StickerRepository(MyDatabase.getInstance().getSqLiteDatabase());
         this.stickerPackValidator = StickerPackValidator.getInstance();
-        foldersManagementService = FoldersManagementServiceImpl.getInstance();
+        foldersManagementService = FoldersManagementService.getInstance();
         stickerUriProvider = StickerUriProvider.getInstance();
         contentResolver = context.getContentResolver();
         this.executor = Executors.newSingleThreadExecutor();
@@ -83,14 +82,14 @@ public class StickerService {
                                  Uri selectedStickerImage,
                                  EntityOperationCallback<Sticker> callbackClass) throws StickerException {
         validateParametersCreateSticker(stickerPack, selectedStickerImage, callbackClass);
-        FoldersManagementServiceImpl.Image copiedImages = null;
+        FoldersManagementService.Image copiedImages = null;
         try {
             callbackClass.onProgressUpdate(10);
             File stickerPackFolder = foldersManagementService.getStickerPackFolderByFolderName(stickerPack.getFolderName());
             copiedImages = stickerImageConvertionService.generateStickerImages(stickerPackFolder,
                     selectedStickerImage,
                     generateStickerImageName(),
-                    FoldersManagementServiceImpl.STICKER_IMAGE_SIZE,
+                    FoldersManagementService.STICKER_IMAGE_SIZE,
                     false);
 
             callbackClass.onProgressUpdate(50);
@@ -118,7 +117,7 @@ public class StickerService {
         }
     }
 
-    private void deleteStickerImages(FoldersManagementServiceImpl.Image copiedImages) {
+    private void deleteStickerImages(FoldersManagementService.Image copiedImages) {
         try {
             foldersManagementService.deleteFile(copiedImages.getResizedImageFile());
         } catch (Exception e) {

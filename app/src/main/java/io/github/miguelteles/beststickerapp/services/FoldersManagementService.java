@@ -2,29 +2,22 @@ package io.github.miguelteles.beststickerapp.services;
 
 import android.content.Context;
 import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Matrix;
-import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
 
-import io.github.miguelteles.beststickerapp.exception.StickerFolderException;
-import io.github.miguelteles.beststickerapp.exception.enums.StickerFolderExceptionEnum;
-import io.github.miguelteles.beststickerapp.services.interfaces.FoldersManagementService;
-import io.github.miguelteles.beststickerapp.utils.Utils;
-
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Files;
 
-public class FoldersManagementServiceImpl implements FoldersManagementService {
+import io.github.miguelteles.beststickerapp.exception.StickerFolderException;
+import io.github.miguelteles.beststickerapp.exception.enums.StickerFolderExceptionEnum;
+import io.github.miguelteles.beststickerapp.utils.Utils;
 
-    private static FoldersManagementServiceImpl instance;
+public class FoldersManagementService {
+
+    private static FoldersManagementService instance;
 
     public static final int TRAY_IMAGE_MAX_FILE_SIZE = 50; //50KB
     public static final int STICKER_IMAGE_MAX_FILE_SIZE = 100; //50KB
@@ -35,16 +28,16 @@ public class FoldersManagementServiceImpl implements FoldersManagementService {
 
     private final Context context;
 
-    private FoldersManagementServiceImpl() {
+    private FoldersManagementService() {
         context = Utils.getApplicationContext();
     }
 
-    public static FoldersManagementServiceImpl getInstance() {
+    public static FoldersManagementService getInstance() {
         if (instance == null) {
-            instance = new FoldersManagementServiceImpl();
+            instance = new FoldersManagementService();
         }
 
-        return new FoldersManagementServiceImpl();
+        return new FoldersManagementService();
     }
 
     public void makeAllDirs() throws StickerFolderException {
@@ -211,7 +204,6 @@ public class FoldersManagementServiceImpl implements FoldersManagementService {
         return result;
     }
 
-    @Override
     public byte[] readBytesFromInputStream(InputStream inputStream, String imageFileName) throws StickerFolderException {
         try (final ByteArrayOutputStream buffer = new ByteArrayOutputStream()) {
             if (inputStream == null) {
@@ -229,5 +221,41 @@ public class FoldersManagementServiceImpl implements FoldersManagementService {
         }
     }
 
+    public static class Image {
+
+        private final File originalImageFile;
+        private final File resizedImageFile;
+
+        private final byte[] residezImageFileInBytes;
+
+        public Image(File originalImageFile, File resizedImageFile, byte[] residezImageFileInBytes) {
+            this.originalImageFile = originalImageFile;
+            this.resizedImageFile = resizedImageFile;
+            this.residezImageFileInBytes = residezImageFileInBytes;
+        }
+
+        public File getOriginalImageFile() {
+            return originalImageFile;
+        }
+
+        public File getResizedImageFile() {
+            return resizedImageFile;
+        }
+
+        public byte[] getResidezImageFileInBytes() {
+            return residezImageFileInBytes;
+        }
+    }
+
+    public abstract static class DirectoryNames {
+        public final static String ROOT = "appFigurinhas";
+        public final static String LOGS = "logs";
+        public final static String PACKS = "packs";
+
+        public static class Logs {
+            public final static String CRITICAL_ERRORS = "critical_erros";
+            public final static String ERROS = "errors";
+        }
+    }
 
 }

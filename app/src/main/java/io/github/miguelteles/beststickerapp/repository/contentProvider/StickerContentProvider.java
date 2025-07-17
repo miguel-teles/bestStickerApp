@@ -22,15 +22,14 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import io.github.miguelteles.beststickerapp.BuildConfig;
-import io.github.miguelteles.beststickerapp.exception.StickerExceptionHandler;
+import io.github.miguelteles.beststickerapp.exception.handler.StickerExceptionHandler;
 import io.github.miguelteles.beststickerapp.exception.StickerFolderException;
 import io.github.miguelteles.beststickerapp.exception.StickerException;
 import io.github.miguelteles.beststickerapp.exception.enums.StickerFolderExceptionEnum;
 import io.github.miguelteles.beststickerapp.domain.entity.Sticker;
 import io.github.miguelteles.beststickerapp.domain.entity.StickerPack;
-import io.github.miguelteles.beststickerapp.services.FoldersManagementServiceImpl;
+import io.github.miguelteles.beststickerapp.services.FoldersManagementService;
 import io.github.miguelteles.beststickerapp.services.StickerPackService;
-import io.github.miguelteles.beststickerapp.services.interfaces.FoldersManagementService;
 import io.github.miguelteles.beststickerapp.utils.Utils;
 
 import java.io.File;
@@ -109,7 +108,7 @@ public class StickerContentProvider extends ContentProvider {
         try {
             Utils.setApplicationContext(getContext());
             stickerPackService = StickerPackService.getInstance();
-            foldersManagementService = FoldersManagementServiceImpl.getInstance();
+            foldersManagementService = FoldersManagementService.getInstance();
 
             AUTHORITY = BuildConfig.CONTENT_PROVIDER_AUTHORITY;
             if (!AUTHORITY.startsWith(Objects.requireNonNull(getContext()).getPackageName())) {
@@ -349,10 +348,10 @@ public class StickerContentProvider extends ContentProvider {
     }
 
     private File copyStickerErroImageAssetToCache() throws StickerFolderException {
-        File cacheFile = new File(getContext().getCacheDir(), FoldersManagementServiceImpl.STICKER_ERROR_IMAGE);
+        File cacheFile = new File(getContext().getCacheDir(), FoldersManagementService.STICKER_ERROR_IMAGE);
 
         if (!cacheFile.exists()) {
-            try (InputStream in = getContext().getAssets().open(FoldersManagementServiceImpl.STICKER_ERROR_IMAGE);
+            try (InputStream in = getContext().getAssets().open(FoldersManagementService.STICKER_ERROR_IMAGE);
                  OutputStream out = new FileOutputStream(cacheFile)) {
 
                 byte[] buffer = new byte[4096];
