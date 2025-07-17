@@ -30,6 +30,7 @@ public class FoldersManagementService {
 
     private FoldersManagementService() {
         context = Utils.getApplicationContext();
+        makeAllDirs();
     }
 
     public static FoldersManagementService getInstance() {
@@ -40,118 +41,71 @@ public class FoldersManagementService {
         return new FoldersManagementService();
     }
 
-    public void makeAllDirs() throws StickerFolderException {
-        if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
-            makeDirPacks();
-            makeDirLogs();
-            makeDirErrorsLogs();
-            makeDirCriticalErrorsLogs();
-        } else {
-            throw new StickerFolderException(null, StickerFolderExceptionEnum.MKDIR_ROOT, null);
+    public void makeAllDirs() {
+        makeDirPacks();
+        makeDirLogs();
+    }
+
+    private void makeDirPacks() {
+        File externalDir = context.getFilesDir();
+        File folderPacks = new File(externalDir, DirectoryNames.PACKS);
+        if (!folderPacks.exists()) {
+            folderPacks.mkdir();
         }
     }
 
-    public void makeDirLogs() throws StickerFolderException {
-        if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
-
-            File externalStorage = context.getExternalFilesDir(null);
-            File folderLogs = new File(externalStorage, DirectoryNames.LOGS);
-            if (!folderLogs.exists()) {
-                folderLogs.mkdir();
-            }
-        } else {
-            throw new StickerFolderException(null, StickerFolderExceptionEnum.MKDIR_LOG, null);
+    private void makeDirLogs() {
+        File filesDir = context.getFilesDir();
+        File folderLogs = new File(filesDir, DirectoryNames.LOGS);
+        if (!folderLogs.exists()) {
+            folderLogs.mkdir();
         }
+
+        makeDirErrorsLogs();
     }
 
-    public void makeDirErrorsLogs() throws StickerFolderException {
-        if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
-
-            File externalStorage = context.getExternalFilesDir(null);
-            File folderErrorsLogs = new File(DirectoryNames.LOGS, DirectoryNames.Logs.ERROS);
-            File path = new File(externalStorage, folderErrorsLogs.getPath());
-            if (!path.exists()) {
-                path.mkdir();
-            }
-        } else {
-            throw new StickerFolderException(null, StickerFolderExceptionEnum.MKDIR_LOG_ERRORS, null);
-        }
-    }
-
-    public void makeDirCriticalErrorsLogs() throws StickerFolderException {
-        if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
-            makeDirLogs();
-
-            File externalStorage = context.getExternalFilesDir(null);
-            File folderCriticalErrorsLogs = new File(DirectoryNames.LOGS, DirectoryNames.Logs.CRITICAL_ERRORS);
-            File path = new File(externalStorage, folderCriticalErrorsLogs.getPath());
-            if (!path.exists()) {
-                path.mkdir();
-            }
-
-        } else {
-            throw new StickerFolderException(null, StickerFolderExceptionEnum.MKDIR_LOG_CRITICAL_ERRORS, null);
+    private void makeDirErrorsLogs() {
+        File filesDir = context.getFilesDir();
+        File folderErrorsLogs = new File(DirectoryNames.LOGS, DirectoryNames.Logs.ERROS);
+        File path = new File(filesDir, folderErrorsLogs.getPath());
+        if (!path.exists()) {
+            path.mkdir();
         }
     }
 
     public File getPackFolderByFolderName(String folderName) throws StickerFolderException {
-        if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
+        File filesDir = context.getFilesDir();
+        File packs = new File(filesDir, DirectoryNames.PACKS);
+        if (packs.exists()) {
 
-            File externalDir = context.getExternalFilesDir(null);
-            File packs = new File(externalDir, DirectoryNames.PACKS);
-            if (packs.exists()) {
-
-                File stickerPack = new File(packs, folderName);
-                if (stickerPack.exists()) {
-                    return stickerPack;
-                } else {
-                    throw new StickerFolderException(null, StickerFolderExceptionEnum.GET_PATH, "Pasta do pacote " + folderName + " não encontrada");
-                }
-
+            File stickerPack = new File(packs, folderName);
+            if (stickerPack.exists()) {
+                return stickerPack;
             } else {
-                throw new StickerFolderException(null, StickerFolderExceptionEnum.GET_PATH, "Pasta de pacotes não encontrada");
+                throw new StickerFolderException(null, StickerFolderExceptionEnum.GET_PATH, "Pasta do pacote " + folderName + " não encontrada");
             }
 
         } else {
-            throw new StickerFolderException(null, StickerFolderExceptionEnum.GET_PATH, "Erro ao buscar pasta de pacotes");
+            throw new StickerFolderException(null, StickerFolderExceptionEnum.GET_PATH, "Pasta de pacotes não encontrada");
         }
     }
 
     public File getStickerPackFolderByFolderName(String stickerPackFolderName) throws StickerFolderException {
         try {
-            if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
+            File filesDir = context.getFilesDir();
 
-                File externalDir = context.getExternalFilesDir(null);
-
-                File folderPacks = new File(externalDir, DirectoryNames.PACKS);
-                if (folderPacks.exists()) {
-                    File stickerPackFolder = new File(folderPacks, stickerPackFolderName);
-                    if (!stickerPackFolder.exists() && !stickerPackFolder.mkdir()) {
-                        throw new StickerFolderException(null, StickerFolderExceptionEnum.CREATE_FOLDER_PACOTE, null);
-                    }
-                    return stickerPackFolder;
-                } else {
-                    throw new StickerFolderException(null, StickerFolderExceptionEnum.GET_FOLDER, "Pasta dos pacotes não existe!");
+            File folderPacks = new File(filesDir, DirectoryNames.PACKS);
+            if (folderPacks.exists()) {
+                File stickerPackFolder = new File(folderPacks, stickerPackFolderName);
+                if (!stickerPackFolder.exists() && !stickerPackFolder.mkdir()) {
+                    throw new StickerFolderException(null, StickerFolderExceptionEnum.CREATE_FOLDER_PACOTE, null);
                 }
+                return stickerPackFolder;
             } else {
-                throw new StickerFolderException(null, StickerFolderExceptionEnum.MKDIR_PACKS, null);
+                throw new StickerFolderException(null, StickerFolderExceptionEnum.GET_FOLDER, "Pasta dos pacotes não existe!");
             }
         } catch (Exception ex) {
             throw new StickerFolderException(ex, StickerFolderExceptionEnum.MKDIR_PACKS, "Erro ao criar pasta do pacote " + stickerPackFolderName);
-        }
-    }
-
-    public void makeDirPacks() throws StickerFolderException {
-        if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
-            File externalDir = context.getExternalFilesDir(null);
-
-            File folderPacks = new File(externalDir, DirectoryNames.PACKS);
-            if (!folderPacks.exists()) {
-                folderPacks.mkdir();
-            }
-
-        } else {
-            throw new StickerFolderException(null, StickerFolderExceptionEnum.MKDIR_PACKS, null);
         }
     }
 
@@ -169,13 +123,16 @@ public class FoldersManagementService {
         try {
             if (stickerPackFolderName.exists()) {
                 if (stickerPackFolderName.isDirectory()) {
-                    for (String fileStr : stickerPackFolderName.list()) {
-                        File file = new File(stickerPackFolderName, fileStr);
-                        if (file.isDirectory()) {
-                            deleteFile(file);
-                        } else {
-                            if (!file.delete()) {
-                                throw new StickerFolderException(null, StickerFolderExceptionEnum.DELETE_FOLDER, "Erro ao deletar file " + file.getName());
+                    String[] subfiles = stickerPackFolderName.list();
+                    if (subfiles != null) {
+                        for (String fileStr : subfiles) {
+                            File file = new File(stickerPackFolderName, fileStr);
+                            if (file.isDirectory()) {
+                                deleteFile(file);
+                            } else {
+                                if (!file.delete()) {
+                                    throw new StickerFolderException(null, StickerFolderExceptionEnum.DELETE_FOLDER, "Erro ao deletar file " + file.getName());
+                                }
                             }
                         }
                     }

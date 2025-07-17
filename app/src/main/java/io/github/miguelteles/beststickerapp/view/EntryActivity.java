@@ -52,7 +52,6 @@ public class EntryActivity extends BaseActivity {
             stickerPackValidator = StickerPackValidator.getInstance();
             MyDatabase.getInstance();
             stickerPackService = StickerPackService.getInstance();
-            FoldersManagementService.getInstance().makeAllDirs();
         } catch (StickerException ex) {
             StickerExceptionHandler.handleException(ex, this);
         }
