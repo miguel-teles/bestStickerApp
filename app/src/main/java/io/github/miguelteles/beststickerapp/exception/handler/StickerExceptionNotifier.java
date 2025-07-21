@@ -8,11 +8,14 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
 
 import io.github.miguelteles.beststickerapp.domain.pojo.ResponseAPIBase;
 import io.github.miguelteles.beststickerapp.exception.StickerFolderException;
@@ -50,13 +53,14 @@ public class StickerExceptionNotifier {
         executor.execute(() -> {
             System.out.println("Init new thread stickerExceptionNotifier");
             if (notificationQueue != null) {
-                for (File exceptionLog : notificationQueue) {
+                List<File> notificationQueueSnapshot = notificationQueue.stream().collect(Collectors.toList());
+                for (File exceptionLog : notificationQueueSnapshot) {
                     try {
                         String notification = String.join("", Files.readAllLines(exceptionLog.toPath()));
 
                         System.out.println("Sending log " + exceptionLog.getName());
                         ResponseAPIBase post = exceptionNotifierAPI.post(notification);
-                        if (post.getStatus() == 200) {
+                        if (isSuccessful(post)) {
                             System.out.println("Log sent!");
                             foldersManagementService.deleteFile(exceptionLog);
                             notificationQueue.poll();
@@ -70,7 +74,11 @@ public class StickerExceptionNotifier {
         });
     }
 
-    public void addExceptionToNotificationQueue(Exception exception) {
+    private static boolean isSuccessful(ResponseAPIBase post) {
+        return post.getStatus() == null;
+    }
+
+    public void addExceptionToNotificationQueue(Throwable exception) {
         ExceptionNotifierRQ notification = buildNotificationFromException(exception);
 
         File notificationLogFile = new File(foldersManagementService.getErrosFolder(), Utils.formatData(new Date(), "yyyyMMddHHmmss"));

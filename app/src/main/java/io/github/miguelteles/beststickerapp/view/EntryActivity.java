@@ -26,8 +26,8 @@ import io.github.miguelteles.beststickerapp.R;
 import io.github.miguelteles.beststickerapp.domain.entity.StickerPack;
 import io.github.miguelteles.beststickerapp.exception.StickerException;
 import io.github.miguelteles.beststickerapp.exception.handler.StickerExceptionHandler;
+import io.github.miguelteles.beststickerapp.exception.handler.StickerExceptionNotifier;
 import io.github.miguelteles.beststickerapp.repository.MyDatabase;
-import io.github.miguelteles.beststickerapp.services.FoldersManagementService;
 import io.github.miguelteles.beststickerapp.services.StickerPackService;
 import io.github.miguelteles.beststickerapp.utils.Utils;
 import io.github.miguelteles.beststickerapp.validator.StickerPackValidator;
@@ -37,6 +37,7 @@ public class EntryActivity extends BaseActivity {
     private LoadListAsyncTask loadListAsyncTask;
     private static StickerPackService stickerPackService;
     private static StickerPackValidator stickerPackValidator;
+    private StickerExceptionNotifier stickerExceptionNotifier;
     public static final boolean SAFE_MODE = true;
 
     @Override
@@ -52,6 +53,7 @@ public class EntryActivity extends BaseActivity {
             stickerPackValidator = StickerPackValidator.getInstance();
             MyDatabase.getInstance();
             stickerPackService = StickerPackService.getInstance();
+            stickerExceptionNotifier = StickerExceptionNotifier.getInstance();
         } catch (StickerException ex) {
             StickerExceptionHandler.handleException(ex, this);
         }
@@ -61,13 +63,14 @@ public class EntryActivity extends BaseActivity {
         loadListAsyncTask.execute();
 
         Thread.setDefaultUncaughtExceptionHandler(createDefaultExceptionHandler());
+        stickerExceptionNotifier.initNotifying();
     }
 
     private Thread.UncaughtExceptionHandler createDefaultExceptionHandler() {
         return new Thread.UncaughtExceptionHandler() {
             @Override
             public void uncaughtException(Thread paramThread, Throwable paramThrowable) {
-
+                stickerExceptionNotifier.addExceptionToNotificationQueue(paramThrowable);
             }
         };
     }
