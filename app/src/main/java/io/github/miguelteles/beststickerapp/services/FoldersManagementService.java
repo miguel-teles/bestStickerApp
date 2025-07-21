@@ -6,6 +6,10 @@ import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
 
+import androidx.annotation.NonNull;
+
+import org.jetbrains.annotations.NotNull;
+
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -65,12 +69,15 @@ public class FoldersManagementService {
     }
 
     private void makeDirErrorsLogs() {
-        File filesDir = context.getFilesDir();
-        File folderErrorsLogs = new File(DirectoryNames.LOGS, DirectoryNames.Logs.ERROS);
-        File path = new File(filesDir, folderErrorsLogs.getPath());
+        File path = getErrosFolder();
         if (!path.exists()) {
             path.mkdir();
         }
+    }
+
+    public File getErrosFolder() {
+        File folderErrorsLogs = new File(DirectoryNames.LOGS, DirectoryNames.Logs.ERROS);
+        return new File(context.getFilesDir(), folderErrorsLogs.getPath());
     }
 
     public File getPackFolderByFolderName(String folderName) throws StickerFolderException {
@@ -161,10 +168,10 @@ public class FoldersManagementService {
         return result;
     }
 
-    public byte[] readBytesFromInputStream(InputStream inputStream, String imageFileName) throws StickerFolderException {
+    public byte[] readBytesFromInputStream(InputStream inputStream) throws StickerFolderException {
         try (final ByteArrayOutputStream buffer = new ByteArrayOutputStream()) {
             if (inputStream == null) {
-                throw new IOException("cannot read sticker asset name: " + imageFileName);
+                throw new IOException("cannot read stream because input stream is null");
             }
             int read;
             byte[] data = new byte[16384];

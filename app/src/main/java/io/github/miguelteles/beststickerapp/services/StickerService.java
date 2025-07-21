@@ -203,7 +203,7 @@ public class StickerService {
     public byte[] fetchStickerAsset(@NonNull UUID packIdentifier, @NonNull String stickerImageFileName) throws StickerFolderException {
         //o contentResolver.openInputStream vai pro método openAssetFile do contentProvider
         try (final InputStream inputStream = contentResolver.openInputStream(stickerUriProvider.getStickerAssetUri(packIdentifier, stickerImageFileName))) {
-            return foldersManagementService.readBytesFromInputStream(inputStream, stickerImageFileName);
+            return foldersManagementService.readBytesFromInputStream(inputStream);
         } catch (IOException ex) {
             throw new StickerFolderException(ex, StickerFolderExceptionEnum.GET_FILE, "Erro when fetching sticker asset");
         }

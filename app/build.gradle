@@ -25,7 +25,7 @@ android {
                 "CONTENT_PROVIDER_AUTHORITY",
                 "\"${contentProviderAuthority}\"")
 
-        buildConfigField "String", "API_PRODUCTION_URL", "\"https://tjmoup5015.execute-api.us-east-1.amazonaws.com/prod/\""
+        buildConfigField "String", "API_PRODUCTION_URL", "\"https://q7h1mc4qwh.execute-api.sa-east-1.amazonaws.com/prod\""
 
     }
     buildTypes {

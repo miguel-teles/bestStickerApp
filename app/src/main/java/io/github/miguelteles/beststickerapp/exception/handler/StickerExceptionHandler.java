@@ -7,6 +7,8 @@ import io.github.miguelteles.beststickerapp.exception.StickerException;
 
 public class StickerExceptionHandler {
 
+    private final static StickerExceptionNotifier stickerExceptionNotifier = StickerExceptionNotifier.getInstance();
+
     private StickerExceptionHandler() {
     }
 
@@ -19,6 +21,7 @@ public class StickerExceptionHandler {
         setExceptionCauseDetails(ex, finalMessage);
 
         System.out.println(ex.getLocationException());
+        stickerExceptionNotifier.addExceptionToNotificationQueue(ex);
         new AlertDialog.Builder(context)
                 .setTitle("Erro :(")
                 .setMessage(finalMessage)
@@ -27,12 +30,14 @@ public class StickerExceptionHandler {
     }
 
     private static void setExceptionCauseDetails(StickerException ex, StringBuilder finalMessage) {
-        finalMessage.append(" - ");
-        finalMessage.append(ex.getException().getClass().getName());
+        if (ex.getException() != null) {
+            finalMessage.append(" - ");
+            finalMessage.append(ex.getException().getClass().getName());
+            StackTraceElement[] stackTraceElement = ex.getException().getStackTrace();
+            finalMessage.append(" - ");
+            finalMessage.append(stackTraceElement[0].getFileName() + "(" + stackTraceElement[0].getLineNumber() + ")");
+        }
 
-        StackTraceElement[] stackTraceElement = ex.getException().getStackTrace();
-        finalMessage.append(" - ");
-        finalMessage.append(stackTraceElement[0].getFileName() + "(" + stackTraceElement[0].getLineNumber() + ")");
     }
 
     private static void printStackTrace(StickerException ex) {

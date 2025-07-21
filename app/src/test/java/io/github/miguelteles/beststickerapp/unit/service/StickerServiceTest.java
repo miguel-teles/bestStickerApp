@@ -145,7 +145,7 @@ public class StickerServiceTest {
                 return uri;
             }
         });
-        when(foldersManagementService.readBytesFromInputStream(any(InputStream.class), any(String.class))).then(new Answer<byte[]>() {
+        when(foldersManagementService.readBytesFromInputStream(any(InputStream.class))).then(new Answer<byte[]>() {
 
             @Override
             public byte[] answer(InvocationOnMock invocation) throws Throwable {

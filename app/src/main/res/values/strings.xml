@@ -76,4 +76,5 @@
     <string name="FETCH_STICKER_PACK" translatable="false">Erro ao buscar pacote de figurinhas</string>
     <string name="INVALID_STICKER_PACK" translatable="false">Invalid sticker pack</string>
     <string name="POST" translatable="false">Erro ao executar HTTP POST</string>
+    <string name="NO_INTERNET_ACCESS">É preciso estar conectado a internet para acessar essa funcionalidade</string>
 </resources>

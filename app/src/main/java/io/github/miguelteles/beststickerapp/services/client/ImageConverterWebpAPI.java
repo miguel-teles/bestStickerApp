@@ -22,11 +22,23 @@ public class ImageConverterWebpAPI extends HttpClient {
 
     public ResponseAPIConvertedWebpDTO convertImageToWebp(String imageInBase64) throws StickerHttpClientException {
 
-        Call call = this.post("/converter", "{\"originalImageBase64\": \"" + imageInBase64 + "\"}");
+        Call call = this.post("/converter", gson.toJson(new ConvertImageToWebpRQ(imageInBase64)));
         try (Response response = call.execute()) {
             return gson.fromJson(response.body().string(), ResponseAPIConvertedWebpDTO.class);
         } catch (IOException ex) {
-            throw new StickerHttpClientException(ex, StickerHttpClientExceptionEnum.POST, "Error converting image to webp via web service");
+            handleIOException(ex);
+            return null;
         }
+    }
+
+    private void handleIOException(IOException ex) throws StickerHttpClientException {
+        if (this.isNetworkAvailable()) {
+            throw new StickerHttpClientException(ex, StickerHttpClientExceptionEnum.POST, "Error converting image to webp via web service");
+        } else {
+            throw new StickerHttpClientException(null, StickerHttpClientExceptionEnum.NO_INTERNET_ACCESS, null);
+        }
+    }
+
+    record ConvertImageToWebpRQ(String originalImageBase64) {
     }
 }

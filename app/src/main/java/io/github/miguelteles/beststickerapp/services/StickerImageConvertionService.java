@@ -42,7 +42,7 @@ public class StickerImageConvertionService {
                                                                 Uri selectedImageSourceUri,
                                                                 String destinationImageFileName,
                                                                 Integer imageWidthAndHeight,
-                                                                boolean keepOriginalCopy) throws StickerFolderException {
+                                                                boolean keepOriginalCopy) throws StickerException {
         return this.generateStickerImages(stickerPackFolder,
                 foldersManagementService.getAbsolutePathFromURI(selectedImageSourceUri),
                 destinationImageFileName,
@@ -54,7 +54,7 @@ public class StickerImageConvertionService {
                                                                 String selectedImageSourceAbsolutePath,
                                                                 String destinationImageFileName,
                                                                 Integer imageWidthAndHeight,
-                                                                boolean keepOriginalCopy) throws StickerFolderException {
+                                                                boolean keepOriginalCopy) throws StickerException {
         File originalImage = null;
         File resizedImageOriginalFormat = null;
         try {
@@ -77,10 +77,10 @@ public class StickerImageConvertionService {
 
             byte[] bytes = null;
             try (InputStream inputStream = Files.newInputStream(resizedImageWebp.toPath())) {
-                bytes = foldersManagementService.readBytesFromInputStream(inputStream, resizedImageOriginalFormat.getName());
+                bytes = foldersManagementService.readBytesFromInputStream(inputStream);
             }
             return new FoldersManagementService.Image(originalImage, resizedImageWebp, bytes);
-        } catch (StickerFolderException ste) {
+        } catch (StickerException ste) {
             throw ste;
         } catch (Exception ex) {
             throw new StickerFolderException(ex, StickerFolderExceptionEnum.COPY, "Erro ao copiar foto do pacote para a pasta do pacote " + stickerPackFolder.getName());
@@ -172,7 +172,7 @@ public class StickerImageConvertionService {
     private String convertFileIntoBase64(File file) throws StickerFolderException {
         String originalFormatImageBase64;
         try (InputStream inputStream = Files.newInputStream(file.toPath())) {
-            byte[] encodedImageInBase64 = foldersManagementService.readBytesFromInputStream(inputStream, file.getName());
+            byte[] encodedImageInBase64 = foldersManagementService.readBytesFromInputStream(inputStream);
             originalFormatImageBase64 = Base64.getEncoder().encodeToString(encodedImageInBase64);
         } catch (IOException e) {
             throw new StickerFolderException(e, StickerFolderExceptionEnum.GET_FILE, "Erro ao ler imagem e converter para base64");

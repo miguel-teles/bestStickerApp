@@ -5,7 +5,8 @@ import io.github.miguelteles.beststickerapp.utils.Utils;
 
 public enum StickerHttpClientExceptionEnum {
 
-    POST(R.string.POST);
+    POST(R.string.POST),
+    NO_INTERNET_ACCESS(R.string.NO_INTERNET_ACCESS);
 
     int mResourceId;
 

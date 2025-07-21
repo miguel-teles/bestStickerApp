@@ -3,6 +3,8 @@ package io.github.miguelteles.beststickerapp.utils;
 import android.content.Context;
 import android.text.Editable;
 
+import com.google.gson.Gson;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -15,9 +17,15 @@ public class Utils {
 
     public static int PICK_IMAGE_REQUEST_CODE = 1;
     public static String tpAmbiente = "H";
-
     private static Context applicationContext;
+    private static Gson gson;
 
+    public static Gson getGson() {
+        if (gson == null) {
+            gson = new Gson();
+        }
+        return gson;
+    }
 
     public static Integer encontraMaior(List<Number> numberList) {
         Integer maiorNmb = null;
