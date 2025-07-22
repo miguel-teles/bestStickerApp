@@ -7,12 +7,13 @@ import android.graphics.Matrix;
 import android.media.ExifInterface;
 import android.net.Uri;
 
+import androidx.annotation.NonNull;
+
 import java.io.ByteArrayInputStream;
-import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Files;
 import java.util.Base64;
 
 import io.github.miguelteles.beststickerapp.domain.pojo.ResponseAPIConvertedWebpDTO;
@@ -58,20 +59,15 @@ public class StickerImageConvertionService {
             String stickerPackImageResizedFileName = destinationImageFileName + this.resourcesManagement.getFileExtension(sourceImage, true); //TEM QUE SER .webp se não o whatsapp não aceita
 
             if (keepOriginalCopy) {
-                originalImageCopy = resourcesManagement.getOrCreateFile(stickerPackFolder, stickerPackImageFileName);
-                resourcesManagement.writeToFile(originalImageCopy, contentResolver.openInputStream(sourceImage));
+                originalImageCopy = generateImageCopy(sourceImage, stickerPackFolder, stickerPackImageFileName);
                 rotateImage(originalImageCopy, rotation);
             }
-            resizedImageOriginalFormat = resourcesManagement.getOrCreateFile(resourcesManagement.getCacheFolder(), stickerPackImageResizedFileName);
-            resourcesManagement.writeToFile(resizedImageOriginalFormat, contentResolver.openInputStream(sourceImage));
-            resizeImage(resizedImageOriginalFormat, imageWidthAndHeight);
+            resizedImageOriginalFormat = generateImageCopy(sourceImage, resourcesManagement.getCacheFolder(), stickerPackImageResizedFileName);
             rotateImage(resizedImageOriginalFormat, rotation);
-            Uri resizedImageWebp = convertImageToWebp(resizedImageOriginalFormat, stickerPackFolder);
+            resizeImage(resizedImageOriginalFormat, imageWidthAndHeight);
 
-            byte[] bytes = null;
-            try (InputStream inputStream = contentResolver.openInputStream(resizedImageWebp)) {
-                bytes = resourcesManagement.readBytesFromInputStream(inputStream);
-            }
+            Uri resizedImageWebp = convertImageToWebp(resizedImageOriginalFormat, stickerPackFolder);
+            byte[] bytes = readBytesFromGeneratedImageWebp(resizedImageWebp);
             return new ResourcesManagement.Image(originalImageCopy, resizedImageWebp, bytes);
         } catch (StickerException ste) {
             throw ste;
@@ -80,6 +76,31 @@ public class StickerImageConvertionService {
         } finally {
             resourcesManagement.deleteFile(resizedImageOriginalFormat);
         }
+    }
+
+    private byte[] readBytesFromGeneratedImageWebp(Uri resizedImageWebp) throws IOException, StickerFolderException {
+        byte[] bytes = null;
+        try (InputStream inputStream = contentResolver.openInputStream(resizedImageWebp)) {
+            bytes = resourcesManagement.readBytesFromInputStream(inputStream);
+        }
+        return bytes;
+    }
+
+    private Uri generateImageCopy(Uri sourceImage,
+                                  Uri copyDestinationFolder,
+                                  String copyDestinationFileName) throws Exception {
+        Uri resizedImageOriginalFormat = resourcesManagement.getOrCreateFile(copyDestinationFolder, copyDestinationFileName);
+        resourcesManagement.writeToFile(resizedImageOriginalFormat, contentResolver.openInputStream(sourceImage));
+        return resizedImageOriginalFormat;
+    }
+
+    @NonNull
+    private Uri generateOriginalImageCopy(Uri stickerPackFolder, Uri sourceImage, String stickerPackImageFileName, int rotation) throws StickerFolderException, FileNotFoundException {
+        Uri originalImageCopy;
+        originalImageCopy = resourcesManagement.getOrCreateFile(stickerPackFolder, stickerPackImageFileName);
+        resourcesManagement.writeToFile(originalImageCopy, contentResolver.openInputStream(sourceImage));
+        rotateImage(originalImageCopy, rotation);
+        return originalImageCopy;
     }
 
     private Bitmap applyRotationToBitmap(Bitmap bitmap, int rotate) {
