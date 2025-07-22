@@ -36,12 +36,16 @@ public class FileResourcesManagementTest {
     File doNotDeleteResult = new File("src/test/resources/doNotDeleteResult.txt");
     File doNotDeleteEmptyFile = new File("src/test/resources/doNotDeleteEmptyFile.txt");
     Uri tempFile;
+    Uri tempFolder;
 
     @Before
     public void test() throws StickerFolderException {
         resourcesManagement = new FileResourceManagement(ApplicationProvider.getApplicationContext());
         uri = Uri.fromFile(resourcesFile);
-        tempFile = resourcesManagement.getOrCreateFile(resourcesManagement.getCacheFolder(), "temp.txt");
+        File tempFolder = new File(resourcesManagement.getCacheFolder().getPath(), "tempFolder");
+        tempFolder.mkdir();
+        this.tempFolder = Uri.fromFile(tempFolder);
+        tempFile = resourcesManagement.getOrCreateFile(this.tempFolder, "temp.txt");
     }
 
     @Test
@@ -131,9 +135,9 @@ public class FileResourcesManagementTest {
 
     @Test
     public void testDeleteFile() throws StickerFolderException {
-        File file = new File(tempFile.getPath());
+        File file = new File(tempFolder.getPath());
         assertTrue(file.exists());
-        resourcesManagement.deleteFile(tempFile);
+        resourcesManagement.deleteFile(tempFolder);
 
         assertFalse(file.exists());
     }

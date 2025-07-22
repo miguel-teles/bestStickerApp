@@ -123,7 +123,8 @@ public class FileResourceManagement implements ResourcesManagement {
                             deleteFile(new File(stickerPackFolderName, fileStr));
                         }
                     }
-                } else if (!stickerPackFolderName.delete()) {
+                }
+                if (!stickerPackFolderName.delete()) {
                     throw new StickerFolderException(null, StickerFolderExceptionEnum.DELETE_FOLDER, "Erro ao deletar file " + stickerPackFolderName.getName());
                 }
             }
