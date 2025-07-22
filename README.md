@@ -4,6 +4,7 @@
 <div style="text-align: justify;">
 Olá! Eu adoro as figurinhas do WhatsApp, sempre que termino uma frase mando uma figurinha. Decidi fazer este aplicativo porque infelizmente, porém compreensível, os aplicativos que já vi contêm propagandas. Muitas vezes eu só quero adicionar **uma** figurinha e eu preciso assistir uma propaganda de 30 segundos :/
 
+
 Fiquei curioso sobre como o mundo das figurinhas poderia funcionar por de trás dos panos, procurei alguma documentação ou coisa do tipo e achei um projeto do próprio WhatsApp com um exemplo de aplicativo de figurinhas: https://github.com/WhatsApp/stickers
 
 Utilizei o projeto do WhatsApp como base, construí a minha versão em cima do código do aplicativo de exemplo. Isso foi importante e necessário para eu aprender Android e também entender os passos necessários para passar os dados dos pacotes de figurinhas e das figurinhas em si para o WhatsApp.
