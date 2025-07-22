@@ -94,15 +94,6 @@ public class StickerImageConvertionService {
         return resizedImageOriginalFormat;
     }
 
-    @NonNull
-    private Uri generateOriginalImageCopy(Uri stickerPackFolder, Uri sourceImage, String stickerPackImageFileName, int rotation) throws StickerFolderException, FileNotFoundException {
-        Uri originalImageCopy;
-        originalImageCopy = resourcesManagement.getOrCreateFile(stickerPackFolder, stickerPackImageFileName);
-        resourcesManagement.writeToFile(originalImageCopy, contentResolver.openInputStream(sourceImage));
-        rotateImage(originalImageCopy, rotation);
-        return originalImageCopy;
-    }
-
     private Bitmap applyRotationToBitmap(Bitmap bitmap, int rotate) {
         Matrix matrix = new Matrix();
         matrix.postRotate(rotate);
@@ -158,7 +149,7 @@ public class StickerImageConvertionService {
         }
     }
 
-    public Uri convertImageToWebp(Uri file, Uri destinationFolder) throws StickerException {
+    private Uri convertImageToWebp(Uri file, Uri destinationFolder) throws StickerException {
         String originalFormatImageBase64 = convertFileIntoBase64(file);
         ResponseAPIConvertedWebpDTO responseAPIConvertedWebpDTO = this.imageConverterWebpAPI.convertImageToWebp(originalFormatImageBase64);
         if (responseAPIConvertedWebpDTO.getMessage() != null) {

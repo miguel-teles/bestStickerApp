@@ -108,6 +108,7 @@ public class StickerPackService {
             Uri stickerPackFolder = null;
             try {
                 callbackClass.onProgressUpdate(10);
+
                 String stickerPackFolderName = packNameInput + Utils.formatData(new Date(), "yyyy.MM.dd.HH.mm.ss");
                 stickerPackFolder = resourceManagement.getOrCreateStickerPackDirectory(stickerPackFolderName);
                 ResourcesManagement.Image copiedImages = stickerImageConvertionService.generateStickerImages(stickerPackFolder,
@@ -116,6 +117,7 @@ public class StickerPackService {
                         StickerPack.TRAY_IMAGE_SIZE,
                         true);
                 callbackClass.onProgressUpdate(50);
+
                 stickerPack = new StickerPack(null,
                         packNameInput,
                         authorName,
@@ -128,6 +130,7 @@ public class StickerPackService {
                 stickerPackValidator.verifyCreatedStickerPackValidity(stickerPack);
                 stickerPackRepository.save(stickerPack);
                 callbackClass.onProgressUpdate(70);
+
                 addStickerPackToContentProvider(stickerPack);
             } catch (StickerException ex) {
                 deletePackFolderOnException(stickerPackFolder);
