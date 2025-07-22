@@ -131,5 +131,6 @@ dependencies {
     androidTestImplementation 'org.mockito:mockito-android:2.28.2'
     // Dependência do Mockito para ser possível mockar classes e métodos constantes
     testImplementation 'org.mockito:mockito-inline:2.28.2'
-    testImplementation "org.robolectric:robolectric:3.4.2"
+    testImplementation "androidx.test:core:1.6.1" // or newer
+    testImplementation 'org.robolectric:robolectric:4.11.1'
 }

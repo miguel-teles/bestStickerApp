@@ -49,7 +49,7 @@ public class StickerImageConvertionService {
                                                            String destinationImageFileName,
                                                            Integer imageWidthAndHeight,
                                                            boolean keepOriginalCopy) throws StickerException {
-        Uri originalImage = null;
+        Uri originalImageCopy = null;
         Uri resizedImageOriginalFormat = null;
         try {
             int rotation = getImageOrientation(sourceImage);
@@ -58,12 +58,12 @@ public class StickerImageConvertionService {
             String stickerPackImageResizedFileName = destinationImageFileName + this.resourcesManagement.getFileExtension(sourceImage, true); //TEM QUE SER .webp se não o whatsapp não aceita
 
             if (keepOriginalCopy) {
-                originalImage = resourcesManagement.getOrCreateFile(stickerPackFolder, stickerPackImageFileName);
-                resourcesManagement.copyImageToStickerPackFolder(sourceImage, originalImage);
-                rotateImage(originalImage, rotation);
+                originalImageCopy = resourcesManagement.getOrCreateFile(stickerPackFolder, stickerPackImageFileName);
+                resourcesManagement.writeToFile(originalImageCopy, contentResolver.openInputStream(sourceImage));
+                rotateImage(originalImageCopy, rotation);
             }
             resizedImageOriginalFormat = resourcesManagement.getOrCreateFile(resourcesManagement.getCacheFolder(), stickerPackImageResizedFileName);
-            resourcesManagement.copyImageToStickerPackFolder(sourceImage, resizedImageOriginalFormat);
+            resourcesManagement.writeToFile(resizedImageOriginalFormat, contentResolver.openInputStream(sourceImage));
             resizeImage(resizedImageOriginalFormat, imageWidthAndHeight);
             rotateImage(resizedImageOriginalFormat, rotation);
             Uri resizedImageWebp = convertImageToWebp(resizedImageOriginalFormat, stickerPackFolder);
@@ -72,7 +72,7 @@ public class StickerImageConvertionService {
             try (InputStream inputStream = contentResolver.openInputStream(resizedImageWebp)) {
                 bytes = resourcesManagement.readBytesFromInputStream(inputStream);
             }
-            return new ResourcesManagement.Image(originalImage, resizedImageWebp, bytes);
+            return new ResourcesManagement.Image(originalImageCopy, resizedImageWebp, bytes);
         } catch (StickerException ste) {
             throw ste;
         } catch (Exception ex) {

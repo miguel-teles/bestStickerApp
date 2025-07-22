@@ -25,6 +25,7 @@ import io.github.miguelteles.beststickerapp.exception.StickerFolderException;
 import io.github.miguelteles.beststickerapp.exception.enums.StickerFolderExceptionEnum;
 import io.github.miguelteles.beststickerapp.services.interfaces.ResourcesManagement;
 import io.github.miguelteles.beststickerapp.utils.Utils;
+import io.github.miguelteles.beststickerapp.validator.MethodInputValidator;
 
 public class FileResourceManagement implements ResourcesManagement {
 
@@ -33,7 +34,7 @@ public class FileResourceManagement implements ResourcesManagement {
 
     private static ContentResolver contentResolver;
 
-    private FileResourceManagement(Context context) {
+    public FileResourceManagement(Context context) {
         this.context = context;
         this.contentResolver = context.getContentResolver();
     }
@@ -57,6 +58,9 @@ public class FileResourceManagement implements ResourcesManagement {
 
     @Override
     public Uri getOrCreateFile(Uri folder, String fileName) throws StickerFolderException {
+        MethodInputValidator.requireNotNull(folder, "Folder");
+        MethodInputValidator.requireNotEmpty(fileName, "FileName");
+
         File file = new File(folder.getPath(), fileName);
         try {
             file.createNewFile();
@@ -68,6 +72,7 @@ public class FileResourceManagement implements ResourcesManagement {
 
     @Override
     public Uri getOrCreateStickerPackDirectory(String folderName) {
+        MethodInputValidator.requireNotEmpty(folderName, "FolderName");
         return getDirectoryCreateIfNotExist(getDirectoryCreateIfNotExist(getOrCreateLogsDirectory(),
                 DirectoryNames.PACKS), folderName);
     }
@@ -92,6 +97,7 @@ public class FileResourceManagement implements ResourcesManagement {
 
     @Override
     public List<Uri> getFilesFromDirectory(Uri folder) throws StickerFolderException {
+        MethodInputValidator.requireNotNull(folder, "Folder");
         File directory = new File(folder.getPath());
         if (directory.isDirectory()) {
             List<Uri> uris = new ArrayList<>();
@@ -127,23 +133,14 @@ public class FileResourceManagement implements ResourcesManagement {
     }
 
     @Override
-    public void copyImageToStickerPackFolder(Uri sourceUri, Uri destinationUri) throws StickerFolderException {
-        try (InputStream in = contentResolver.openInputStream(sourceUri);
-             OutputStream out = contentResolver.openOutputStream(destinationUri)) {
-
-            out.write(readBytesFromInputStream(in));
-        } catch (Exception ex) {
-            throw new StickerFolderException(ex, StickerFolderExceptionEnum.COPY, "Erro ao copiar file");
-        }
-    }
-
-    @Override
     public void deleteFile(Uri uri) throws StickerFolderException {
+        MethodInputValidator.requireNotNull(uri, "uri");
         this.deleteFile(new File(uri.getPath()));
     }
 
     @Override
     public String getFileExtension(Uri file, boolean withDot) {
+        MethodInputValidator.requireNotNull(file, "file");
         String result = null;
         switch (file.getScheme()) {
             case ContentResolver.SCHEME_CONTENT:
@@ -182,8 +179,9 @@ public class FileResourceManagement implements ResourcesManagement {
 
     @Override
     public String getContentAsString(Uri exceptionLog) throws StickerFolderException {
+        MethodInputValidator.requireNotNull(exceptionLog, "exceptionLog");
         StringBuilder stringBuilder = new StringBuilder();
-        try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(Utils.getApplicationContext().getContentResolver().openInputStream(exceptionLog)))) {
+        try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(contentResolver.openInputStream(exceptionLog)))) {
             String line;
             if ((line = bufferedReader.readLine()) != null) {
                 stringBuilder.append(line).append("\n");
@@ -196,6 +194,8 @@ public class FileResourceManagement implements ResourcesManagement {
 
     @Override
     public void writeToFile(Uri webpImage, InputStream inputStream) throws StickerFolderException {
+        MethodInputValidator.requireNotNull(webpImage, "webpImage");
+        MethodInputValidator.requireNotNull(inputStream, "inputStream");
         File destinationFile = new File(webpImage.getPath());
         try (InputStream in = inputStream;
              FileOutputStream out = new FileOutputStream(destinationFile)) {

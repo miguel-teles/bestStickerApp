@@ -28,6 +28,7 @@ import io.github.miguelteles.beststickerapp.repository.contentProvider.StickerUr
 import io.github.miguelteles.beststickerapp.services.interfaces.EntityOperationCallback;
 import io.github.miguelteles.beststickerapp.services.interfaces.ResourcesManagement;
 import io.github.miguelteles.beststickerapp.utils.Utils;
+import io.github.miguelteles.beststickerapp.validator.MethodInputValidator;
 import io.github.miguelteles.beststickerapp.validator.StickerPackValidator;
 import io.github.miguelteles.beststickerapp.view.interfaces.UiThreadPoster;
 import io.github.miguelteles.beststickerapp.view.threadHandlers.AndroidUiThreadPoster;
@@ -118,12 +119,12 @@ public class StickerPackService {
                 stickerPack = new StickerPack(null,
                         packNameInput,
                         authorName,
-                        copiedImages.getOriginalImageFile().getLastPathSegment(),
-                        copiedImages.getResizedImageFile().getLastPathSegment(),
+                        copiedImages.originalImageFile().getLastPathSegment(),
+                        copiedImages.resizedImageFile().getLastPathSegment(),
                         stickerPackFolderName,
                         1,
                         false,
-                        copiedImages.getResidezImageFileInBytes());
+                        copiedImages.residezImageFileInBytes());
                 stickerPackValidator.verifyCreatedStickerPackValidity(stickerPack);
                 stickerPackRepository.save(stickerPack);
                 callbackClass.onProgressUpdate(70);
@@ -147,15 +148,11 @@ public class StickerPackService {
     }
 
     private void validateParametersCreateStickerPack(String packName, Uri packImageUri, EntityOperationCallback<StickerPack> callback) {
-        if (Utils.isNothing(packName)) {
-            throw new IllegalArgumentException("Pack name cannot be null or empty");
-        }
-        if (packImageUri == null) {
-            throw new IllegalArgumentException("Pack requires a image");
-        }
-        if (callback == null) {
-            throw new IllegalArgumentException("Callback cannot be null");
-        }
+        MethodInputValidator.requireNotNull(packName, "Pack name");
+        MethodInputValidator.requireNotEmpty(packName, "Pack name");
+
+        MethodInputValidator.requireNotNull(packImageUri, "Pack requires");
+        MethodInputValidator.requireNotNull(callback, "Callback");
     }
 
     @NonNull

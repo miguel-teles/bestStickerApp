@@ -12,7 +12,7 @@ import io.github.miguelteles.beststickerapp.exception.enums.StickerFolderExcepti
 
 public interface ResourcesManagement {
 
-    Uri getBaseFolder() throws StickerFolderException;
+    Uri getBaseFolder();
     Uri getCacheFolder();
     Uri getOrCreateFile(Uri folder, String fileName) throws StickerFolderException;
     Uri getOrCreateStickerPackDirectory(String folderName);
@@ -20,13 +20,15 @@ public interface ResourcesManagement {
     Uri getOrCreateLogErrorsDirectory();
     List<Uri> getFilesFromDirectory(Uri folder) throws StickerFolderException;
 
-    void copyImageToStickerPackFolder(Uri sourceFile, Uri destinationFile) throws StickerFolderException;
+//    void copyImageToStickerPackFolder(Uri sourceFile, Uri destinationFile) throws StickerFolderException;
 
     void deleteFile(Uri file) throws StickerFolderException;
 
     String getFileExtension(Uri file, boolean withDot);
 
     String getContentAsString(Uri exceptionLog) throws StickerFolderException;
+
+    void writeToFile(Uri destinationFile, InputStream inputStream) throws StickerFolderException;
 
     default byte[] readBytesFromInputStream(InputStream inputStream) throws StickerFolderException {
         try (final ByteArrayOutputStream buffer = new ByteArrayOutputStream()) {
@@ -45,31 +47,7 @@ public interface ResourcesManagement {
         }
     }
 
-    void writeToFile(Uri webpImage, InputStream inputStream) throws StickerFolderException;
+    record Image(Uri originalImageFile, Uri resizedImageFile, byte[] residezImageFileInBytes) {
 
-    class Image {
-
-        private final Uri originalImageFile;
-        private final Uri resizedImageFile;
-
-        private final byte[] residezImageFileInBytes;
-
-        public Image(Uri originalImageFile, Uri resizedImageFile, byte[] residezImageFileInBytes) {
-            this.originalImageFile = originalImageFile;
-            this.resizedImageFile = resizedImageFile;
-            this.residezImageFileInBytes = residezImageFileInBytes;
-        }
-
-        public Uri getOriginalImageFile() {
-            return originalImageFile;
-        }
-
-        public Uri getResizedImageFile() {
-            return resizedImageFile;
-        }
-
-        public byte[] getResidezImageFileInBytes() {
-            return residezImageFileInBytes;
-        }
     }
 }

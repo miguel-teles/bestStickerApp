@@ -6,9 +6,9 @@ import android.net.Uri;
 
 import androidx.annotation.NonNull;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Method;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -27,6 +27,7 @@ import io.github.miguelteles.beststickerapp.repository.contentProvider.StickerUr
 import io.github.miguelteles.beststickerapp.services.interfaces.EntityOperationCallback;
 import io.github.miguelteles.beststickerapp.services.interfaces.ResourcesManagement;
 import io.github.miguelteles.beststickerapp.utils.Utils;
+import io.github.miguelteles.beststickerapp.validator.MethodInputValidator;
 import io.github.miguelteles.beststickerapp.validator.StickerPackValidator;
 import io.github.miguelteles.beststickerapp.view.interfaces.UiThreadPoster;
 import io.github.miguelteles.beststickerapp.view.threadHandlers.AndroidUiThreadPoster;
@@ -94,7 +95,7 @@ public class StickerService {
                     false);
 
             callbackClass.onProgressUpdate(50);
-            Sticker sticker = new Sticker(copiedImages.getResizedImageFile().getLastPathSegment(), stickerPack.getIdentifier(), copiedImages.getResidezImageFileInBytes());
+            Sticker sticker = new Sticker(copiedImages.resizedImageFile().getLastPathSegment(), stickerPack.getIdentifier(), copiedImages.residezImageFileInBytes());
             stickerPackValidator.validateSticker(stickerPack.getIdentifier(), sticker, stickerPack.isAnimatedStickerPack());
             stickerRepository.save(sticker);
 
@@ -120,26 +121,18 @@ public class StickerService {
 
     private void deleteStickerImages(ResourcesManagement.Image copiedImages) {
         try {
-            resourcesManagement.deleteFile(copiedImages.getResizedImageFile());
+            resourcesManagement.deleteFile(copiedImages.resizedImageFile());
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
     private void validateParametersCreateSticker(StickerPack stickerPack, Uri selectedStickerImage, EntityOperationCallback<Sticker> callbackClass) {
-        if (stickerPack == null) {
-            throw new IllegalArgumentException("StickerPack parameter is mandatory");
-        } else {
-            if (stickerPack.getIdentifier() == null || Utils.isNothing(stickerPack.getFolderName())) {
-                throw new IllegalArgumentException("StickerPack is missing data");
-            }
-        }
-        if (selectedStickerImage == null) {
-            throw new IllegalArgumentException("SelectedStickerImage parameter is mandatory");
-        }
-        if (callbackClass == null) {
-            throw new IllegalArgumentException("CallbackClass is mandatory");
-        }
+        MethodInputValidator.requireNotNull(stickerPack, "StickerPack");
+        MethodInputValidator.requireNotNull(stickerPack.getIdentifier(), "StickerPack identifier");
+        MethodInputValidator.requireNotEmpty(stickerPack.getFolderName(), "StickerPack folder");
+        MethodInputValidator.requireNotNull(selectedStickerImage, "SelectedStickerImage");
+        MethodInputValidator.requireNotNull(callbackClass, "CallbackClass");
     }
 
     public void deleteSticker(Sticker sticker,
