@@ -101,18 +101,7 @@ public class AddStickerActivity extends AppCompatActivity {
 
             @Override
             public void onProgressUpdate(int process) {
-                runProgressBarAnimation(process);
-                creationProgressBar.setProgress(process);
-            }
-
-            @Override
-            public void runProgressBarAnimation(int process) {
-                new Handler(Looper.getMainLooper()).post(() -> {
-                    ObjectAnimator animation = ObjectAnimator.ofInt(creationProgressBar, "progress", creationProgressBar.getProgress(), process);
-                    animation.setDuration(800);
-                    animation.setInterpolator(new DecelerateInterpolator());
-                    animation.start();
-                });
+                creationProgressBar.setProgress(process, true);
             }
         };
     }

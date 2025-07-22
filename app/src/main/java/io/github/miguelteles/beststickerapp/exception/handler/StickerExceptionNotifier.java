@@ -1,14 +1,10 @@
 package io.github.miguelteles.beststickerapp.exception.handler;
 
+import android.net.Uri;
+
 import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -19,25 +15,24 @@ import java.util.stream.Collectors;
 
 import io.github.miguelteles.beststickerapp.domain.pojo.ResponseAPIBase;
 import io.github.miguelteles.beststickerapp.exception.StickerFolderException;
-import io.github.miguelteles.beststickerapp.services.FoldersManagementService;
-import io.github.miguelteles.beststickerapp.services.client.ExceptionNotifierAPI;
+import io.github.miguelteles.beststickerapp.services.FileResourceManagement;
+import io.github.miguelteles.beststickerapp.services.client.ExceptionNotifierImpl;
+import io.github.miguelteles.beststickerapp.services.client.interfaces.ExceptionNotifierAPI;
+import io.github.miguelteles.beststickerapp.services.interfaces.ResourcesManagement;
 import io.github.miguelteles.beststickerapp.utils.Utils;
 
 public class StickerExceptionNotifier {
 
     private static StickerExceptionNotifier instance;
-    private final FoldersManagementService foldersManagementService;
+    private final ResourcesManagement resourcesManagement;
     private final ExceptionNotifierAPI exceptionNotifierAPI;
-    private final ConcurrentLinkedQueue<File> notificationQueue;
+    private final ConcurrentLinkedQueue<Uri> notificationQueue;
     private final Executor executor;
 
     private StickerExceptionNotifier() {
-        this.foldersManagementService = FoldersManagementService.getInstance();
-        this.exceptionNotifierAPI = new ExceptionNotifierAPI();
+        this.resourcesManagement = FileResourceManagement.getInstance(Utils.getApplicationContext());
+        this.exceptionNotifierAPI = new ExceptionNotifierImpl();
         this.notificationQueue = new ConcurrentLinkedQueue<>();
-        if (foldersManagementService.getErrosFolder().listFiles() != null) {
-            this.notificationQueue.addAll(Arrays.asList(foldersManagementService.getErrosFolder().listFiles()));
-        }
         this.executor = Executors.newSingleThreadExecutor();
     }
 
@@ -52,24 +47,26 @@ public class StickerExceptionNotifier {
     public void initNotifying() {
         executor.execute(() -> {
             System.out.println("Init new thread stickerExceptionNotifier");
-            if (notificationQueue != null) {
-                List<File> notificationQueueSnapshot = notificationQueue.stream().collect(Collectors.toList());
-                for (File exceptionLog : notificationQueueSnapshot) {
-                    try {
-                        String notification = String.join("", Files.readAllLines(exceptionLog.toPath()));
+            try {
+                this.notificationQueue.addAll(resourcesManagement.getFilesFromDirectory(resourcesManagement.getOrCreateLogErrorsDirectory()));
+                List<Uri> notificationQueueSnapshot = notificationQueue.stream().collect(Collectors.toList());
+                for (Uri exceptionLog : notificationQueueSnapshot) {
 
-                        System.out.println("Sending log " + exceptionLog.getName());
-                        ResponseAPIBase post = exceptionNotifierAPI.post(notification);
-                        if (isSuccessful(post)) {
-                            System.out.println("Log sent!");
-                            foldersManagementService.deleteFile(exceptionLog);
-                            notificationQueue.poll();
-                            System.out.println("Log removed from queue and device");
-                        }
-                    } catch (Exception e) {
-                        addExceptionToNotificationQueue(e);
+                    String notification = resourcesManagement.getContentAsString(exceptionLog);
+
+                    System.out.println("Sending log " + exceptionLog.getLastPathSegment());
+                    ResponseAPIBase post = exceptionNotifierAPI.post(notification);
+                    if (isSuccessful(post)) {
+                        System.out.println("Log sent!");
+                        resourcesManagement.deleteFile(exceptionLog);
+                        notificationQueue.poll();
+                        System.out.println("Log removed from queue and device");
                     }
+
                 }
+
+            } catch (Exception e) {
+                addExceptionToNotificationQueue(e);
             }
         });
     }
@@ -81,14 +78,13 @@ public class StickerExceptionNotifier {
     public void addExceptionToNotificationQueue(Throwable exception) {
         ExceptionNotifierRQ notification = buildNotificationFromException(exception);
 
-        File notificationLogFile = new File(foldersManagementService.getErrosFolder(), Utils.formatData(new Date(), "yyyyMMddHHmmss"));
-        try (OutputStream out = new FileOutputStream(notificationLogFile);
-             InputStream in = new ByteArrayInputStream(Utils.getGson().toJson(notification).getBytes(StandardCharsets.UTF_8))) {
+        try {
+            Uri notificationLogFile = resourcesManagement.getOrCreateFile(resourcesManagement.getOrCreateLogErrorsDirectory(), Utils.formatData(new Date(), "yyyyMMddHHmmss"));
 
-            out.write(foldersManagementService.readBytesFromInputStream(in));
+            InputStream in = new ByteArrayInputStream(Utils.getGson().toJson(notification).getBytes(StandardCharsets.UTF_8));
+            resourcesManagement.writeToFile(notificationLogFile, in);
 
-            notificationQueue.add(notificationLogFile);
-        } catch (IOException | StickerFolderException ignored) {
+        } catch (StickerFolderException ignored) {
         }
     }
 

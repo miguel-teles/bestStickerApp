@@ -6,6 +6,4 @@ public interface EntityOperationCallback<T> {
     void onCreationFinish(T createdEntity, StickerException stickerException);
 
     void onProgressUpdate(int process);
-
-    void runProgressBarAnimation(int process);
 }

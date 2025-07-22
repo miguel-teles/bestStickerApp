@@ -55,6 +55,9 @@ public class AddStickerPackActivity extends AppCompatActivity {
         } catch (StickerException ex) {
             StickerExceptionHandler.handleException(ex, this);
         }
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().hide();
+        }
         verifyMandatoryFields();
     }
 
@@ -206,18 +209,7 @@ public class AddStickerPackActivity extends AppCompatActivity {
 
             @Override
             public void onProgressUpdate(int process) {
-                runProgressBarAnimation(process);
-                creationProgressBar.setProgress(process);
-            }
-
-            @Override
-            public void runProgressBarAnimation(int process) {
-                new Handler(Looper.getMainLooper()).post(() -> {
-                    ObjectAnimator animation = ObjectAnimator.ofInt(creationProgressBar, "progress", creationProgressBar.getProgress(), process);
-                    animation.setDuration(500);
-                    animation.setInterpolator(new DecelerateInterpolator());
-                    animation.start();
-                });
+                creationProgressBar.setProgress(process, true);
             }
         };
     }

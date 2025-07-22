@@ -35,6 +35,8 @@ public class StickerPack implements Parcelable {
     public static final String AVOID_CACHE = "avoidCache";
     public static final String ANIMATED_STICKER_PACK = "animatedStickerPack";
 
+    public static final int TRAY_IMAGE_SIZE = 96; //96pxs
+
     private UUID identifier;
     private String name;
     private String publisher;

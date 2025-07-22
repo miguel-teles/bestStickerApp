@@ -5,7 +5,8 @@ import io.github.miguelteles.beststickerapp.utils.Utils;
 
 public enum StickerFolderExceptionEnum {
 
-    MKDIR_ROOT(R.string.MKDIR_ROOT),
+    MKDIR(R.string.MKDIR),
+    MKFILE(R.string.MKFILE),
 
     MKDIR_LOG(R.string.MKDIR_LOG),
 
@@ -14,12 +15,9 @@ public enum StickerFolderExceptionEnum {
     MKDIR_LOG_CRITICAL_ERRORS(R.string.MKDIR_LOG_CRITICAL_ERRORS),
 
     MKDIR_PACKS(R.string.MKDIR_PACKS),
-
     GET_PATH(R.string.GET_PATH),
-
     GET_FOLDER(R.string.GET_FOLDER),
     GET_FILE(R.string.GET_FILE),
-
     CREATE_FOLDER_PACOTE(R.string.CREATE_FOLDER_PACOTE),
 
     COPY(R.string.COPY),

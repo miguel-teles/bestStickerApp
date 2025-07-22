@@ -8,14 +8,15 @@ import io.github.miguelteles.beststickerapp.BuildConfig;
 import io.github.miguelteles.beststickerapp.domain.pojo.ResponseAPIConvertedWebpDTO;
 import io.github.miguelteles.beststickerapp.exception.StickerHttpClientException;
 import io.github.miguelteles.beststickerapp.exception.enums.StickerHttpClientExceptionEnum;
+import io.github.miguelteles.beststickerapp.services.client.interfaces.ImageConverterWebpAPI;
 import okhttp3.Call;
 import okhttp3.Response;
 
-public class ImageConverterWebpAPI extends HttpClient {
+public class ImageConverterWebpImpl extends HttpClient implements ImageConverterWebpAPI {
 
     private final Gson gson;
 
-    public ImageConverterWebpAPI() {
+    public ImageConverterWebpImpl() {
         super(BuildConfig.API_PRODUCTION_URL);
         gson = new Gson();
     }
@@ -39,6 +40,6 @@ public class ImageConverterWebpAPI extends HttpClient {
         }
     }
 
-    record ConvertImageToWebpRQ(String originalImageBase64) {
+    private record ConvertImageToWebpRQ(String originalImageBase64) {
     }
 }

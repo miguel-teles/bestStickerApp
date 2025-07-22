@@ -28,8 +28,9 @@ import io.github.miguelteles.beststickerapp.exception.StickerException;
 import io.github.miguelteles.beststickerapp.exception.enums.StickerFolderExceptionEnum;
 import io.github.miguelteles.beststickerapp.domain.entity.Sticker;
 import io.github.miguelteles.beststickerapp.domain.entity.StickerPack;
-import io.github.miguelteles.beststickerapp.services.FoldersManagementService;
+import io.github.miguelteles.beststickerapp.services.FileResourceManagement;
 import io.github.miguelteles.beststickerapp.services.StickerPackService;
+import io.github.miguelteles.beststickerapp.services.interfaces.ResourcesManagement;
 import io.github.miguelteles.beststickerapp.utils.Utils;
 
 import java.io.File;
@@ -97,7 +98,8 @@ public class StickerContentProvider extends ContentProvider {
 
     private List<StickerPack> stickerPackList;
     private StickerPackService stickerPackService;
-    private FoldersManagementService foldersManagementService;
+    private ResourcesManagement resourcesManagement;
+
     boolean isStickerPackListOutdated = true;
 
     /**
@@ -108,7 +110,7 @@ public class StickerContentProvider extends ContentProvider {
         try {
             Utils.setApplicationContext(getContext());
             stickerPackService = StickerPackService.getInstance();
-            foldersManagementService = FoldersManagementService.getInstance();
+            resourcesManagement = FileResourceManagement.getInstance(Utils.getApplicationContext());
 
             AUTHORITY = BuildConfig.CONTENT_PROVIDER_AUTHORITY;
             if (!AUTHORITY.startsWith(Objects.requireNonNull(getContext()).getPackageName())) {
@@ -189,20 +191,17 @@ public class StickerContentProvider extends ContentProvider {
     @Override
     public String getType(@NonNull Uri uri) {
         final int matchCode = MATCHER.match(uri);
-        switch (matchCode) {
-            case METADATA_CODE:
-                return "vnd.android.cursor.dir/vnd." + BuildConfig.CONTENT_PROVIDER_AUTHORITY + "." + METADATA;
-            case METADATA_CODE_FOR_SINGLE_PACK:
-                return "vnd.android.cursor.item/vnd." + BuildConfig.CONTENT_PROVIDER_AUTHORITY + "." + METADATA;
-            case STICKERS_CODE:
-                return "vnd.android.cursor.dir/vnd." + BuildConfig.CONTENT_PROVIDER_AUTHORITY + "." + STICKERS;
-            case STICKERS_ASSET_CODE:
-                return "image/webp";
-            case STICKER_PACK_TRAY_ICON_CODE:
-                return "image/png";
-            default:
-                throw new IllegalArgumentException("Unknown URI: " + uri);
-        }
+        return switch (matchCode) {
+            case METADATA_CODE ->
+                    "vnd.android.cursor.dir/vnd." + BuildConfig.CONTENT_PROVIDER_AUTHORITY + "." + METADATA;
+            case METADATA_CODE_FOR_SINGLE_PACK ->
+                    "vnd.android.cursor.item/vnd." + BuildConfig.CONTENT_PROVIDER_AUTHORITY + "." + METADATA;
+            case STICKERS_CODE ->
+                    "vnd.android.cursor.dir/vnd." + BuildConfig.CONTENT_PROVIDER_AUTHORITY + "." + STICKERS;
+            case STICKERS_ASSET_CODE -> "image/webp";
+            case STICKER_PACK_TRAY_ICON_CODE -> "image/png";
+            default -> throw new IllegalArgumentException("Unknown URI: " + uri);
+        };
     }
 
     private List<StickerPack> getStickerPackList() {
@@ -331,7 +330,10 @@ public class StickerContentProvider extends ContentProvider {
 
     private ParcelFileDescriptor fetchFile(@NonNull String fileName, @NonNull String folder) throws StickerException {
         try {
-            return ParcelFileDescriptor.open(new File(foldersManagementService.getPackFolderByFolderName(folder), fileName), ParcelFileDescriptor.MODE_READ_ONLY);
+            return this
+                    .getContext()
+                    .getContentResolver()
+                    .openFileDescriptor(Uri.withAppendedPath(resourcesManagement.getOrCreateStickerPackDirectory(folder), fileName), "r");
         } catch (IOException e) {
             return fetchFileStickerErrorImage();
         }
@@ -339,7 +341,10 @@ public class StickerContentProvider extends ContentProvider {
 
     private ParcelFileDescriptor fetchFileStickerErrorImage() throws StickerFolderException {
         try {
-            return ParcelFileDescriptor.open(copyStickerErroImageAssetToCache(), ParcelFileDescriptor.MODE_READ_ONLY);
+            return this
+                    .getContext()
+                    .getContentResolver()
+                    .openFileDescriptor(copyStickerErroImageAssetToCache(), "r");
         } catch (StickerException e) {
             throw e;
         } catch (IOException e) {
@@ -347,22 +352,15 @@ public class StickerContentProvider extends ContentProvider {
         }
     }
 
-    private File copyStickerErroImageAssetToCache() throws StickerFolderException {
-        File cacheFile = new File(getContext().getCacheDir(), FoldersManagementService.STICKER_ERROR_IMAGE);
+    private Uri copyStickerErroImageAssetToCache() throws StickerFolderException {
+        Uri cacheFile = resourcesManagement.getOrCreateFile(resourcesManagement.getCacheFolder(), Sticker.STICKER_ERROR_IMAGE);
 
-        if (!cacheFile.exists()) {
-            try (InputStream in = getContext().getAssets().open(FoldersManagementService.STICKER_ERROR_IMAGE);
-                 OutputStream out = new FileOutputStream(cacheFile)) {
-
-                byte[] buffer = new byte[4096];
-                int read;
-                while ((read = in.read(buffer)) != -1) {
-                    out.write(buffer, 0, read);
-                }
-            } catch (IOException e) {
-                throw new StickerFolderException(e, StickerFolderExceptionEnum.GET_FILE, "Erro ao copiar sticker_error.");
-            }
+        try (InputStream in = getContext().getAssets().open(Sticker.STICKER_ERROR_IMAGE)) {
+            resourcesManagement.writeToFile(cacheFile, in);
+        } catch (IOException e) {
+            throw new StickerFolderException(e, StickerFolderExceptionEnum.GET_FILE, "Erro ao copiar sticker_error.");
         }
+
         return cacheFile;
     }
 

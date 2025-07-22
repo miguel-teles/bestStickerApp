@@ -8,14 +8,15 @@ import io.github.miguelteles.beststickerapp.BuildConfig;
 import io.github.miguelteles.beststickerapp.domain.pojo.ResponseAPIBase;
 import io.github.miguelteles.beststickerapp.exception.StickerHttpClientException;
 import io.github.miguelteles.beststickerapp.exception.enums.StickerHttpClientExceptionEnum;
+import io.github.miguelteles.beststickerapp.services.client.interfaces.ExceptionNotifierAPI;
 import okhttp3.Call;
 import okhttp3.Response;
 
-public class ExceptionNotifierAPI extends HttpClient {
+public class ExceptionNotifierImpl extends HttpClient implements ExceptionNotifierAPI {
 
     private final Gson gson;
 
-    public ExceptionNotifierAPI() {
+    public ExceptionNotifierImpl() {
         super(BuildConfig.API_PRODUCTION_URL);
         gson = new Gson();
     }

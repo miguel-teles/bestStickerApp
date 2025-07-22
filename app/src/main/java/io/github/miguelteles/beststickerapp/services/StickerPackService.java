@@ -7,7 +7,6 @@ import android.net.Uri;
 import androidx.annotation.NonNull;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Date;
@@ -27,6 +26,7 @@ import io.github.miguelteles.beststickerapp.repository.MyDatabase;
 import io.github.miguelteles.beststickerapp.repository.StickerPackRepository;
 import io.github.miguelteles.beststickerapp.repository.contentProvider.StickerUriProvider;
 import io.github.miguelteles.beststickerapp.services.interfaces.EntityOperationCallback;
+import io.github.miguelteles.beststickerapp.services.interfaces.ResourcesManagement;
 import io.github.miguelteles.beststickerapp.utils.Utils;
 import io.github.miguelteles.beststickerapp.validator.StickerPackValidator;
 import io.github.miguelteles.beststickerapp.view.interfaces.UiThreadPoster;
@@ -36,7 +36,7 @@ import io.github.miguelteles.beststickerapp.view.threadHandlers.ImmediateUiThrea
 public class StickerPackService {
 
     private static StickerPackService instance;
-    private final FoldersManagementService foldersManagementService;
+    private final ResourcesManagement resourceManagement;
     private final StickerUriProvider stickerUriProvider;
     private final StickerPackRepository stickerPackRepository;
     private final ContentResolver contentResolver;
@@ -50,7 +50,7 @@ public class StickerPackService {
 
     private StickerPackService() throws StickerException {
         this.stickerPackRepository = new StickerPackRepository(MyDatabase.getInstance().getSqLiteDatabase());
-        this.foldersManagementService = FoldersManagementService.getInstance();
+        this.resourceManagement = FileResourceManagement.getInstance(Utils.getApplicationContext());
         this.stickerUriProvider = StickerUriProvider.getInstance();
         this.contentResolver = Utils.getApplicationContext().getContentResolver();
         this.stickerPackValidator = StickerPackValidator.getInstance();
@@ -61,7 +61,7 @@ public class StickerPackService {
         this.stickerImageConvertionService = StickerImageConvertionService.getInstance();
     }
 
-    public StickerPackService(FoldersManagementService foldersManagementService,
+    public StickerPackService(ResourcesManagement resourceManagement,
                               StickerUriProvider stickerUriProvider,
                               StickerPackRepository stickerPackRepository,
                               ContentResolver contentResolver,
@@ -70,7 +70,7 @@ public class StickerPackService {
                               StickerImageConvertionService stickerImageConvertionService,
                               Resources resources,
                               Executor executor) {
-        this.foldersManagementService = foldersManagementService;
+        this.resourceManagement = resourceManagement;
         this.stickerUriProvider = stickerUriProvider;
         this.stickerPackRepository = stickerPackRepository;
         this.contentResolver = contentResolver;
@@ -104,22 +104,22 @@ public class StickerPackService {
             StickerPack stickerPack = null;
             StickerException exception = null;
 
-            File stickerPackFolder = null;
+            Uri stickerPackFolder = null;
             try {
                 callbackClass.onProgressUpdate(10);
                 String stickerPackFolderName = packNameInput + Utils.formatData(new Date(), "yyyy.MM.dd.HH.mm.ss");
-                stickerPackFolder = foldersManagementService.getStickerPackFolderByFolderName(stickerPackFolderName);
-                FoldersManagementService.Image copiedImages = stickerImageConvertionService.generateStickerImages(stickerPackFolder,
+                stickerPackFolder = resourceManagement.getOrCreateStickerPackDirectory(stickerPackFolderName);
+                ResourcesManagement.Image copiedImages = stickerImageConvertionService.generateStickerImages(stickerPackFolder,
                         selectedImagemUri,
                         generateStickerPackImageName(),
-                        FoldersManagementService.TRAY_IMAGE_SIZE,
+                        StickerPack.TRAY_IMAGE_SIZE,
                         true);
                 callbackClass.onProgressUpdate(50);
                 stickerPack = new StickerPack(null,
                         packNameInput,
                         authorName,
-                        copiedImages.getOriginalImageFile().getName(),
-                        copiedImages.getResizedImageFile().getName(),
+                        copiedImages.getOriginalImageFile().getLastPathSegment(),
+                        copiedImages.getResizedImageFile().getLastPathSegment(),
                         stickerPackFolderName,
                         1,
                         false,
@@ -171,9 +171,9 @@ public class StickerPackService {
         }
     }
 
-    private void deletePackFolderOnException(File stickerPackFolder) {
+    private void deletePackFolderOnException(Uri stickerPackFolder) {
         try {
-            foldersManagementService.deleteFile(stickerPackFolder);
+            resourceManagement.deleteFile(stickerPackFolder);
         } catch (Exception e) {
         }
     }
@@ -230,7 +230,7 @@ public class StickerPackService {
                 stickerPackRepository.remove(stickerPack);
 
                 callbackClass.onProgressUpdate(60);
-                foldersManagementService.deleteStickerPackFolder(stickerPack.getFolderName());
+                resourceManagement.deleteFile(resourceManagement.getOrCreateStickerPackDirectory(stickerPack.getFolderName()));
 
                 callbackClass.onProgressUpdate(90);
                 contentResolver.delete(stickerUriProvider.getStickerDeleteUri(), null, null);

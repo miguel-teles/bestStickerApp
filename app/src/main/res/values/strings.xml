@@ -48,7 +48,8 @@
     <string name="not_enough_stickers_to_add_to_whatsapp" translatable="false">É necessário que o pacote tenha pelo menos três figurinhas</string>
 
     <!-- Exception enums   -->
-    <string name="MKDIR_ROOT" translatable="false">Erro ao criar pasta dos arquivos do aplicativo</string>
+    <string name="MKDIR" translatable="false">Erro ao criar pasta</string>
+    <string name="MKFILE" translatable="false">Erro ao criar arquivo</string>
     <string name="MKDIR_LOG" translatable="false">Erro ao criar pasta de logs</string>
     <string name="MKDIR_LOG_ERRORS" translatable="false">Erro ao criar pasta de logs de erro</string>
     <string name="MKDIR_LOG_CRITICAL_ERRORS" translatable="false">Erro ao criar pasta de logs de erros críticos</string>

@@ -20,7 +20,9 @@ import android.text.format.Formatter;
 import android.view.Menu;
 import android.view.View;
 import android.view.ViewTreeObserver;
+import android.view.animation.Animation;
 import android.view.animation.DecelerateInterpolator;
+import android.view.animation.Transformation;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -224,18 +226,7 @@ public class StickerPackDetailsActivity extends AddStickerPackToWhatsappActivity
 
             @Override
             public void onProgressUpdate(int process) {
-                runProgressBarAnimation(process);
-                progressBar.setProgress(process);
-            }
-
-            @Override
-            public void runProgressBarAnimation(int process) {
-                new Handler(Looper.getMainLooper()).post(() -> {
-                    ObjectAnimator animation = ObjectAnimator.ofInt(progressBar, "progress", progressBar.getProgress(), process);
-                    animation.setDuration(800);
-                    animation.setInterpolator(new DecelerateInterpolator());
-                    animation.start();
-                });
+                progressBar.setProgress(process, true);
             }
         };
     }

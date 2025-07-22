@@ -25,6 +25,7 @@ import io.github.miguelteles.beststickerapp.repository.MyDatabase;
 import io.github.miguelteles.beststickerapp.repository.StickerRepository;
 import io.github.miguelteles.beststickerapp.repository.contentProvider.StickerUriProvider;
 import io.github.miguelteles.beststickerapp.services.interfaces.EntityOperationCallback;
+import io.github.miguelteles.beststickerapp.services.interfaces.ResourcesManagement;
 import io.github.miguelteles.beststickerapp.utils.Utils;
 import io.github.miguelteles.beststickerapp.validator.StickerPackValidator;
 import io.github.miguelteles.beststickerapp.view.interfaces.UiThreadPoster;
@@ -34,7 +35,7 @@ import io.github.miguelteles.beststickerapp.view.threadHandlers.ImmediateUiThrea
 public class StickerService {
 
     private static StickerService instance;
-    private final FoldersManagementService foldersManagementService;
+    private final ResourcesManagement resourcesManagement;
     private final StickerImageConvertionService stickerImageConvertionService;
     private final StickerRepository stickerRepository;
     private final StickerUriProvider stickerUriProvider;
@@ -46,7 +47,7 @@ public class StickerService {
     private StickerService(Context context) throws StickerException {
         this.stickerRepository = new StickerRepository(MyDatabase.getInstance().getSqLiteDatabase());
         this.stickerPackValidator = StickerPackValidator.getInstance();
-        foldersManagementService = FoldersManagementService.getInstance();
+        resourcesManagement = FileResourceManagement.getInstance(Utils.getApplicationContext());
         stickerUriProvider = StickerUriProvider.getInstance();
         contentResolver = context.getContentResolver();
         this.executor = Executors.newSingleThreadExecutor();
@@ -55,14 +56,14 @@ public class StickerService {
     }
 
     public StickerService(StickerRepository stickerRepository,
-                          FoldersManagementService foldersManagementService,
+                          ResourcesManagement resourcesManagement,
                           StickerUriProvider stickerUriProvider,
                           ContentResolver contentResolver,
                           StickerPackValidator stickerPackValidator,
                           StickerImageConvertionService stickerImageConvertionService,
                           Executor executor) {
         this.stickerRepository = stickerRepository;
-        this.foldersManagementService = foldersManagementService;
+        this.resourcesManagement = resourcesManagement;
         this.stickerUriProvider = stickerUriProvider;
         this.contentResolver = contentResolver;
         this.stickerPackValidator = stickerPackValidator;
@@ -82,18 +83,18 @@ public class StickerService {
                                  Uri selectedStickerImage,
                                  EntityOperationCallback<Sticker> callbackClass) throws StickerException {
         validateParametersCreateSticker(stickerPack, selectedStickerImage, callbackClass);
-        FoldersManagementService.Image copiedImages = null;
+        ResourcesManagement.Image copiedImages = null;
         try {
             callbackClass.onProgressUpdate(10);
-            File stickerPackFolder = foldersManagementService.getStickerPackFolderByFolderName(stickerPack.getFolderName());
+            Uri stickerPackFolder = resourcesManagement.getOrCreateStickerPackDirectory(stickerPack.getFolderName());
             copiedImages = stickerImageConvertionService.generateStickerImages(stickerPackFolder,
                     selectedStickerImage,
                     generateStickerImageName(),
-                    FoldersManagementService.STICKER_IMAGE_SIZE,
+                    Sticker.STICKER_IMAGE_SIZE,
                     false);
 
             callbackClass.onProgressUpdate(50);
-            Sticker sticker = new Sticker(copiedImages.getResizedImageFile().getName(), stickerPack.getIdentifier(), copiedImages.getResidezImageFileInBytes());
+            Sticker sticker = new Sticker(copiedImages.getResizedImageFile().getLastPathSegment(), stickerPack.getIdentifier(), copiedImages.getResidezImageFileInBytes());
             stickerPackValidator.validateSticker(stickerPack.getIdentifier(), sticker, stickerPack.isAnimatedStickerPack());
             stickerRepository.save(sticker);
 
@@ -117,9 +118,9 @@ public class StickerService {
         }
     }
 
-    private void deleteStickerImages(FoldersManagementService.Image copiedImages) {
+    private void deleteStickerImages(ResourcesManagement.Image copiedImages) {
         try {
-            foldersManagementService.deleteFile(copiedImages.getResizedImageFile());
+            resourcesManagement.deleteFile(copiedImages.getResizedImageFile());
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -146,14 +147,11 @@ public class StickerService {
         validateParametersDeleteSticker(sticker, stickerPack);
 
 
-        File stickerPackFolder = foldersManagementService.getStickerPackFolderByFolderName(stickerPack.getFolderName());
-        foldersManagementService.deleteFile(new File(stickerPackFolder, sticker.getStickerImageFile()));
+        Uri stickerPackFolder = resourcesManagement.getOrCreateStickerPackDirectory(stickerPack.getFolderName());
+        resourcesManagement.deleteFile(Uri.withAppendedPath(stickerPackFolder, sticker.getStickerImageFile()));
         stickerRepository.remove(sticker);
 
         contentResolver.delete(stickerUriProvider.getStickerDeleteUri(), null);
-    }
-    public void deleteStickersFromStickerPack(UUID packIdentifier) throws StickerException {
-        this.stickerRepository.removeByPackIdentifier(packIdentifier);
     }
 
     private void validateParametersDeleteSticker(Sticker sticker, StickerPack stickerPack) {
@@ -203,7 +201,7 @@ public class StickerService {
     public byte[] fetchStickerAsset(@NonNull UUID packIdentifier, @NonNull String stickerImageFileName) throws StickerFolderException {
         //o contentResolver.openInputStream vai pro método openAssetFile do contentProvider
         try (final InputStream inputStream = contentResolver.openInputStream(stickerUriProvider.getStickerAssetUri(packIdentifier, stickerImageFileName))) {
-            return foldersManagementService.readBytesFromInputStream(inputStream);
+            return resourcesManagement.readBytesFromInputStream(inputStream);
         } catch (IOException ex) {
             throw new StickerFolderException(ex, StickerFolderExceptionEnum.GET_FILE, "Erro when fetching sticker asset");
         }

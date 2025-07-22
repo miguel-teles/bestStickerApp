@@ -50,10 +50,10 @@ public class EntryActivity extends BaseActivity {
         }
         Utils.setApplicationContext(getApplicationContext());
         try {
+            stickerExceptionNotifier = StickerExceptionNotifier.getInstance();
             stickerPackValidator = StickerPackValidator.getInstance();
             MyDatabase.getInstance();
             stickerPackService = StickerPackService.getInstance();
-            stickerExceptionNotifier = StickerExceptionNotifier.getInstance();
         } catch (StickerException ex) {
             StickerExceptionHandler.handleException(ex, this);
         }

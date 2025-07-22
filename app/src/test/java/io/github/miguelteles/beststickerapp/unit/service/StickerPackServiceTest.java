@@ -13,7 +13,9 @@ import android.net.Uri;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
@@ -25,16 +27,16 @@ import io.github.miguelteles.beststickerapp.domain.entity.StickerPack;
 import io.github.miguelteles.beststickerapp.exception.StickerException;
 import io.github.miguelteles.beststickerapp.repository.StickerPackRepository;
 import io.github.miguelteles.beststickerapp.repository.contentProvider.StickerUriProvider;
-import io.github.miguelteles.beststickerapp.services.FoldersManagementService;
 import io.github.miguelteles.beststickerapp.services.StickerImageConvertionService;
 import io.github.miguelteles.beststickerapp.services.StickerPackService;
 import io.github.miguelteles.beststickerapp.services.StickerService;
 import io.github.miguelteles.beststickerapp.services.interfaces.EntityOperationCallback;
+import io.github.miguelteles.beststickerapp.services.interfaces.ResourcesManagement;
 import io.github.miguelteles.beststickerapp.validator.StickerPackValidator;
 
 public class StickerPackServiceTest {
 
-    FoldersManagementService foldersManagementService = mock(FoldersManagementService.class);
+    ResourcesManagement resourcesManagement = mock(ResourcesManagement.class);
     StickerUriProvider stickerUriProvider = mock(StickerUriProvider.class);
     StickerPackRepository stickerPackRepository = mock(StickerPackRepository.class);
     ContentResolver contentResolver = mock(ContentResolver.class);
@@ -56,24 +58,11 @@ public class StickerPackServiceTest {
         public void onProgressUpdate(int process) {
             //do nothing...
         }
-
-        @Override
-        public void runProgressBarAnimation(int process) {
-
-        }
     };
 
     StickerPack generatedStickerPack = null;
 
-    StickerPackService stickerPackService = new StickerPackService(foldersManagementService,
-            stickerUriProvider,
-            stickerPackRepository,
-            contentResolver,
-            stickerService,
-            stickerPackValidator,
-            stickerImageConvertionService,
-            resources,
-            testExecutor);
+    StickerPackService stickerPackService = null;
 
     StickerPack validStickerPack = new StickerPack(UUID.randomUUID(),
             "teste",
@@ -91,18 +80,25 @@ public class StickerPackServiceTest {
 
     @Before
     public void mockingDepedencies() throws StickerException {
-        when(foldersManagementService.getStickerPackFolderByFolderName(any(String.class))).then(new Answer<File>() {
+        MockitoAnnotations.initMocks(this);
+        when(resourcesManagement.getOrCreateStickerPackDirectory(any(String.class))).then(new Answer<Uri>() {
             @Override
-            public File answer(InvocationOnMock invocation) throws Throwable {
-                return new File("/home/miguel/StudioProjects/stickersProjeto/app/src/main/assets/test_image.jpg");
+            public Uri answer(InvocationOnMock invocation) throws Throwable {
+                return uri;
             }
         });
-        when(stickerImageConvertionService.generateStickerImages(any(File.class), any(Uri.class), any(String.class), any(Integer.class), any(Boolean.class))).then(new Answer<FoldersManagementService.Image>() {
+        when(stickerImageConvertionService.generateStickerImages(any(Uri.class), any(Uri.class), any(String.class), any(Integer.class), any(Boolean.class))).then(new Answer<ResourcesManagement.Image>() {
             @Override
-            public FoldersManagementService.Image answer(InvocationOnMock invocation) throws Throwable {
-                return new FoldersManagementService.Image(new File("/home/miguel/StudioProjects/stickersProjeto/app/src/main/assets/test_image.jpg"),
-                        new File("/home/miguel/StudioProjects/stickersProjeto/app/src/main/assets/test_image.jpg"),
+            public ResourcesManagement.Image answer(InvocationOnMock invocation) throws Throwable {
+                return new ResourcesManagement.Image(uri,
+                        uri,
                         new byte[]{1, 1, 1, 1, 1, 1, 1, 1});
+            }
+        });
+        when(uri.getLastPathSegment()).then(new Answer<String>() {
+            @Override
+            public String answer(InvocationOnMock invocation) throws Throwable {
+                return "falagalera.jpg";
             }
         });
         Mockito.doNothing().when(stickerPackValidator).verifyStickerPackValidity(any(StickerPack.class));
@@ -133,6 +129,16 @@ public class StickerPackServiceTest {
                 return invocation.getArgument(0);
             }
         });
+
+        stickerPackService = new StickerPackService(resourcesManagement,
+                stickerUriProvider,
+                stickerPackRepository,
+                contentResolver,
+                stickerService,
+                stickerPackValidator,
+                stickerImageConvertionService,
+                resources,
+                testExecutor);
     }
 
     @Test

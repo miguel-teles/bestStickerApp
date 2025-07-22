@@ -28,17 +28,17 @@ import io.github.miguelteles.beststickerapp.domain.entity.StickerPack;
 import io.github.miguelteles.beststickerapp.exception.StickerException;
 import io.github.miguelteles.beststickerapp.repository.StickerRepository;
 import io.github.miguelteles.beststickerapp.repository.contentProvider.StickerUriProvider;
-import io.github.miguelteles.beststickerapp.services.FoldersManagementService;
 import io.github.miguelteles.beststickerapp.services.StickerImageConvertionService;
 import io.github.miguelteles.beststickerapp.services.StickerService;
 import io.github.miguelteles.beststickerapp.services.interfaces.EntityOperationCallback;
+import io.github.miguelteles.beststickerapp.services.interfaces.ResourcesManagement;
 import io.github.miguelteles.beststickerapp.utils.Utils;
 import io.github.miguelteles.beststickerapp.validator.StickerPackValidator;
 
 public class StickerServiceTest {
 
     StickerRepository stickerRepository = mock(StickerRepository.class);
-    FoldersManagementService foldersManagementService = mock(FoldersManagementService.class);
+    ResourcesManagement stickerFilesManagementService = mock(ResourcesManagement.class);
     StickerUriProvider stickerUriProvider = mock(StickerUriProvider.class);
     ContentResolver contentResolver = mock(ContentResolver.class);
     StickerPackValidator stickerPackValidator = mock(StickerPackValidator.class);
@@ -55,11 +55,6 @@ public class StickerServiceTest {
 
         @Override
         public void onProgressUpdate(int process) {
-
-        }
-
-        @Override
-        public void runProgressBarAnimation(int process) {
 
         }
     };
@@ -95,17 +90,23 @@ public class StickerServiceTest {
                 return sticker;
             }
         });
-        when(foldersManagementService.getStickerPackFolderByFolderName(any(String.class))).then(new Answer<File>() {
+        when(stickerFilesManagementService.getOrCreateStickerPackDirectory(any(String.class))).then(new Answer<Uri>() {
             @Override
-            public File answer(InvocationOnMock invocation) throws Throwable {
-                return new File("hey");
+            public Uri answer(InvocationOnMock invocation) throws Throwable {
+                return uri;
             }
         });
-        when(stickerImageConvertionService.generateStickerImages(any(File.class), any(Uri.class), any(String.class), any(Integer.class), any(Boolean.class))).then(new Answer<FoldersManagementService.Image>() {
+        when(uri.getLastPathSegment()).then(new Answer<String>() {
             @Override
-            public FoldersManagementService.Image answer(InvocationOnMock invocation) throws Throwable {
-                return new FoldersManagementService.Image(new File("/home/miguel/StudioProjects/stickersProjeto/app/src/main/assets/test_image.jpg"),
-                        new File("/home/miguel/StudioProjects/stickersProjeto/app/src/main/assets/test_image.jpg"),
+            public String answer(InvocationOnMock invocation) throws Throwable {
+                return "falagalera.jpg";
+            }
+        });
+        when(stickerImageConvertionService.generateStickerImages(any(Uri.class), any(Uri.class), any(String.class), any(Integer.class), any(Boolean.class))).then(new Answer<ResourcesManagement.Image>() {
+            @Override
+            public ResourcesManagement.Image answer(InvocationOnMock invocation) throws Throwable {
+                return new ResourcesManagement.Image(uri,
+                        uri,
                         new byte[]{1,1,1,1,1,1,1,1});
             }
         });
@@ -145,7 +146,7 @@ public class StickerServiceTest {
                 return uri;
             }
         });
-        when(foldersManagementService.readBytesFromInputStream(any(InputStream.class))).then(new Answer<byte[]>() {
+        when(stickerFilesManagementService.readBytesFromInputStream(any(InputStream.class))).then(new Answer<byte[]>() {
 
             @Override
             public byte[] answer(InvocationOnMock invocation) throws Throwable {
@@ -153,16 +154,16 @@ public class StickerServiceTest {
             }
         });
 
-        stickerService = new StickerService(stickerRepository, foldersManagementService, stickerUriProvider, contentResolver, stickerPackValidator, stickerImageConvertionService, testExecutor);
+        stickerService = new StickerService(stickerRepository, stickerFilesManagementService, stickerUriProvider, contentResolver, stickerPackValidator, stickerImageConvertionService, testExecutor);
     }
 
     @Test
     public void testCreateSticker() throws StickerException {
-        stickerService.createSticker(validStickerPack, uri, callback);
+        Sticker sticker = stickerService.createSticker(validStickerPack, uri, callback);
 
-        assertFalse("StickerImageFile is not null", Utils.isNothing(generatedSticker.getStickerImageFile()));
-        assertNotNull("Sticker has identifier", generatedSticker.getPackIdentifier());
-        assertTrue("Sticker size is greater then 0",generatedSticker.getSize()>0);
+        assertFalse("StickerImageFile is not null", Utils.isNothing(sticker.getStickerImageFile()));
+        assertNotNull("Sticker has identifier", sticker.getPackIdentifier());
+        assertTrue("Sticker size is greater then 0",sticker.getSize()>0);
     }
 
     @Test
@@ -178,7 +179,7 @@ public class StickerServiceTest {
     }
 
     @Test
-    public void testDeleteStickerInputInvalido() throws StickerException {
+    public void testDeleteStickerInputInvalido() {
         assertThrows("IllegalArgumentException thrown when sticker is null", IllegalArgumentException.class, () -> stickerService.deleteSticker(null, validStickerPack));
         assertThrows("IllegalArgumentException thrown when stickerPack is null", IllegalArgumentException.class, () -> stickerService.deleteSticker(validSticker, null));
     }
