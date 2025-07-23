@@ -5,6 +5,7 @@ import java.util.concurrent.Executors;
 
 import io.github.miguelteles.beststickerapp.BuildConfig;
 import io.github.miguelteles.beststickerapp.domain.pojo.ResponseAPIAppLatestVersion;
+import io.github.miguelteles.beststickerapp.domain.pojo.Version;
 import io.github.miguelteles.beststickerapp.exception.StickerHttpClientException;
 import io.github.miguelteles.beststickerapp.services.client.GetLatestAppVersionImpl;
 import io.github.miguelteles.beststickerapp.services.client.interfaces.GetLatestAppVersionAPI;
@@ -34,13 +35,13 @@ public class StickerAppUpdateService {
     public void isNewVersionAvailable(CheckLatestVersionCallback callback) {
         executor.execute(() -> {
             boolean newUpdateAvailable;
-            ResponseAPIAppLatestVersion.Version version;
+            Version version;
             try {
                 ResponseAPIAppLatestVersion responseAPIAppLatestVersion = getLatestAppVersionAPI.get();
                 validateApiResponse(responseAPIAppLatestVersion);
 
-                newUpdateAvailable = !responseAPIAppLatestVersion.getVersion().getLatestVersion().equals(BuildConfig.VERSION_NAME);
-                version = responseAPIAppLatestVersion.getVersion();
+                newUpdateAvailable = !responseAPIAppLatestVersion.getLatestVersion().getVersion().equals(BuildConfig.VERSION_NAME);
+                version = responseAPIAppLatestVersion.getLatestVersion();
             } catch (StickerHttpClientException ex) {
                 throw new RuntimeException(ex);
             }
@@ -52,13 +53,13 @@ public class StickerAppUpdateService {
     }
 
     private static void validateApiResponse(ResponseAPIAppLatestVersion responseAPIAppLatestVersion) {
-        if (responseAPIAppLatestVersion.getVersion() == null || responseAPIAppLatestVersion.getVersion().getLatestVersion() == null) {
+        if (responseAPIAppLatestVersion.getLatestVersion() == null || responseAPIAppLatestVersion.getLatestVersion().getVersion() == null) {
             throw new RuntimeException("Erro ao validar nova atualização: " + responseAPIAppLatestVersion.getMessage());
         }
     }
 
     public interface CheckLatestVersionCallback {
-        void onUpdateAvailable(ResponseAPIAppLatestVersion.Version version);
+        void onUpdateAvailable(Version version);
     }
 
 }

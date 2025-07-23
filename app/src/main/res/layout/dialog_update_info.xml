@@ -24,7 +24,7 @@
         android:textAppearance="?android:attr/textAppearanceMedium"/>
 
     <TextView
-        android:id="@+id/txtUpdateText"
+        android:id="@+id/txtUpdateDialogMessage"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/NEW_OPTIONAL_UPDATE_TEXT"

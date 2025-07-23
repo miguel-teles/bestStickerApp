@@ -3,20 +3,20 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:paddingHorizontal="16dp"
+    android:paddingHorizontal="20dp"
     android:paddingBottom="16dp"
     android:paddingTop="32dp">
 
     <TextView
-        android:id="@+id/updateTitle"
+        android:id="@+id/txtUpdateActivityTitle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Versão 2.5"
+        android:text="@string/VERSION"
         android:textAlignment="center"
         android:textAppearance="?android:attr/textAppearanceLarge" />
 
     <TextView
-        android:id="@+id/txtUpdateText"
+        android:id="@+id/txtUpdateActivityMessage"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"

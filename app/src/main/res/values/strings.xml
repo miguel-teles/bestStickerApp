@@ -83,4 +83,5 @@
     <string name="NEW_MANDATORY_UPDATE_TEXT">A atualização é <b>obrigatória</b>, sem ela você não pode usar o aplicativo. Algum bug que compromete a segurança ou a utilização de funcionalidades essenciais foi resolvido!</string>
     <string name="OPTIONAL_VERSION_NAME">Versão %s</string>
     <string name="MANDATORY_VERSION_NAME">Versão %s - obrigatória</string>
+    <string name="VERSION">Versão %s</string>
 </resources>

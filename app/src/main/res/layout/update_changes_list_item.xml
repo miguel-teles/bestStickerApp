@@ -1,18 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
+    android:orientation="horizontal"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginHorizontal="16dp"
     android:layout_marginVertical="8dp">
 
 
-
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:drawableLeft="@drawable/list_item_circle">
+
+    </TextView>
+
+    <TextView
+        android:id="@+id/txtChangeText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceSmall"
-        android:drawableLeft="@drawable/outline_arrow_right_24"
-        android:text="Uma mudança tal e pa"/>
+        android:layout_marginStart="5dp" />
 
 </LinearLayout>

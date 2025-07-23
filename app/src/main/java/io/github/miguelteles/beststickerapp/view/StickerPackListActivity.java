@@ -18,9 +18,14 @@ import android.widget.TextView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import io.github.miguelteles.beststickerapp.R;
 import io.github.miguelteles.beststickerapp.domain.entity.StickerPack;
-import io.github.miguelteles.beststickerapp.domain.pojo.ResponseAPIAppLatestVersion;
+import io.github.miguelteles.beststickerapp.domain.pojo.Version;
 import io.github.miguelteles.beststickerapp.exception.StickerException;
 import io.github.miguelteles.beststickerapp.exception.handler.StickerExceptionHandler;
 import io.github.miguelteles.beststickerapp.services.StickerAppUpdateService;
@@ -29,11 +34,6 @@ import io.github.miguelteles.beststickerapp.validator.WhitelistCheck;
 import io.github.miguelteles.beststickerapp.view.dialogs.UpdateDialogFragment;
 import io.github.miguelteles.beststickerapp.view.recyclerViewAdapters.stickerpacks.StickerPackListAdapter;
 import io.github.miguelteles.beststickerapp.view.recyclerViewAdapters.stickerpacks.StickerPackListItemViewHolder;
-
-import java.lang.ref.WeakReference;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 
 public class StickerPackListActivity extends AddStickerPackToWhatsappActivity {
@@ -69,8 +69,8 @@ public class StickerPackListActivity extends AddStickerPackToWhatsappActivity {
     private StickerAppUpdateService.CheckLatestVersionCallback createNewVersionAvailableCallback() {
         return new StickerAppUpdateService.CheckLatestVersionCallback() {
             @Override
-            public void onUpdateAvailable(ResponseAPIAppLatestVersion.Version version) {
-                new UpdateDialogFragment(version.isUpdateOptional(), version.getLatestVersion()).show(getSupportFragmentManager(), "updateDialog");
+            public void onUpdateAvailable(Version version) {
+                new UpdateDialogFragment(version).show(getSupportFragmentManager(), "updateDialog");
             }
         };
     }
@@ -106,17 +106,13 @@ public class StickerPackListActivity extends AddStickerPackToWhatsappActivity {
     }
 
     private void showStickerPackList(List<StickerPack> stickerPackList) {
-        allStickerPacksListAdapter = new StickerPackListAdapter(stickerPackList, onAddButtonClickedListener);
+        allStickerPacksListAdapter = new StickerPackListAdapter(stickerPackList);
         packRecyclerView.setAdapter(allStickerPacksListAdapter);
         packLayoutManager = new LinearLayoutManager(this);
         packLayoutManager.setOrientation(RecyclerView.VERTICAL);
         packRecyclerView.setLayoutManager(packLayoutManager);
         packRecyclerView.getViewTreeObserver().addOnGlobalLayoutListener(this::recalculateColumnCount);
     }
-
-
-    private final StickerPackListAdapter.OnAddButtonClickedListener onAddButtonClickedListener = pack -> addStickerPackToWhatsApp(pack.getIdentifier(), pack.getName());
-
 
     private void recalculateColumnCount() {
         final int previewSize = getResources().getDimensionPixelSize(R.dimen.sticker_pack_list_item_preview_image_size);

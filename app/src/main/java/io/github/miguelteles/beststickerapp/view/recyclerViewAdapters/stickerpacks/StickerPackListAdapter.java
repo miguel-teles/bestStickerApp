@@ -31,11 +31,10 @@ import java.util.List;
 public class StickerPackListAdapter extends RecyclerView.Adapter<StickerPackListItemViewHolder> {
     @NonNull
     private List<StickerPack> stickerPacks;
-        private int maxNumberOfStickersInARow;
+    private int maxNumberOfStickersInARow;
     private int minMarginBetweenImages;
 
-    StickerPackListAdapter(@NonNull List<StickerPack> stickerPacks,
-                           @NonNull OnAddButtonClickedListener onAddButtonClickedListener) {
+    public StickerPackListAdapter(@NonNull List<StickerPack> stickerPacks) {
         this.stickerPacks = stickerPacks;
     }
 

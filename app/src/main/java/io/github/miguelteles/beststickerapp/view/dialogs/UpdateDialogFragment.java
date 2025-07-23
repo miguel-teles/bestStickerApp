@@ -14,16 +14,15 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 
 import io.github.miguelteles.beststickerapp.R;
+import io.github.miguelteles.beststickerapp.domain.pojo.Version;
 import io.github.miguelteles.beststickerapp.view.UpdateAppActivity;
 
 public class UpdateDialogFragment extends DialogFragment {
 
-    private final boolean isUpdateOptional;
-    private final String versionName;
+    private final Version version;
 
-    public UpdateDialogFragment(boolean isUpdateOptional, String versionName) {
-        this.isUpdateOptional = isUpdateOptional;
-        this.versionName = versionName;
+    public UpdateDialogFragment(Version version) {
+        this.version = version;
     }
 
     @Nullable
@@ -32,36 +31,45 @@ public class UpdateDialogFragment extends DialogFragment {
                              @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.dialog_update_info, container, false);
-
-        TextView txtAppVersion = view.findViewById(R.id.txtAppVersion);
-        TextView txtUpdateText = view.findViewById(R.id.txtUpdateText);
-        TextView txtPressOutsideToCloseUpdateDialog = view.findViewById(R.id.txtPressOutsideToCloseUpdateDialog);
-        TextView btnUpdateApp = view.findViewById(R.id.btnUpdateApp);
         if (getDialog() != null && getDialog().getWindow() != null) {
             getDialog().getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         }
-        if (isUpdateOptional) {
-            customizeScreenWithOptionalUpdate(txtAppVersion, txtUpdateText);
+
+        if (version.isUpdateOptional()) {
+            customizeScreenWithOptionalUpdate(view);
         } else {
-            customizeScreenWithMandatoryUpdate(txtAppVersion, txtUpdateText, txtPressOutsideToCloseUpdateDialog);
+            customizeScreenWithMandatoryUpdate(view);
         }
-        btnUpdateApp.setOnClickListener(v -> {
-            Intent intent = new Intent(getContext(), UpdateAppActivity.class);
-            startActivity(intent);
-        });
+        createUpdateButtonOnClickListener(view, version);
         return view;
     }
 
-    private void customizeScreenWithMandatoryUpdate(TextView txtAppVersion, TextView txtUpdateText, TextView txtPressOutsideToCloseUpdateDialog) {
-        txtAppVersion.setText(getContext().getString(R.string.MANDATORY_VERSION_NAME, versionName));
+    private void createUpdateButtonOnClickListener(View view, Version version) {
+        TextView btnUpdateApp = view.findViewById(R.id.btnUpdateApp);
+        btnUpdateApp.setOnClickListener(v -> {
+            Intent intent = new Intent(getContext(), UpdateAppActivity.class);
+            intent.putExtra(UpdateAppActivity.Extras.EXTRA_VERSION, version);
+            startActivity(intent);
+        });
+    }
+
+    private void customizeScreenWithMandatoryUpdate(View view) {
+        TextView txtAppVersion = view.findViewById(R.id.txtAppVersion);
+        TextView txtUpdateText = view.findViewById(R.id.txtUpdateDialogMessage);
+        TextView txtPressOutsideToCloseUpdateDialog = view.findViewById(R.id.txtPressOutsideToCloseUpdateDialog);
+
+        txtAppVersion.setText(getContext().getString(R.string.MANDATORY_VERSION_NAME, version.getVersion()));
         txtUpdateText.setText(R.string.NEW_MANDATORY_UPDATE_TEXT);
         txtAppVersion.setTextColor(getResources().getColor(R.color.colorRed));
         getDialog().setCanceledOnTouchOutside(false);
         txtPressOutsideToCloseUpdateDialog.setVisibility(View.GONE);
     }
 
-    private void customizeScreenWithOptionalUpdate(TextView txtAppVersion, TextView txtUpdateText) {
-        txtAppVersion.setText(getContext().getString(R.string.OPTIONAL_VERSION_NAME, versionName));
+    private void customizeScreenWithOptionalUpdate(View view) {
+        TextView txtAppVersion = view.findViewById(R.id.txtAppVersion);
+        TextView txtUpdateText = view.findViewById(R.id.txtUpdateDialogMessage);
+
+        txtAppVersion.setText(getContext().getString(R.string.OPTIONAL_VERSION_NAME, version.getVersion()));
         txtUpdateText.setText(R.string.NEW_OPTIONAL_UPDATE_TEXT);
         txtAppVersion.setTextColor(getResources().getColor(R.color.colorAccent));
     }
