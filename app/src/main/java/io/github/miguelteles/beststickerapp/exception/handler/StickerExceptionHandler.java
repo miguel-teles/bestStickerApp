@@ -3,11 +3,12 @@ package io.github.miguelteles.beststickerapp.exception.handler;
 import android.app.AlertDialog;
 import android.content.Context;
 
+import io.github.miguelteles.beststickerapp.BuildConfig;
 import io.github.miguelteles.beststickerapp.exception.StickerException;
 
 public class StickerExceptionHandler {
 
-    private final static StickerExceptionNotifier stickerExceptionNotifier = StickerExceptionNotifier.getInstance();
+    private static StickerExceptionNotifier stickerExceptionNotifier;
 
     private StickerExceptionHandler() {
     }
@@ -55,4 +56,14 @@ public class StickerExceptionHandler {
         }
     }
 
+    public static StickerExceptionNotifier getStickerExceptionNotifier() {
+        if (stickerExceptionNotifier == null) {
+            if (BuildConfig.DEBUG) {
+                stickerExceptionNotifier = new DebugStickerExceptionNotifier();
+            } else {
+                stickerExceptionNotifier = ProductionStickerExceptionNotifier.getInstance();
+            }
+        }
+        return stickerExceptionNotifier;
+    }
 }

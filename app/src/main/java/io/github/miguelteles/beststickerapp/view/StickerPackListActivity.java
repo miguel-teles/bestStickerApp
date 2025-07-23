@@ -20,10 +20,15 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import io.github.miguelteles.beststickerapp.R;
 import io.github.miguelteles.beststickerapp.domain.entity.StickerPack;
+import io.github.miguelteles.beststickerapp.domain.pojo.ResponseAPIAppLatestVersion;
 import io.github.miguelteles.beststickerapp.exception.StickerException;
 import io.github.miguelteles.beststickerapp.exception.handler.StickerExceptionHandler;
+import io.github.miguelteles.beststickerapp.services.StickerAppUpdateService;
 import io.github.miguelteles.beststickerapp.services.StickerPackService;
 import io.github.miguelteles.beststickerapp.validator.WhitelistCheck;
+import io.github.miguelteles.beststickerapp.view.dialogs.UpdateDialogFragment;
+import io.github.miguelteles.beststickerapp.view.recyclerViewAdapters.stickerpacks.StickerPackListAdapter;
+import io.github.miguelteles.beststickerapp.view.recyclerViewAdapters.stickerpacks.StickerPackListItemViewHolder;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -41,6 +46,7 @@ public class StickerPackListActivity extends AddStickerPackToWhatsappActivity {
     private ArrayList<StickerPack> stickerPackList;
     private TextView btnCreateNewStickerPack;
     private StickerPackService stickerPackService;
+    private StickerAppUpdateService stickerAppUpdateService;
 
 
     @Override
@@ -51,16 +57,31 @@ public class StickerPackListActivity extends AddStickerPackToWhatsappActivity {
         btnCreateNewStickerPack = findViewById(R.id.createNewStickerPack);
         btnCreateNewStickerPack.setOnClickListener(createNewStickerPack());
 
-        try {
-            stickerPackService = StickerPackService.getInstance();
-            stickerPackList = new ArrayList<>(stickerPackService.fetchAllStickerPacksWithAssets());
-        } catch (StickerException ex) {
-            StickerExceptionHandler.handleException(ex, this);
-        }
+        initializeServices();
 
         showStickerPackList(stickerPackList);
         if (getSupportActionBar() != null) {
             getSupportActionBar().hide();
+        }
+        stickerAppUpdateService.isNewVersionAvailable(createNewVersionAvailableCallback());
+    }
+
+    private StickerAppUpdateService.CheckLatestVersionCallback createNewVersionAvailableCallback() {
+        return new StickerAppUpdateService.CheckLatestVersionCallback() {
+            @Override
+            public void onUpdateAvailable(ResponseAPIAppLatestVersion.Version version) {
+                new UpdateDialogFragment(version.isUpdateOptional(), version.getLatestVersion()).show(getSupportFragmentManager(), "updateDialog");
+            }
+        };
+    }
+
+    private void initializeServices() {
+        try {
+            stickerPackService = StickerPackService.getInstance();
+            stickerPackList = new ArrayList<>(stickerPackService.fetchAllStickerPacksWithAssets());
+            stickerAppUpdateService = StickerAppUpdateService.getInstance();
+        } catch (StickerException ex) {
+            StickerExceptionHandler.handleException(ex, this);
         }
     }
 
@@ -102,7 +123,7 @@ public class StickerPackListActivity extends AddStickerPackToWhatsappActivity {
         int firstVisibleItemPosition = packLayoutManager.findFirstVisibleItemPosition();
         StickerPackListItemViewHolder viewHolder = (StickerPackListItemViewHolder) packRecyclerView.findViewHolderForAdapterPosition(firstVisibleItemPosition);
         if (viewHolder != null) {
-            final int widthOfImageRow = viewHolder.imageRowView.getMeasuredWidth();
+            final int widthOfImageRow = viewHolder.getImageRowView().getMeasuredWidth();
             final int max = Math.max(widthOfImageRow / previewSize, 1);
             int maxNumberOfImagesInARow = Math.min(STICKER_PREVIEW_DISPLAY_LIMIT, max);
             int minMarginBetweenImages = (widthOfImageRow - maxNumberOfImagesInARow * previewSize) / (maxNumberOfImagesInARow - 1);

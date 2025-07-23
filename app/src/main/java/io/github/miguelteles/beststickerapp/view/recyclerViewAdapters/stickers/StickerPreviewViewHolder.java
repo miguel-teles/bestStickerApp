@@ -6,7 +6,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-package io.github.miguelteles.beststickerapp.view;
+package io.github.miguelteles.beststickerapp.view.recyclerViewAdapters.stickers;
 
 import android.view.View;
 

@@ -26,7 +26,7 @@ public class ExceptionNotifierImpl extends HttpClient implements ExceptionNotifi
         try (Response response = call.execute()) {
             return gson.fromJson(response.body().string(), ResponseAPIBase.class);
         } catch (IOException ex) {
-            throw new StickerHttpClientException(ex, StickerHttpClientExceptionEnum.POST, "Error converting image to webp via web service");
+            throw new StickerHttpClientException(ex, StickerHttpClientExceptionEnum.POST, "Erro ao notificar erro no aplicativo");
         }
     }
 }

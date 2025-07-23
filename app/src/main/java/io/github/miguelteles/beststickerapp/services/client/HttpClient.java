@@ -15,7 +15,7 @@ import okhttp3.RequestBody;
 abstract class HttpClient {
     public static final MediaType JSON = MediaType.parse("application/json");
     private final String baseUrl;
-    private OkHttpClient okHttpClient;
+    private final OkHttpClient okHttpClient;
 
     protected HttpClient(String baseUrl) {
         this.baseUrl = baseUrl; //TODO: pensar num jeito de mudar esse ip dinamicamente
@@ -24,8 +24,11 @@ abstract class HttpClient {
 
     protected Call post(String endpoint, String bodyContent) {
         RequestBody requestBody = RequestBody.create(bodyContent, JSON);
-        Request request = new Request.Builder().url(baseUrl + endpoint).post(requestBody).build();
-        return okHttpClient.newCall(request);
+        return okHttpClient.newCall(new Request.Builder().url(baseUrl + endpoint).post(requestBody).build());
+    }
+
+    protected Call get(String endpoint) {
+        return okHttpClient.newCall(new Request.Builder().url(baseUrl+endpoint).get().build());
     }
 
     protected boolean isNetworkAvailable() {
@@ -34,5 +37,4 @@ abstract class HttpClient {
         NetworkInfo activeNetworkInfo = connectivityManager != null ? connectivityManager.getActiveNetworkInfo() : null;
         return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
-
 }

@@ -6,7 +6,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-package io.github.miguelteles.beststickerapp.view;
+package io.github.miguelteles.beststickerapp.view.recyclerViewAdapters.stickers;
 
 import android.content.Context;
 import android.net.Uri;
@@ -23,6 +23,7 @@ import io.github.miguelteles.beststickerapp.R;
 import io.github.miguelteles.beststickerapp.domain.entity.Sticker;
 import io.github.miguelteles.beststickerapp.domain.entity.StickerPack;
 import io.github.miguelteles.beststickerapp.repository.contentProvider.StickerUriProvider;
+import io.github.miguelteles.beststickerapp.view.StickerPackDetailsActivity;
 
 import com.facebook.drawee.backends.pipeline.Fresco;
 import com.facebook.drawee.interfaces.DraweeController;
@@ -52,7 +53,7 @@ public class StickerPreviewAdapter extends RecyclerView.Adapter<StickerPreviewVi
 
     Context context;
 
-    StickerPreviewAdapter(
+    public StickerPreviewAdapter(
             @NonNull final LayoutInflater layoutInflater,
             final int errorResource,
             final int cellSize,

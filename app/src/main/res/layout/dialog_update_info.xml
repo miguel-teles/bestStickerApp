@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/dialog_rounded_bg"
+    android:padding="32dp">
+
+    <TextView
+        android:id="@+id/updateTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/NEW_UPDATE_AVAILABLE"
+        android:textAlignment="center"
+        android:textAppearance="?android:attr/textAppearanceLarge"/>
+
+    <TextView
+        android:id="@+id/txtAppVersion"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/MANDATORY_VERSION_NAME"
+        android:textAlignment="center"
+        android:textColor="@color/colorRed"
+        android:textAppearance="?android:attr/textAppearanceMedium"/>
+
+    <TextView
+        android:id="@+id/txtUpdateText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/NEW_OPTIONAL_UPDATE_TEXT"
+        android:justificationMode="inter_word"
+        android:layout_marginTop="8dp"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center|center"
+        android:paddingTop="16dp">
+        <TextView
+            android:id="@+id/btnUpdateApp"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:text="ATUALIZAR"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:singleLine="true"
+            android:ellipsize="end"
+            android:textAllCaps="true"
+            android:gravity="center"
+            android:textColor="@color/white"
+            android:background="@drawable/shape_btn_default" />
+        <TextView
+            android:id="@+id/txtPressOutsideToCloseUpdateDialog"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Você pode apertar fora desta caixa para fechá-la"
+            android:textAlignment="center"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:textColor="@color/gray"
+            android:layout_marginTop="8dp"/>
+    </LinearLayout>
+
+</LinearLayout>

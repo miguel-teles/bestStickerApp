@@ -15,7 +15,8 @@ android {
         targetSdkVersion 33
         versionCode 1
         versionName "1.0"
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        setProperty("archivesBaseName", "BestStickerApp-$versionName")
+
         def contentProviderAuthority = applicationId + ".stickercontentprovider"
         // Creates a placeholder property to use in the manifest.
         manifestPlaceholders =
@@ -24,8 +25,9 @@ android {
         buildConfigField("String",
                 "CONTENT_PROVIDER_AUTHORITY",
                 "\"${contentProviderAuthority}\"")
-
         buildConfigField "String", "API_PRODUCTION_URL", "\"https://q7h1mc4qwh.execute-api.sa-east-1.amazonaws.com/prod\""
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
     }
     buildTypes {
@@ -42,6 +44,7 @@ android {
     }
     buildFeatures {
         compose true
+        buildConfig true
     }
 
     testOptions {
@@ -76,23 +79,10 @@ private void checkApplicationIdInDebug() {
     }
 }
 
-
-tasks.register('checkRelease') {
-    doLast {
-        println("checkRelease")
-        if (android.defaultConfig.applicationId.startsWith("com.best")) {
-            throw new GradleException("applicationId in defaultConfig cannot start with com.best, please change your applicationId in app/build.gradle")
-        }
-    }
-}
-
-tasks.whenTaskAdded { task ->
+tasks.configureEach { task ->
     println(task.name)
     if (task.name.contains("assembleDebug")) {
         task.dependsOn checkDebug
-    }
-    if (task.name.contains("assembleRelease")) {
-        task.dependsOn checkRelease
     }
 }
 dependencies {

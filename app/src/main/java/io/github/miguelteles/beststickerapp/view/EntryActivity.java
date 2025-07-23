@@ -17,6 +17,7 @@ import android.util.Pair;
 import android.view.View;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import java.lang.ref.WeakReference;
@@ -26,8 +27,10 @@ import io.github.miguelteles.beststickerapp.R;
 import io.github.miguelteles.beststickerapp.domain.entity.StickerPack;
 import io.github.miguelteles.beststickerapp.exception.StickerException;
 import io.github.miguelteles.beststickerapp.exception.handler.StickerExceptionHandler;
+import io.github.miguelteles.beststickerapp.exception.handler.ProductionStickerExceptionNotifier;
 import io.github.miguelteles.beststickerapp.exception.handler.StickerExceptionNotifier;
 import io.github.miguelteles.beststickerapp.repository.MyDatabase;
+import io.github.miguelteles.beststickerapp.services.StickerAppUpdateService;
 import io.github.miguelteles.beststickerapp.services.StickerPackService;
 import io.github.miguelteles.beststickerapp.utils.Utils;
 import io.github.miguelteles.beststickerapp.validator.StickerPackValidator;
@@ -37,7 +40,6 @@ public class EntryActivity extends BaseActivity {
     private LoadListAsyncTask loadListAsyncTask;
     private static StickerPackService stickerPackService;
     private static StickerPackValidator stickerPackValidator;
-    private StickerExceptionNotifier stickerExceptionNotifier;
     public static final boolean SAFE_MODE = true;
 
     @Override
@@ -45,32 +47,40 @@ public class EntryActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.loading_entry);
         overridePendingTransition(0, 0);
+
+        Utils.setApplicationContext(getApplicationContext());
+
+        initializeServices();
+        initializeScreenElements();
+
+        Thread.setDefaultUncaughtExceptionHandler(createDefaultExceptionHandler());
+        StickerExceptionHandler.getStickerExceptionNotifier().initNotifying();
+    }
+
+    private void initializeScreenElements() {
         if (getSupportActionBar() != null) {
             getSupportActionBar().hide();
         }
-        Utils.setApplicationContext(getApplicationContext());
+        progressBar = findViewById(R.id.activity_progress_bar);
+        loadListAsyncTask = new LoadListAsyncTask(this);
+        loadListAsyncTask.execute();
+    }
+
+    private void initializeServices() {
         try {
-            stickerExceptionNotifier = StickerExceptionNotifier.getInstance();
             stickerPackValidator = StickerPackValidator.getInstance();
             MyDatabase.getInstance();
             stickerPackService = StickerPackService.getInstance();
         } catch (StickerException ex) {
             StickerExceptionHandler.handleException(ex, this);
         }
-
-        progressBar = findViewById(R.id.activity_progress_bar);
-        loadListAsyncTask = new LoadListAsyncTask(this);
-        loadListAsyncTask.execute();
-
-        Thread.setDefaultUncaughtExceptionHandler(createDefaultExceptionHandler());
-        stickerExceptionNotifier.initNotifying();
     }
 
     private Thread.UncaughtExceptionHandler createDefaultExceptionHandler() {
         return new Thread.UncaughtExceptionHandler() {
             @Override
             public void uncaughtException(Thread paramThread, Throwable paramThrowable) {
-                stickerExceptionNotifier.addExceptionToNotificationQueue(paramThrowable);
+                StickerExceptionHandler.getStickerExceptionNotifier().addExceptionToNotificationQueue(paramThrowable);
             }
         };
     }

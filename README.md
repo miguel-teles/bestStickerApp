@@ -14,19 +14,28 @@ Utilizei o projeto do WhatsApp como base, construí a minha versão em cima do c
 
 ## Pendências do projeto
 
-### Terminar o read.me
+### Pendências inadiáveis
+
+#### Atualização do aplicativo
+Implementar uma funcionalidade de atualização do aplicativo, baixando e instalando novas versões caso o usuário aceite. 
+
+### Pendências adiáveis
+#### Terminar o read.me
 Terminar de escrever esse documento;
-### Editar imagem selecionada para pacote ou figurinha
+#### Editar imagem selecionada para pacote ou figurinha
 <div style="text-align: justify;">
 Atualmente a imagem selecionada é achatada ou espremida para caber dentro do tamanho exigido pelo WhatsApp que é de 512x512 para figurinhas e 96x96 para a imagem do pacote. Decidi não gastar tempo com isso agora porque 99% das figurinhas que eu faço ficam mais engraçadas achatadas, porém sei que outros usuários vão se incomodar com isso.
 </div>
 
-### Funcionalidade de compartilhar pacote de figurinhas
+#### Funcionalidade de compartilhar pacote de figurinhas
 <div style="text-align: justify;">
 Acho que seria interessante esta funcionalidade. Normalmente eu compartilho as figurinhas enviando todas que eu tenho, então acho que seria algo interessante, além de ser muito bom como aprendizado.
 </div>
 
-### Banimento por figurinha indevida
+#### Banimento por figurinha indevida
 <div style="text-align: justify;">
 Não aceito que meu aplicativo seja usado para criação de figurinhas que promovem discurso de ódio, então vou desenvolver uma funcionalidade que usa I.A. para identificar se a figurinha contém algum tipo de símbolo de ódio ou outras coisas ruins.
 </div>
+
+#### Mudar a mensagem de atualização de pacote
+O Whats coloca uma mensagem de "tal pacote já foi adicionado".

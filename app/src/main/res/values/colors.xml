@@ -3,6 +3,7 @@
     <color name="colorPrimary">@android:color/transparent</color>
     <color name="colorPrimaryDark">#BABABA</color>
     <color name="colorAccent">#128C7E</color>
+    <color name="colorRed">#D53737</color>
     <color name="inactiveAddButtonColor">#B3B3B3</color>
     <color name="buttonColor">#128C7E</color>
     <color name="buttonBorderColor">#10786B</color>
