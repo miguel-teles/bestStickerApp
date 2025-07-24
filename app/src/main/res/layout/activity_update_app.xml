@@ -3,8 +3,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:paddingHorizontal="20dp"
-    android:paddingBottom="16dp"
+    android:paddingHorizontal="25dp"
+    android:paddingBottom="25dp"
     android:paddingTop="32dp">
 
     <TextView
@@ -28,18 +28,50 @@
         android:layout_height="0dp"
         android:layout_weight="1"
         android:paddingBottom="8dp">
-        <ScrollView
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:padding="20dp"
+            android:background="@drawable/shape_card_default"
+            android:orientation="vertical">
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/changesList"
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/CHANGES">
+
+            </TextView>
+
+            <ScrollView
                 android:layout_width="match_parent"
-                android:layout_height="match_parent" />
+                android:layout_height="match_parent"
+                android:layout_marginTop="5dp">
 
-        </ScrollView>
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/changesList"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
+
+            </ScrollView>
+
+        </LinearLayout>
 
     </LinearLayout>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:justificationMode="inter_word"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:textColor="@color/gray"
+        android:text="@string/UPDATE_ACTIVITY_OPEN_CODE_GITHUB" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/GITHUB_PROJECT_LINK"
+        android:autoLink="web" />
 
     <TextView
         android:id="@+id/btnUpdateApp"
@@ -48,8 +80,9 @@
         android:background="@drawable/shape_btn_default"
         android:ellipsize="end"
         android:gravity="center"
+        android:layout_marginTop="16dp"
         android:singleLine="true"
-        android:text="BAIXAR"
+        android:text="BAIXAR ATUALIZAÇÃO"
         android:textAllCaps="true"
         android:textColor="@color/white"
         android:textSize="14sp"

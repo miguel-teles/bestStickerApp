@@ -84,4 +84,7 @@
     <string name="OPTIONAL_VERSION_NAME">Versão %s</string>
     <string name="MANDATORY_VERSION_NAME">Versão %s - obrigatória</string>
     <string name="VERSION">Versão %s</string>
+    <string name="CHANGES">Ajustes:</string>
+    <string name="UPDATE_ACTIVITY_OPEN_CODE_GITHUB">"Ao clicar nesse botão, você baixará um arquivo .apk contendo a nova atualização. O código fonte é aberto, você pode ter acesso caso queira em: "</string>
+    <string name="GITHUB_PROJECT_LINK">https://github.com/miguel-teles/bestStickerApp</string>
 </resources>
