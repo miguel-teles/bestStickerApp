@@ -82,7 +82,7 @@
         android:gravity="center"
         android:layout_marginTop="16dp"
         android:singleLine="true"
-        android:text="BAIXAR ATUALIZAÇÃO"
+        android:text="@string/DOWNLOAD_UPDATE"
         android:textAllCaps="true"
         android:textColor="@color/white"
         android:textSize="14sp"
