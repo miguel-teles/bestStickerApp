@@ -46,15 +46,15 @@ jobs:
       run: ./gradlew assembleRelease
       
     - name: Upload APK to S3
-      uses: jakejarvis/s3-sync-action@v0.5.1
-      with:
-        args: --acl private
+      run: |
+        aws s3 cp app/build/outputs/apk/release/app-release.apk \
+        s3://${{ secrets.S3_BUCKET_NAME }}/$VERSION_NAME/app-release.apk \
+        --region ${{ secrets.S3_BUCKET_REGION }} \
+        --acl private
+
       env:
-        AWS_S3_BUCKET: ${{ secrets.S3_BUCKET_NAME }}
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        AWS_REGION: ${{ secrets.S3_BUCKET_REGION }}
-        SOURCE_DIR: app/build/outputs/apk/release/
 
   dependency-submission:
 
