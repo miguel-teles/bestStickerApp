@@ -14,6 +14,7 @@ import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
@@ -134,7 +135,7 @@ public class StickerServiceTest {
             when(contentResolver.openInputStream(any(Uri.class))).then(new Answer<InputStream>() {
                 @Override
                 public InputStream answer(InvocationOnMock invocation) throws Throwable {
-                    return Files.newInputStream(Paths.get(validSticker.getStickerImageFile()));
+                    return new ByteArrayInputStream(new byte[]{1,1,1,2,2,2,1,1,});
                 }
             });
         } catch (FileNotFoundException ex) {
