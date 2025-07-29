@@ -35,6 +35,12 @@ jobs:
     - name: Decode keystore
       run: echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > app/release.keystore
 
+    - name: Generate API Key
+      id: get_api_key
+      run: |
+        API_KEY=$(head -c 32 /dev/urandom | sha256sum | cut -d" " -f1)
+        echo "apiKey=$API_KEY" >> $GITHUB_OUTPUT
+
     - name: Grant execute permission to gradlew
       run: chmod +x ./gradlew
 
@@ -43,6 +49,9 @@ jobs:
         KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
         KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
         KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        API_ENDPOINT_FIELDNAME: ${{ secrets.API_ENDPOINT }}
+        SECURE_TOKEN: ${{ steps.get_api_key.outputs.apiKey }}
+
       run: ./gradlew assembleRelease
 
     - name: Get versionName from Gradle

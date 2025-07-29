@@ -42,7 +42,7 @@ android {
 
     }
     signingConfigs {
-        release {
+        release { //trecho usado para assinar o aplicativo no build do Github Action
             storeFile file("release.keystore")
             storePassword System.getenv(KEYSTORE_PASSWORD_FIELDNAME)
             keyPassword System.getenv(KEY_PASSWORD_FIELDNAME)
