@@ -2,6 +2,12 @@ apply plugin: 'com.android.application'
 apply plugin: 'org.jetbrains.kotlin.android'
 apply plugin: 'org.jetbrains.kotlin.plugin.compose'
 
+
+def SECURE_TOKEN_FIELDNAME = "SECURE_TOKEN"
+def API_ENDPOINT_FIELDNAME = "API_ENDPOINT"
+def KEY_PASSWORD_FIELDNAME = "KEY_PASSWORD";
+def KEY_ALIAS_FIELDNAME = "KEY_ALIAS"
+
 android {
     namespace "io.github.miguelteles.beststickerapp"
     //the compression of webp file during build causes problem with FileDescriptor in ContentProvider.
@@ -25,14 +31,22 @@ android {
                 "CONTENT_PROVIDER_AUTHORITY",
                 "\"${contentProviderAuthority}\"")
 
-        def secureToken = project.hasProperty("secureToken") ? project.property("secureToken") : "f0a9c3bdeaf2ef5df1be92c6a47ff8eac8470a05d183fb68c4eec0b5c112cd0a"
-        buildConfigField "String", "SECURE_TOKEN", "\"${secureToken}\""
+        def secureToken = System.getenv(SECURE_TOKEN_FIELDNAME) != null ? System.getenv(SECURE_TOKEN_FIELDNAME) : "f0a9c3bdeaf2ef5df1be92c6a47ff8eac8470a05d183fb68c4eec0b5c112cd0a"
+        buildConfigField "String", SECURE_TOKEN_FIELDNAME, "\"${secureToken}\""
 
-        def apiProductionUrl = project.hasProperty("apiEndpoint") ? project.property("apiEndpoint") : "https://q7h1mc4qwh.execute-api.sa-east-1.amazonaws.com/prod/"
-        buildConfigField "String", "API_ENDPOINT", "\"${apiProductionUrl}\""
+        def apiProductionUrl = System.getenv(API_ENDPOINT_FIELDNAME) != null ? System.getenv(API_ENDPOINT_FIELDNAME) : "https://q7h1mc4qwh.execute-api.sa-east-1.amazonaws.com/prod/"
+        buildConfigField "String", API_ENDPOINT_FIELDNAME, "\"${apiProductionUrl}\""
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
+    }
+    signingConfigs {
+        release {
+            storeFile file("release.keystore")
+            storePassword ''
+            keyPassword System.getenv(KEY_PASSWORD_FIELDNAME)
+            keyAlias System.getenv(KEY_ALIAS_FIELDNAME)
+        }
     }
     buildTypes {
         debug {
@@ -44,6 +58,7 @@ android {
             minifyEnabled true
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
         }
     }
     buildFeatures {
