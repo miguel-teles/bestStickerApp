@@ -91,7 +91,7 @@ public class StickerContentProviderReader {
             final String name = cursor.getString(cursor.getColumnIndexOrThrow(STICKER_PACK_NAME_IN_QUERY));
             final String publisher = cursor.getString(cursor.getColumnIndexOrThrow(STICKER_PACK_PUBLISHER_IN_QUERY));
             final String originalTrayImage = cursor.getString(cursor.getColumnIndexOrThrow(STICKER_PACK_ICON_ORIGINAL_IMAGE_FILE));
-            final String resizedTrayImage = cursor.getString(cursor.getColumnIndex(STICKER_PACK_ICON_IN_QUERY));
+            final String resizedTrayImage = cursor.getString(cursor.getColumnIndexOrThrow(STICKER_PACK_ICON_IN_QUERY));
             final String folder = cursor.getString(cursor.getColumnIndexOrThrow(FOLDER));
             final String publisherEmail = cursor.getString(cursor.getColumnIndexOrThrow(PUBLISHER_EMAIL));
             final String publisherWebsite = cursor.getString(cursor.getColumnIndexOrThrow(PUBLISHER_WEBSITE));
