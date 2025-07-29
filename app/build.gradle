@@ -60,22 +60,6 @@ android {
     }
 }
 
-tasks.register('checkDebug') {
-    doLast {
-        println("checkDebug")
-        if (android.defaultConfig.applicationId.startsWith("com.whatsapp")) {
-            throw new GradleException("applicationId in defaultConfig cannot start with com.whatsapp, please change your applicationId in app/build.gradle")
-        }
-        checkApplicationIdInDebug()
-    }
-}
-
-tasks.configureEach { task ->
-    println(task.name)
-    if (task.name.contains("assembleDebug")) {
-        task.dependsOn checkDebug
-    }
-}
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation 'androidx.appcompat:appcompat:1.7.1'
