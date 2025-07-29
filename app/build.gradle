@@ -7,6 +7,7 @@ def SECURE_TOKEN_FIELDNAME = "SECURE_TOKEN"
 def API_ENDPOINT_FIELDNAME = "API_ENDPOINT"
 def KEY_PASSWORD_FIELDNAME = "KEY_PASSWORD";
 def KEY_ALIAS_FIELDNAME = "KEY_ALIAS"
+def KEYSTORE_PASSWORD_FIELDNAME = "KEYSTORE_PASSWORD"
 
 android {
     namespace "io.github.miguelteles.beststickerapp"
@@ -43,7 +44,7 @@ android {
     signingConfigs {
         release {
             storeFile file("release.keystore")
-            storePassword ""
+            storePassword System.getenv(KEYSTORE_PASSWORD_FIELDNAME)
             keyPassword System.getenv(KEY_PASSWORD_FIELDNAME)
             keyAlias System.getenv(KEY_ALIAS_FIELDNAME)
         }
