@@ -22,7 +22,10 @@ public class StickerExceptionHandler {
         setExceptionCauseDetails(ex, finalMessage);
 
         System.out.println(ex.getLocationException());
-        stickerExceptionNotifier.addExceptionToNotificationQueue(ex);
+        try {
+            getStickerExceptionNotifier().writeExceptionIntoLogFile(ex);
+        } catch (Exception e) {
+        }
         new AlertDialog.Builder(context)
                 .setTitle("Erro :(")
                 .setMessage(finalMessage)
@@ -56,7 +59,7 @@ public class StickerExceptionHandler {
         }
     }
 
-    public static StickerExceptionNotifier getStickerExceptionNotifier() {
+    public static StickerExceptionNotifier getStickerExceptionNotifier() throws StickerException {
         if (stickerExceptionNotifier == null) {
             if (BuildConfig.DEBUG) {
                 stickerExceptionNotifier = new DebugStickerExceptionNotifier();

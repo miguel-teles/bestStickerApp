@@ -4,5 +4,5 @@ public interface StickerExceptionNotifier {
 
     void initNotifying();
 
-    void addExceptionToNotificationQueue(Throwable exception);
+    void writeExceptionIntoLogFile(Throwable exception);
 }

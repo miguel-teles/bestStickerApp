@@ -15,7 +15,6 @@ android {
         targetSdkVersion 33
         versionCode 1
         versionName "1.0"
-        setProperty("archivesBaseName", "BestStickerApp-$versionName")
 
         def contentProviderAuthority = applicationId + ".stickercontentprovider"
         // Creates a placeholder property to use in the manifest.
@@ -25,7 +24,12 @@ android {
         buildConfigField("String",
                 "CONTENT_PROVIDER_AUTHORITY",
                 "\"${contentProviderAuthority}\"")
-        buildConfigField "String", "API_PRODUCTION_URL", "\"https://q7h1mc4qwh.execute-api.sa-east-1.amazonaws.com/prod\""
+
+        def secureToken = project.hasProperty("secureToken") ? project.property("secureToken") : "f0a9c3bdeaf2ef5df1be92c6a47ff8eac8470a05d183fb68c4eec0b5c112cd0a"
+        buildConfigField "String", "SECURE_TOKEN", "\"${secureToken}\""
+
+        def apiProductionUrl = project.hasProperty("apiEndpoint") ? project.property("apiEndpoint") : "https://q7h1mc4qwh.execute-api.sa-east-1.amazonaws.com/prod/"
+        buildConfigField "String", "API_ENDPOINT", "\"${apiProductionUrl}\""
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
@@ -113,6 +117,7 @@ dependencies {
     implementation 'androidx.cardview:cardview:1.0.0'
     implementation 'com.google.code.gson:gson:2.11.0'
     implementation("com.squareup.okhttp3:okhttp:5.1.0")
+    implementation 'org.bouncycastle:bcpkix-jdk18on:1.72'
 
     testImplementation 'junit:junit:4.13.2'
     // Dependência principal do Mockito

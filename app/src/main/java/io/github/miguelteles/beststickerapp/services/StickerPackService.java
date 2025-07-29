@@ -51,7 +51,7 @@ public class StickerPackService {
 
     private StickerPackService() throws StickerException {
         this.stickerPackRepository = new StickerPackRepository(MyDatabase.getInstance().getSqLiteDatabase());
-        this.resourceManagement = FileResourceManagement.getInstance(Utils.getApplicationContext());
+        this.resourceManagement = FileResourceManagement.getInstance();
         this.stickerUriProvider = StickerUriProvider.getInstance();
         this.contentResolver = Utils.getApplicationContext().getContentResolver();
         this.stickerPackValidator = StickerPackValidator.getInstance();

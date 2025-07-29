@@ -1,18 +1,17 @@
 package io.github.miguelteles.beststickerapp.view;
 
-import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.view.View;
-import android.view.animation.DecelerateInterpolator;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.PickVisualMediaRequest;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -25,7 +24,6 @@ import io.github.miguelteles.beststickerapp.exception.StickerException;
 import io.github.miguelteles.beststickerapp.exception.handler.StickerExceptionHandler;
 import io.github.miguelteles.beststickerapp.services.StickerPackService;
 import io.github.miguelteles.beststickerapp.services.interfaces.EntityOperationCallback;
-import io.github.miguelteles.beststickerapp.utils.Utils;
 
 public class AddStickerActivity extends AppCompatActivity {
 
@@ -35,6 +33,7 @@ public class AddStickerActivity extends AppCompatActivity {
     private StickerPackService stickerPackService;
     private StickerPack stickerPack;
     private ProgressBar creationProgressBar;
+    private ActivityResultLauncher<PickVisualMediaRequest> pickMedia;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -68,9 +67,21 @@ public class AddStickerActivity extends AppCompatActivity {
     }
 
     private void declaraCampos() {
-        stickerImageView = findViewById(R.id.stickerImageView);
-        btnAdicionarSticker = findViewById(R.id.adicionarSticker);
-        creationProgressBar = findViewById(R.id.pg_sticker_creation);
+        this.stickerImageView = findViewById(R.id.stickerImageView);
+        this.btnAdicionarSticker = findViewById(R.id.adicionarSticker);
+        this.creationProgressBar = findViewById(R.id.pg_sticker_creation);
+        this.pickMedia =
+                registerForActivityResult(new ActivityResultContracts.PickVisualMedia(), uri -> {
+                    // Callback is invoked after the user selects a media item or closes the
+                    // photo picker.
+                    if (uri != null) {
+                        stickerImageView.setImageURI(uri);
+                        uriStickerImage = uri;
+                        adjustPickedImageProportions();
+                        stickerImageView.setTag("modified");
+                    }
+                    verificaCamposObrigatorios();
+                });
     }
 
     private View.OnClickListener adicionarSticker() {
@@ -108,24 +119,10 @@ public class AddStickerActivity extends AppCompatActivity {
 
     private View.OnClickListener selecionaImagem() {
         return view -> {
-            Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-            intent.setType("image/*");
-            startActivityForResult(intent, Utils.PICK_IMAGE_REQUEST_CODE);
+            pickMedia.launch(new PickVisualMediaRequest.Builder()
+                    .setMediaType(ActivityResultContracts.PickVisualMedia.ImageOnly.INSTANCE)
+                    .build());
         };
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == Utils.PICK_IMAGE_REQUEST_CODE && resultCode == RESULT_OK && data != null) {
-            stickerImageView.setTag("modified");
-
-            Uri imageUri = data.getData();
-            stickerImageView.setImageURI(imageUri);
-            uriStickerImage = imageUri;
-            adjustPickedImageProportions();
-        }
-        verificaCamposObrigatorios();
     }
 
     private void adjustPickedImageProportions() {

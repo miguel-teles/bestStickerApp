@@ -110,7 +110,7 @@ public class StickerContentProvider extends ContentProvider {
         try {
             Utils.setApplicationContext(getContext());
             stickerPackService = StickerPackService.getInstance();
-            resourcesManagement = FileResourceManagement.getInstance(Utils.getApplicationContext());
+            resourcesManagement = FileResourceManagement.getInstance();
 
             AUTHORITY = BuildConfig.CONTENT_PROVIDER_AUTHORITY;
             if (!AUTHORITY.startsWith(Objects.requireNonNull(getContext()).getPackageName())) {

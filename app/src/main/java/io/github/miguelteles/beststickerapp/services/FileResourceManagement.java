@@ -8,16 +8,13 @@ import android.provider.OpenableColumns;
 
 import androidx.annotation.NonNull;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,9 +36,9 @@ public class FileResourceManagement implements ResourcesManagement {
         this.contentResolver = context.getContentResolver();
     }
 
-    public static FileResourceManagement getInstance(Context context) {
+    public static FileResourceManagement getInstance() {
         if (filesManagement == null) {
-            filesManagement = new FileResourceManagement(context);
+            filesManagement = new FileResourceManagement(Utils.getApplicationContext());
         }
         return filesManagement;
     }
@@ -54,6 +51,11 @@ public class FileResourceManagement implements ResourcesManagement {
     @Override
     public Uri getCacheFolder() {
         return Uri.fromFile(context.getCacheDir());
+    }
+
+    @Override
+    public Uri getCertificateFolder() {
+        return getOrCreateDirectory(getBaseFolder(), DirectoryNames.CERTIFICATES);
     }
 
     @Override
@@ -73,11 +75,11 @@ public class FileResourceManagement implements ResourcesManagement {
     @Override
     public Uri getOrCreateStickerPackDirectory(String folderName) {
         MethodInputValidator.requireNotEmpty(folderName, "FolderName");
-        return getDirectoryCreateIfNotExist(getDirectoryCreateIfNotExist(getOrCreateLogsDirectory(),
+        return getOrCreateDirectory(getOrCreateDirectory(getOrCreateLogsDirectory(),
                 DirectoryNames.PACKS), folderName);
     }
 
-    private Uri getDirectoryCreateIfNotExist(Uri folder, String folderName) {
+    private Uri getOrCreateDirectory(Uri folder, String folderName) {
         File file = new File(folder.getPath(), folderName);
         file.mkdir();
         return Uri.fromFile(file);
@@ -85,13 +87,13 @@ public class FileResourceManagement implements ResourcesManagement {
 
     @Override
     public Uri getOrCreateLogsDirectory() {
-        return getDirectoryCreateIfNotExist(getBaseFolder(),
+        return getOrCreateDirectory(getBaseFolder(),
                 DirectoryNames.LOGS);
     }
 
     @Override
     public Uri getOrCreateLogErrorsDirectory() {
-        return getDirectoryCreateIfNotExist(getOrCreateLogsDirectory(),
+        return getOrCreateDirectory(getOrCreateLogsDirectory(),
                 DirectoryNames.Logs.ERRORS);
     }
 
@@ -179,10 +181,10 @@ public class FileResourceManagement implements ResourcesManagement {
     }
 
     @Override
-    public String getContentAsString(Uri exceptionLog) throws StickerFolderException {
-        MethodInputValidator.requireNotNull(exceptionLog, "exceptionLog");
+    public String getContentAsString(Uri file) throws StickerFolderException {
+        MethodInputValidator.requireNotNull(file, "file");
         StringBuilder stringBuilder = new StringBuilder();
-        try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(contentResolver.openInputStream(exceptionLog)))) {
+        try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(contentResolver.openInputStream(file)))) {
             String line;
             if ((line = bufferedReader.readLine()) != null) {
                 stringBuilder.append(line).append("\n");
@@ -191,6 +193,16 @@ public class FileResourceManagement implements ResourcesManagement {
             throw new StickerFolderException(e, StickerFolderExceptionEnum.GET_FILE, "Erro ao pegar conteúdo da uri");
         }
         return stringBuilder.toString();
+    }
+
+    @Override
+    public byte[] getContentAsBytes(Uri file) throws StickerFolderException {
+        MethodInputValidator.requireNotNull(file, "file");
+        try (InputStream inputStream = contentResolver.openInputStream(file)) {
+            return readBytesFromInputStream(inputStream);
+        } catch (IOException e) {
+            throw new StickerFolderException(e, StickerFolderExceptionEnum.GET_FILE, "Erro ao pegar conteúdo da uri");
+        }
     }
 
     @Override
@@ -214,6 +226,11 @@ public class FileResourceManagement implements ResourcesManagement {
     public abstract static class DirectoryNames {
         public final static String LOGS = "logs";
         public final static String PACKS = "packs";
+        public final static String CERTIFICATES = "certificates";
+
+        public static class Files {
+            public final static String CLIENT_CERTIFICATE = "clientCertificate";
+        }
 
         public static class Logs {
             public final static String ERRORS = "errors";

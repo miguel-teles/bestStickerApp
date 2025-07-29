@@ -14,9 +14,10 @@ import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 import io.github.miguelteles.beststickerapp.domain.pojo.ResponseAPIBase;
+import io.github.miguelteles.beststickerapp.exception.StickerException;
 import io.github.miguelteles.beststickerapp.exception.StickerFolderException;
 import io.github.miguelteles.beststickerapp.services.FileResourceManagement;
-import io.github.miguelteles.beststickerapp.services.client.ExceptionNotifierImpl;
+import io.github.miguelteles.beststickerapp.services.client.ExceptionNotifierAPIImpl;
 import io.github.miguelteles.beststickerapp.services.client.interfaces.ExceptionNotifierAPI;
 import io.github.miguelteles.beststickerapp.services.interfaces.ResourcesManagement;
 import io.github.miguelteles.beststickerapp.utils.Utils;
@@ -29,14 +30,14 @@ public class ProductionStickerExceptionNotifier implements StickerExceptionNotif
     private final ConcurrentLinkedQueue<Uri> notificationQueue;
     private final Executor executor;
 
-    private ProductionStickerExceptionNotifier() {
-        this.resourcesManagement = FileResourceManagement.getInstance(Utils.getApplicationContext());
-        this.exceptionNotifierAPI = new ExceptionNotifierImpl();
+    protected ProductionStickerExceptionNotifier() throws StickerException {
+        this.resourcesManagement = FileResourceManagement.getInstance();
+        this.exceptionNotifierAPI = new ExceptionNotifierAPIImpl();
         this.notificationQueue = new ConcurrentLinkedQueue<>();
         this.executor = Executors.newSingleThreadExecutor();
     }
 
-    public static ProductionStickerExceptionNotifier getInstance() {
+    public static ProductionStickerExceptionNotifier getInstance() throws StickerException {
         if (instance == null) {
             instance = new ProductionStickerExceptionNotifier();
         }
@@ -66,7 +67,7 @@ public class ProductionStickerExceptionNotifier implements StickerExceptionNotif
                 }
 
             } catch (Exception e) {
-                addExceptionToNotificationQueue(e);
+                writeExceptionIntoLogFile(e);
             }
         });
     }
@@ -75,7 +76,7 @@ public class ProductionStickerExceptionNotifier implements StickerExceptionNotif
         return post.getStatus() == null;
     }
 
-    public void addExceptionToNotificationQueue(Throwable exception) {
+    public void writeExceptionIntoLogFile(Throwable exception) {
         ExceptionNotifierRQ notification = buildNotificationFromException(exception);
 
         try {

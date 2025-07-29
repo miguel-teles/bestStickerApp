@@ -17,7 +17,6 @@ import android.util.Pair;
 import android.view.View;
 import android.widget.TextView;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import java.lang.ref.WeakReference;
@@ -27,10 +26,7 @@ import io.github.miguelteles.beststickerapp.R;
 import io.github.miguelteles.beststickerapp.domain.entity.StickerPack;
 import io.github.miguelteles.beststickerapp.exception.StickerException;
 import io.github.miguelteles.beststickerapp.exception.handler.StickerExceptionHandler;
-import io.github.miguelteles.beststickerapp.exception.handler.ProductionStickerExceptionNotifier;
-import io.github.miguelteles.beststickerapp.exception.handler.StickerExceptionNotifier;
 import io.github.miguelteles.beststickerapp.repository.MyDatabase;
-import io.github.miguelteles.beststickerapp.services.StickerAppUpdateService;
 import io.github.miguelteles.beststickerapp.services.StickerPackService;
 import io.github.miguelteles.beststickerapp.utils.Utils;
 import io.github.miguelteles.beststickerapp.validator.StickerPackValidator;
@@ -54,7 +50,11 @@ public class EntryActivity extends BaseActivity {
         initializeScreenElements();
 
         Thread.setDefaultUncaughtExceptionHandler(createDefaultExceptionHandler());
-        StickerExceptionHandler.getStickerExceptionNotifier().initNotifying();
+        try {
+            StickerExceptionHandler.getStickerExceptionNotifier().initNotifying();
+        } catch (StickerException ex) {
+            StickerExceptionHandler.handleException(ex, this);
+        }
     }
 
     private void initializeScreenElements() {
@@ -80,7 +80,11 @@ public class EntryActivity extends BaseActivity {
         return new Thread.UncaughtExceptionHandler() {
             @Override
             public void uncaughtException(Thread paramThread, Throwable paramThrowable) {
-                StickerExceptionHandler.getStickerExceptionNotifier().addExceptionToNotificationQueue(paramThrowable);
+                try {
+                    StickerExceptionHandler.getStickerExceptionNotifier().writeExceptionIntoLogFile(paramThrowable);
+                } catch (Exception ex) {
+
+                }
             }
         };
     }

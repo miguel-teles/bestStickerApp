@@ -7,20 +7,18 @@ import android.graphics.Matrix;
 import android.media.ExifInterface;
 import android.net.Uri;
 
-import androidx.annotation.NonNull;
-
 import java.io.ByteArrayInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Base64;
 
-import io.github.miguelteles.beststickerapp.domain.pojo.ResponseAPIConvertedWebpDTO;
+import io.github.miguelteles.beststickerapp.domain.pojo.ResponseAPIConvertedWebp;
 import io.github.miguelteles.beststickerapp.exception.StickerException;
+import io.github.miguelteles.beststickerapp.exception.StickerFatalErrorException;
 import io.github.miguelteles.beststickerapp.exception.StickerFolderException;
 import io.github.miguelteles.beststickerapp.exception.enums.StickerFolderExceptionEnum;
-import io.github.miguelteles.beststickerapp.services.client.ImageConverterWebpImpl;
+import io.github.miguelteles.beststickerapp.services.client.ImageConverterWebpAPIImpl;
 import io.github.miguelteles.beststickerapp.services.client.interfaces.ImageConverterWebpAPI;
 import io.github.miguelteles.beststickerapp.services.interfaces.ResourcesManagement;
 import io.github.miguelteles.beststickerapp.utils.Utils;
@@ -32,13 +30,13 @@ public class StickerImageConvertionService {
     private final ImageConverterWebpAPI imageConverterWebpAPI;
     private final ContentResolver contentResolver;
 
-    private StickerImageConvertionService() {
-        resourcesManagement = FileResourceManagement.getInstance(Utils.getApplicationContext());
-        imageConverterWebpAPI = new ImageConverterWebpImpl();
+    private StickerImageConvertionService() throws StickerException {
+        resourcesManagement = FileResourceManagement.getInstance();
+        imageConverterWebpAPI = new ImageConverterWebpAPIImpl();
         contentResolver = Utils.getApplicationContext().getContentResolver();
     }
 
-    public static StickerImageConvertionService getInstance() throws StickerFolderException {
+    public static StickerImageConvertionService getInstance() throws StickerException {
         if (instance == null) {
             instance = new StickerImageConvertionService();
         }
@@ -151,12 +149,12 @@ public class StickerImageConvertionService {
 
     private Uri convertImageToWebp(Uri file, Uri destinationFolder) throws StickerException {
         String originalFormatImageBase64 = convertFileIntoBase64(file);
-        ResponseAPIConvertedWebpDTO responseAPIConvertedWebpDTO = this.imageConverterWebpAPI.convertImageToWebp(originalFormatImageBase64);
-        if (responseAPIConvertedWebpDTO.getMessage() != null) {
-            throw new StickerFolderException(null, StickerFolderExceptionEnum.CONVERT_FILE, responseAPIConvertedWebpDTO.getMessage());
+        ResponseAPIConvertedWebp responseAPIConvertedWebp = this.imageConverterWebpAPI.convertImageToWebp(originalFormatImageBase64);
+        if (responseAPIConvertedWebp.getMessage() != null) {
+            throw new StickerFolderException(null, StickerFolderExceptionEnum.CONVERT_FILE, responseAPIConvertedWebp.getMessage());
         }
 
-        byte[] webpImageInByteArray = Base64.getDecoder().decode(responseAPIConvertedWebpDTO.getWebpImageBase64());
+        byte[] webpImageInByteArray = Base64.getDecoder().decode(responseAPIConvertedWebp.getWebpImageBase64());
         Uri webpImage = this.resourcesManagement.getOrCreateFile(destinationFolder, file.getLastPathSegment().replace(this.resourcesManagement.getFileExtension(file, true), ".webp"));
         this.resourcesManagement.writeToFile(webpImage, new ByteArrayInputStream(webpImageInByteArray));
         return webpImage;

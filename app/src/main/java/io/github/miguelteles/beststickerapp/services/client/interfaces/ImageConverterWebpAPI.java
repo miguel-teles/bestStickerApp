@@ -1,9 +1,10 @@
 package io.github.miguelteles.beststickerapp.services.client.interfaces;
 
-import io.github.miguelteles.beststickerapp.domain.pojo.ResponseAPIConvertedWebpDTO;
+import io.github.miguelteles.beststickerapp.domain.pojo.ResponseAPIConvertedWebp;
+import io.github.miguelteles.beststickerapp.exception.StickerException;
 import io.github.miguelteles.beststickerapp.exception.StickerHttpClientException;
 
 public interface ImageConverterWebpAPI {
 
-    ResponseAPIConvertedWebpDTO convertImageToWebp(String imageInBase64) throws StickerHttpClientException;
+    ResponseAPIConvertedWebp convertImageToWebp(String imageInBase64) throws StickerException;
 }

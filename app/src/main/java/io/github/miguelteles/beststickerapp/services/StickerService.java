@@ -42,17 +42,13 @@ public class StickerService {
     private final StickerUriProvider stickerUriProvider;
     private final ContentResolver contentResolver;
     private final StickerPackValidator stickerPackValidator;
-    private final Executor executor;
-    private final UiThreadPoster threadResultPoster;
 
     private StickerService(Context context) throws StickerException {
         this.stickerRepository = new StickerRepository(MyDatabase.getInstance().getSqLiteDatabase());
         this.stickerPackValidator = StickerPackValidator.getInstance();
-        resourcesManagement = FileResourceManagement.getInstance(Utils.getApplicationContext());
+        resourcesManagement = FileResourceManagement.getInstance();
         stickerUriProvider = StickerUriProvider.getInstance();
         contentResolver = context.getContentResolver();
-        this.executor = Executors.newSingleThreadExecutor();
-        this.threadResultPoster = new AndroidUiThreadPoster();
         this.stickerImageConvertionService = StickerImageConvertionService.getInstance();
     }
 
@@ -61,16 +57,13 @@ public class StickerService {
                           StickerUriProvider stickerUriProvider,
                           ContentResolver contentResolver,
                           StickerPackValidator stickerPackValidator,
-                          StickerImageConvertionService stickerImageConvertionService,
-                          Executor executor) {
+                          StickerImageConvertionService stickerImageConvertionService) {
         this.stickerRepository = stickerRepository;
         this.resourcesManagement = resourcesManagement;
         this.stickerUriProvider = stickerUriProvider;
         this.contentResolver = contentResolver;
         this.stickerPackValidator = stickerPackValidator;
-        this.executor = executor;
         this.stickerImageConvertionService = stickerImageConvertionService;
-        this.threadResultPoster = new ImmediateUiThreadPoster();
     }
 
     public static StickerService getInstance() throws StickerException {
@@ -86,7 +79,7 @@ public class StickerService {
         validateParametersCreateSticker(stickerPack, selectedStickerImage, callbackClass);
         ResourcesManagement.Image copiedImages = null;
         try {
-            callbackClass.onProgressUpdate(10);
+            callbackClass.onProgressUpdate(30);
             Uri stickerPackFolder = resourcesManagement.getOrCreateStickerPackDirectory(stickerPack.getFolderName());
             copiedImages = stickerImageConvertionService.generateStickerImages(stickerPackFolder,
                     selectedStickerImage,

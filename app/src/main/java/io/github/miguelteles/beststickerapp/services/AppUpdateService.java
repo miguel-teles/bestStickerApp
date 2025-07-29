@@ -6,28 +6,30 @@ import java.util.concurrent.Executors;
 import io.github.miguelteles.beststickerapp.BuildConfig;
 import io.github.miguelteles.beststickerapp.domain.pojo.ResponseAPIAppLatestVersion;
 import io.github.miguelteles.beststickerapp.domain.pojo.Version;
+import io.github.miguelteles.beststickerapp.exception.StickerException;
+import io.github.miguelteles.beststickerapp.exception.StickerFatalErrorException;
 import io.github.miguelteles.beststickerapp.exception.StickerHttpClientException;
-import io.github.miguelteles.beststickerapp.services.client.GetLatestAppVersionImpl;
+import io.github.miguelteles.beststickerapp.services.client.GetLatestAppVersionAPIImpl;
 import io.github.miguelteles.beststickerapp.services.client.interfaces.GetLatestAppVersionAPI;
 import io.github.miguelteles.beststickerapp.view.interfaces.UiThreadPoster;
 import io.github.miguelteles.beststickerapp.view.threadHandlers.AndroidUiThreadPoster;
 
-public class StickerAppUpdateService {
+public class AppUpdateService {
 
-    private static StickerAppUpdateService instance;
+    private static AppUpdateService instance;
     private final GetLatestAppVersionAPI getLatestAppVersionAPI;
     private final Executor executor;
     private final UiThreadPoster threadResultPoster;
 
-    private StickerAppUpdateService() {
-        this.getLatestAppVersionAPI = new GetLatestAppVersionImpl();
+    private AppUpdateService() throws StickerFatalErrorException {
+        this.getLatestAppVersionAPI = new GetLatestAppVersionAPIImpl();
         this.executor = Executors.newSingleThreadExecutor();
         this.threadResultPoster = new AndroidUiThreadPoster();
     }
 
-    public static StickerAppUpdateService getInstance() {
+    public static AppUpdateService getInstance() throws StickerFatalErrorException {
         if (instance == null) {
-            instance = new StickerAppUpdateService();
+            instance = new AppUpdateService();
         }
         return instance;
     }
@@ -42,7 +44,7 @@ public class StickerAppUpdateService {
 
                 newUpdateAvailable = !responseAPIAppLatestVersion.getLatestVersion().getVersion().equals(BuildConfig.VERSION_NAME);
                 version = responseAPIAppLatestVersion.getLatestVersion();
-            } catch (StickerHttpClientException ex) {
+            } catch (StickerException ex) {
                 throw new RuntimeException(ex);
             }
 

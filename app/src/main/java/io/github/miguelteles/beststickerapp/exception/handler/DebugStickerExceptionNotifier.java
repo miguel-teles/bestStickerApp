@@ -1,11 +1,14 @@
 package io.github.miguelteles.beststickerapp.exception.handler;
 
-public class DebugStickerExceptionNotifier implements StickerExceptionNotifier {
-    @Override
-    public void initNotifying() {
+import io.github.miguelteles.beststickerapp.exception.StickerException;
+
+public class DebugStickerExceptionNotifier extends ProductionStickerExceptionNotifier {
+
+    public DebugStickerExceptionNotifier() throws StickerException {
+        super();
     }
 
     @Override
-    public void addExceptionToNotificationQueue(Throwable exception) {
+    public void initNotifying() {
     }
 }

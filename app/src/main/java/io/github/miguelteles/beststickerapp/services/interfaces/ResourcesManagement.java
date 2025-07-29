@@ -14,6 +14,7 @@ public interface ResourcesManagement {
 
     Uri getBaseFolder();
     Uri getCacheFolder();
+    Uri getCertificateFolder();
     Uri getOrCreateFile(Uri folder, String fileName) throws StickerFolderException;
     Uri getOrCreateStickerPackDirectory(String folderName);
     Uri getOrCreateLogsDirectory();
@@ -26,7 +27,9 @@ public interface ResourcesManagement {
 
     String getFileExtension(Uri file, boolean withDot);
 
-    String getContentAsString(Uri exceptionLog) throws StickerFolderException;
+    String getContentAsString(Uri file) throws StickerFolderException;
+
+    byte[] getContentAsBytes(Uri file) throws StickerFolderException;
 
     void writeToFile(Uri destinationFile, InputStream inputStream) throws StickerFolderException;
 

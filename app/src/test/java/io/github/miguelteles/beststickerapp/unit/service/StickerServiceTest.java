@@ -154,7 +154,7 @@ public class StickerServiceTest {
             }
         });
 
-        stickerService = new StickerService(stickerRepository, stickerFilesManagementService, stickerUriProvider, contentResolver, stickerPackValidator, stickerImageConvertionService, testExecutor);
+        stickerService = new StickerService(stickerRepository, stickerFilesManagementService, stickerUriProvider, contentResolver, stickerPackValidator, stickerImageConvertionService);
     }
 
     @Test
