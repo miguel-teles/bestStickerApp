@@ -8,6 +8,7 @@
 
 package io.github.miguelteles.beststickerapp.view;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
@@ -77,6 +78,7 @@ public class EntryActivity extends BaseActivity {
     }
 
     private Thread.UncaughtExceptionHandler createDefaultExceptionHandler() {
+        Activity activity = this;
         return new Thread.UncaughtExceptionHandler() {
             @Override
             public void uncaughtException(Thread paramThread, Throwable paramThrowable) {
@@ -84,6 +86,10 @@ public class EntryActivity extends BaseActivity {
                     StickerExceptionHandler.getStickerExceptionNotifier().writeExceptionIntoLogFile(paramThrowable);
                 } catch (Exception ex) {
 
+                }
+
+                if (paramThrowable instanceof IllegalArgumentException) {
+                    activity.finish();
                 }
             }
         };

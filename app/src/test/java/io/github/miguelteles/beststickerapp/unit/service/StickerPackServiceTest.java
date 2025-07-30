@@ -46,7 +46,6 @@ public class StickerPackServiceTest {
 
     Resources resources = mock(Resources.class);
     Uri uri = mock(Uri.class);
-    Executor testExecutor = Runnable::run;
 
     EntityOperationCallback<StickerPack> callback = new EntityOperationCallback<>() {
         @Override
@@ -120,7 +119,7 @@ public class StickerPackServiceTest {
 
             @Override
             public String answer(InvocationOnMock invocation) throws Throwable {
-                return "test";
+                return "service";
             }
         });
         when(stickerPackRepository.update(any(StickerPack.class))).then(new Answer<StickerPack>() {
@@ -137,8 +136,7 @@ public class StickerPackServiceTest {
                 stickerService,
                 stickerPackValidator,
                 stickerImageConvertionService,
-                resources,
-                testExecutor);
+                resources);
     }
 
     @Test

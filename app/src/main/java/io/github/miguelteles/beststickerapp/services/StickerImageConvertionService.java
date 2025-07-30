@@ -4,8 +4,12 @@ import android.content.ContentResolver;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
-import android.media.ExifInterface;
+
+import androidx.annotation.NonNull;
+import androidx.exifinterface.media.ExifInterface;
 import android.net.Uri;
+
+import org.jetbrains.annotations.NotNull;
 
 import java.io.ByteArrayInputStream;
 import java.io.FileOutputStream;
@@ -22,6 +26,7 @@ import io.github.miguelteles.beststickerapp.services.client.ImageConverterWebpAP
 import io.github.miguelteles.beststickerapp.services.client.interfaces.ImageConverterWebpAPI;
 import io.github.miguelteles.beststickerapp.services.interfaces.ResourcesManagement;
 import io.github.miguelteles.beststickerapp.utils.Utils;
+import io.github.miguelteles.beststickerapp.validator.MethodInputValidator;
 
 public class StickerImageConvertionService {
 
@@ -36,6 +41,14 @@ public class StickerImageConvertionService {
         contentResolver = Utils.getApplicationContext().getContentResolver();
     }
 
+    public StickerImageConvertionService(ResourcesManagement resourcesManagement,
+                                         ImageConverterWebpAPI imageConverterWebpAPI,
+                                         ContentResolver contentResolver) {
+        this.resourcesManagement = resourcesManagement;
+        this.imageConverterWebpAPI = imageConverterWebpAPI;
+        this.contentResolver = contentResolver;
+    }
+
     public static StickerImageConvertionService getInstance() throws StickerException {
         if (instance == null) {
             instance = new StickerImageConvertionService();
@@ -43,11 +56,16 @@ public class StickerImageConvertionService {
         return instance;
     }
 
-    public ResourcesManagement.Image generateStickerImages(Uri stickerPackFolder,
-                                                           Uri sourceImage,
-                                                           String destinationImageFileName,
-                                                           Integer imageWidthAndHeight,
+    public ResourcesManagement.Image generateStickerImages(@NotNull Uri stickerPackFolder,
+                                                           @NotNull Uri sourceImage,
+                                                           @NotNull String destinationImageFileName,
+                                                           @NotNull Integer imageWidthAndHeight,
                                                            boolean keepOriginalCopy) throws StickerException {
+        MethodInputValidator.requireNotNull(stickerPackFolder, "stickerPackFolder");
+        MethodInputValidator.requireNotNull(sourceImage, "sourceImage");
+        MethodInputValidator.requireNotEmpty(destinationImageFileName, "destinationImageFileName");
+        MethodInputValidator.requireNotEmpty(imageWidthAndHeight, "imageWidthAndHeight");
+
         Uri originalImageCopy = null;
         Uri resizedImageOriginalFormat = null;
         try {
@@ -103,8 +121,11 @@ public class StickerImageConvertionService {
      **/
     private int getImageOrientation(Uri imagePath) {
         int rotate = 0;
-        try {
-            ExifInterface exif = new ExifInterface(imagePath.getPath());
+        try (InputStream imageInputStream = contentResolver.openInputStream(imagePath)) {
+            if (imageInputStream == null) {
+                throw new NullPointerException("Não foi possível abrir inputStream da imagem a ser rotacionada");
+            }
+            ExifInterface exif = new ExifInterface(imageInputStream);
             int orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, 1);
             switch (orientation) {
                 case ExifInterface.ORIENTATION_ROTATE_270:

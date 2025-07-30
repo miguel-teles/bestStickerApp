@@ -24,17 +24,16 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
-import java.util.Objects;
 
 @RunWith(RobolectricTestRunner.class)
 public class FileResourcesManagementTest {
 
     private ResourcesManagement resourcesManagement = null;
     private Uri uri;
-    File resourcesFile = new File("src/test/resources");
-    File doNotDelete = new File("src/test/resources/doNotDeleteText.txt");
-    File doNotDeleteResult = new File("src/test/resources/doNotDeleteResult.txt");
-    File doNotDeleteEmptyFile = new File("src/test/resources/doNotDeleteEmptyFile.txt");
+    File resourcesFile = new File("src/service/resources");
+    File doNotDelete = new File("src/service/resources/doNotDeleteText.txt");
+    File doNotDeleteResult = new File("src/service/resources/doNotDeleteResult.txt");
+    File doNotDeleteEmptyFile = new File("src/service/resources/doNotDeleteEmptyFile.txt");
     Uri tempFile;
     Uri tempFolder;
 
@@ -63,16 +62,16 @@ public class FileResourcesManagementTest {
 
     @Test
     public void testGetOrCreateFile() throws StickerFolderException {
-        Uri createdFile = resourcesManagement.getOrCreateFile(uri, "fileTest.jpg");
+        Uri createdFile = resourcesManagement.getOrCreateFile(uri, "io/github/miguelteles/beststickerapp/resources/fileTest.jpg");
         assertUriValues(createdFile);
 
-        createdFile = resourcesManagement.getOrCreateFile(uri, "fileTest.jpg");
+        createdFile = resourcesManagement.getOrCreateFile(uri, "io/github/miguelteles/beststickerapp/resources/fileTest.jpg");
         assertUriValues(createdFile);
     }
 
     @Test
     public void testGetOrCreateFileInvalidInput() throws StickerFolderException {
-        assertThrows(IllegalArgumentException.class, () -> resourcesManagement.getOrCreateFile(null, "fileTest.jpg"));
+        assertThrows(IllegalArgumentException.class, () -> resourcesManagement.getOrCreateFile(null, "io/github/miguelteles/beststickerapp/resources/fileTest.jpg"));
         assertThrows(IllegalArgumentException.class, () -> resourcesManagement.getOrCreateFile(uri, null));
         assertThrows(IllegalArgumentException.class, () -> resourcesManagement.getOrCreateFile(uri, ""));
     }
@@ -103,7 +102,7 @@ public class FileResourcesManagementTest {
 
     @Test
     public void testGetFilesFromDirectory() throws StickerFolderException {
-        Uri resourcesFolder = Uri.fromFile(new File("src/test/resources"));
+        Uri resourcesFolder = Uri.fromFile(new File("src/service/resources"));
 
         List<Uri> filesFromDirectory = resourcesManagement.getFilesFromDirectory(resourcesFolder);
         assertNotNull(filesFromDirectory);

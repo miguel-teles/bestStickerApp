@@ -57,7 +57,7 @@ public class StickerPackService {
         this.stickerPackValidator = StickerPackValidator.getInstance();
         this.stickerService = StickerService.getInstance();
         this.resources = Utils.getApplicationContext().getResources();
-        this.executor = Executors.newSingleThreadExecutor();
+        this.executor = Executors.newSingleThreadExecutor(); //roda criando uma nova  thread
         this.threadResultPoster = new AndroidUiThreadPoster();
         this.stickerImageConvertionService = StickerImageConvertionService.getInstance();
     }
@@ -69,8 +69,7 @@ public class StickerPackService {
                               StickerService stickerService,
                               StickerPackValidator stickerPackValidator,
                               StickerImageConvertionService stickerImageConvertionService,
-                              Resources resources,
-                              Executor executor) {
+                              Resources resources) {
         this.resourceManagement = resourceManagement;
         this.stickerUriProvider = stickerUriProvider;
         this.stickerPackRepository = stickerPackRepository;
@@ -78,7 +77,7 @@ public class StickerPackService {
         this.stickerService = stickerService;
         this.stickerPackValidator = stickerPackValidator;
         this.resources = resources;
-        this.executor = executor;
+        this.executor = Runnable::run; //roda sem criar uma nova thread
         this.threadResultPoster = new ImmediateUiThreadPoster();
         this.stickerImageConvertionService = stickerImageConvertionService;
     }
@@ -111,7 +110,7 @@ public class StickerPackService {
 
                 String stickerPackFolderName = packNameInput + Utils.formatData(new Date(), "yyyy.MM.dd.HH.mm.ss");
                 stickerPackFolder = resourceManagement.getOrCreateStickerPackDirectory(stickerPackFolderName);
-                ResourcesManagement.Image copiedImages = stickerImageConvertionService.generateStickerImages(stickerPackFolder,
+                ResourcesManagement.Image copiedImages = stickerImageConvertionService.generateStickerImages(null,
                         selectedImagemUri,
                         generateStickerPackImageName(),
                         StickerPack.TRAY_IMAGE_SIZE,
