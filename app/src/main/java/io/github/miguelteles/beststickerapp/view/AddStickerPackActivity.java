@@ -1,16 +1,12 @@
 package io.github.miguelteles.beststickerapp.view;
 
-import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
-import android.view.animation.DecelerateInterpolator;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -35,7 +31,7 @@ import com.google.android.material.textfield.TextInputEditText;
 public class AddStickerPackActivity extends AppCompatActivity {
 
     private StickerPack stickerPackBeingEdited;
-    private TextView btnAdicionarStickerPack;
+    private TextView btnAddStickerPack;
     private TextInputEditText txtNomePacote, txtAutor;
     private ImageView stickerPackImageView;
     private Uri uriImagemStickerPack;
@@ -68,7 +64,7 @@ public class AddStickerPackActivity extends AppCompatActivity {
 
     private void populateFieldsWithStickerPackBeingEdited() {
         Intent intent = getIntent();
-        this.btnAdicionarStickerPack.setText(R.string.ADD_PACK);
+        this.btnAddStickerPack.setText(R.string.ADD_PACK);
         if (isStickerPackEdit(intent)) {
             this.stickerPackBeingEdited = (StickerPack) intent.getExtras().get(Extras.STICKER_PACK);
             txtNomePacote.setText(stickerPackBeingEdited.getName());
@@ -77,7 +73,7 @@ public class AddStickerPackActivity extends AppCompatActivity {
             stickerPackImageView.setImageURI(uriImagemStickerPack);
             stickerPackImageView.setScaleType(ImageView.ScaleType.FIT_XY);
             stickerPackImageView.setTag("modified");
-            this.btnAdicionarStickerPack.setText(R.string.SAVE_PACK);
+            this.btnAddStickerPack.setText(R.string.SAVE_PACK);
         }
     }
 
@@ -86,8 +82,8 @@ public class AddStickerPackActivity extends AppCompatActivity {
     }
 
     private void declaraCampos() {
-        btnAdicionarStickerPack = findViewById(R.id.adicionarStickerPack);
-        btnAdicionarStickerPack.setEnabled(false);
+        btnAddStickerPack = findViewById(R.id.adicionarStickerPack);
+        btnAddStickerPack.setEnabled(false);
         txtNomePacote = findViewById(R.id.txtInpEdtNomePacote);
         txtAutor = findViewById(R.id.txtInpEdtAutor);
         stickerPackImageView = findViewById(R.id.pacoteImageView);
@@ -99,11 +95,10 @@ public class AddStickerPackActivity extends AppCompatActivity {
             stickerPackImageView.setOnClickListener(pacoteImageViewOnClick());
         }
 
-        btnAdicionarStickerPack.setOnClickListener(btnSalvarStickerPackOnClick());
+        btnAddStickerPack.setOnClickListener(btnSaveStickerPackOnClick());
         stickerPackImageView.setOnFocusChangeListener(onFocusChangeListener());
         txtNomePacote.setOnFocusChangeListener(onFocusChangeListener());
         txtNomePacote.addTextChangedListener(createTextChangedListener());
-
     }
 
     @NonNull
@@ -134,12 +129,20 @@ public class AddStickerPackActivity extends AppCompatActivity {
 
     private void verifyMandatoryFields() {
         if (!Utils.isNothing(txtNomePacote.getText()) && stickerPackImageView.getTag() != null && stickerPackImageView.getTag().equals("modified")) {
-            btnAdicionarStickerPack.setEnabled(true);
-            btnAdicionarStickerPack.setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.shape_btn_default, null));
+            enableBtnAddStickerPack();
         } else {
-            btnAdicionarStickerPack.setEnabled(false);
-            btnAdicionarStickerPack.setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.shape_btn_default_disabled, null));
+            disableBtnAddStickerPack();
         }
+    }
+
+    private void enableBtnAddStickerPack() {
+        btnAddStickerPack.setEnabled(true);
+        btnAddStickerPack.setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.shape_btn_default, null));
+    }
+
+    private void disableBtnAddStickerPack() {
+        btnAddStickerPack.setEnabled(false);
+        btnAddStickerPack.setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.shape_btn_default_disabled, null));
     }
 
     public View.OnClickListener pacoteImageViewOnClick() {
@@ -163,32 +166,29 @@ public class AddStickerPackActivity extends AppCompatActivity {
         }
     }
 
-    public View.OnClickListener btnSalvarStickerPackOnClick() throws StickerException {
+    public View.OnClickListener btnSaveStickerPackOnClick() throws StickerException {
         try {
-            return createOrUpdateStickerPackOnClick();
+            return v -> {
+                disableBtnAddStickerPack();
+                String nmAutorInput = txtAutor.getText().toString();
+                String nomePacoteInput = txtNomePacote.getText().toString();
+
+                creationProgressBar.setVisibility(View.VISIBLE);
+                if (stickerPackBeingEdited == null) {
+                    stickerPackService.createStickerPack(nmAutorInput,
+                            nomePacoteInput,
+                            uriImagemStickerPack,
+                            createStickerPackCreationCallback());
+                } else {
+                    stickerPackService.updateStickerPack(stickerPackBeingEdited,
+                            nmAutorInput,
+                            nomePacoteInput,
+                            createStickerPackCreationCallback());
+                }
+            };
         } catch (Exception ex) {
             throw new StickerException(ex, StickerExceptionEnum.CSP, null);
         }
-    }
-
-    private View.OnClickListener createOrUpdateStickerPackOnClick() {
-        return v -> {
-            String nmAutorInput = txtAutor.getText().toString();
-            String nomePacoteInput = txtNomePacote.getText().toString();
-
-            creationProgressBar.setVisibility(View.VISIBLE);
-            if (stickerPackBeingEdited == null) {
-                stickerPackService.createStickerPack(nmAutorInput,
-                        nomePacoteInput,
-                        uriImagemStickerPack,
-                        createStickerPackCreationCallback());
-            } else {
-                stickerPackService.updateStickerPack(stickerPackBeingEdited,
-                        nmAutorInput,
-                        nomePacoteInput,
-                        createStickerPackCreationCallback());
-            }
-        };
     }
 
     private EntityOperationCallback<StickerPack> createStickerPackCreationCallback() {

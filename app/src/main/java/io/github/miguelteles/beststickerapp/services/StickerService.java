@@ -132,7 +132,6 @@ public class StickerService {
                               StickerPack stickerPack) throws StickerException {
         validateParametersDeleteSticker(sticker, stickerPack);
 
-
         Uri stickerPackFolder = resourcesManagement.getOrCreateStickerPackDirectory(stickerPack.getFolderName());
         resourcesManagement.deleteFile(Uri.withAppendedPath(stickerPackFolder, sticker.getStickerImageFile()));
         stickerRepository.remove(sticker);

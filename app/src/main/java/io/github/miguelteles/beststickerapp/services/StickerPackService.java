@@ -313,4 +313,9 @@ public class StickerPackService {
             threadResultPoster.post(() -> stickerCreationCallback.onCreationFinish(finalSticker, finalException));
         });
     }
+
+    public void deleteSticker(Sticker sticker, StickerPack stickerPack) throws StickerException {
+        stickerService.deleteSticker(sticker, stickerPack);
+        stickerPackRepository.update(stickerPack);
+    }
 }

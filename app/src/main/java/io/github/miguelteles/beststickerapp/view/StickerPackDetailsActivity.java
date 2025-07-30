@@ -271,7 +271,7 @@ public class StickerPackDetailsActivity extends AddStickerPackToWhatsappActivity
 
     public void deleteSticker(Sticker sticker, StickerPack stickerPack) {
         try {
-            this.stickerService.deleteSticker(sticker, stickerPack);
+            this.stickerPackService.deleteSticker(sticker, stickerPack);
             stickerPack.getStickers().remove(sticker);
             loadStickersOnScreen();
             setBtnAddToWhatsappProperties();

@@ -87,6 +87,7 @@ public class AddStickerActivity extends AppCompatActivity {
     private View.OnClickListener adicionarSticker() {
         Context context = this;
         return v -> {
+            disableBtnAddSticker();
             creationProgressBar.setVisibility(View.VISIBLE);
             stickerPackService.createSticker(stickerPack,
                     uriStickerImage,
@@ -131,11 +132,19 @@ public class AddStickerActivity extends AppCompatActivity {
 
     private void verificaCamposObrigatorios() {
         if (stickerImageView.getTag() != null && stickerImageView.getTag().equals("modified")) {
-            btnAdicionarSticker.setEnabled(true);
-            btnAdicionarSticker.setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.shape_btn_default, null));
+            enableBtnAddSticker();
         } else {
-            btnAdicionarSticker.setEnabled(false);
-            btnAdicionarSticker.setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.shape_btn_default_disabled, null));
+            disableBtnAddSticker();
         }
+    }
+
+    private void disableBtnAddSticker() {
+        btnAdicionarSticker.setEnabled(false);
+        btnAdicionarSticker.setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.shape_btn_default_disabled, null));
+    }
+
+    private void enableBtnAddSticker() {
+        btnAdicionarSticker.setEnabled(true);
+        btnAdicionarSticker.setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.shape_btn_default, null));
     }
 }
