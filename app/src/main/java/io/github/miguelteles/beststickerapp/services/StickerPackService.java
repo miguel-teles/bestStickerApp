@@ -110,7 +110,7 @@ public class StickerPackService {
 
                 String stickerPackFolderName = packNameInput + Utils.formatData(new Date(), "yyyy.MM.dd.HH.mm.ss");
                 stickerPackFolder = resourceManagement.getOrCreateStickerPackDirectory(stickerPackFolderName);
-                ResourcesManagement.Image copiedImages = stickerImageConvertionService.generateStickerImages(null,
+                ResourcesManagement.Image copiedImages = stickerImageConvertionService.generateStickerImages(stickerPackFolder,
                         selectedImagemUri,
                         generateStickerPackImageName(),
                         StickerPack.TRAY_IMAGE_SIZE,
