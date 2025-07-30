@@ -7,6 +7,7 @@ import android.graphics.Matrix;
 
 import androidx.annotation.NonNull;
 import androidx.exifinterface.media.ExifInterface;
+
 import android.net.Uri;
 
 import org.jetbrains.annotations.NotNull;
@@ -90,7 +91,9 @@ public class StickerImageConvertionService {
         } catch (Exception ex) {
             throw new StickerFolderException(ex, StickerFolderExceptionEnum.COPY, "Erro ao copiar foto do pacote para a pasta do pacote " + stickerPackFolder.getLastPathSegment());
         } finally {
-            resourcesManagement.deleteFile(resizedImageOriginalFormat);
+            if (resizedImageOriginalFormat != null) {
+                resourcesManagement.deleteFile(resizedImageOriginalFormat);
+            }
         }
     }
 

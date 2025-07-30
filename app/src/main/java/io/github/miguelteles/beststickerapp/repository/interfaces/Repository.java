@@ -12,8 +12,8 @@ public interface Repository<T> {
 
     T save(T obj) throws StickerException;
     T update(T obj) throws StickerException;
-    Integer remove(T obj) throws StickerException;
-    Integer remove(UUID id) throws StickerException;
+    void remove(T obj) throws StickerException;
+    void remove(UUID id) throws StickerException;
     T findById(UUID id) throws StickerException;
     List<T> findAll() throws StickerException;
 }

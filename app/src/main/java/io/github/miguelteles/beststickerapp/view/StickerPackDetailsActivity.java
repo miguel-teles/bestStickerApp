@@ -86,7 +86,7 @@ public class StickerPackDetailsActivity extends AddStickerPackToWhatsappActivity
     protected void onResume() {
         super.onResume();
         try {
-            stickerPack = stickerPackService.fetchStickerPackByIdWithAssets(stickerPack);
+            stickerPack = stickerPackService.fetchStickerPackAssets(stickerPack);
             loadStickersOnScreen();
             setBtnAddToWhatsappProperties();
         } catch (StickerException ex) {

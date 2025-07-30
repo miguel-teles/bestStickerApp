@@ -70,18 +70,17 @@ public class StickerRepository extends CommonRepository implements io.github.mig
     }
 
     @Override
-    public Integer remove(Sticker sticker) throws StickerException {
-        return this.remove(sticker.getIdentifier());
+    public void remove(Sticker sticker) throws StickerException {
+        this.remove(sticker.getIdentifier());
     }
 
     @Override
-    public Integer remove(UUID identifier) throws StickerException {
+    public void remove(UUID identifier) throws StickerException {
         try {
             String deleteStickers = "DELETE FROM stickers WHERE identifier=?";
             SQLiteStatement stmt = sqLiteDatabase.compileStatement(deleteStickers);
             stmt.bindString(1, identifier.toString());
             stmt.executeUpdateDelete();
-            return null;
         } catch (Exception ex) {
             throw new StickerDataBaseException(ex, StickerDataBaseExceptionEnum.DELETE, "Erro ao deletar figurinhas do pacote");
         }

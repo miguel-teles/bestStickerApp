@@ -88,12 +88,12 @@ public class StickerPackRepository extends CommonRepository implements Repositor
     }
 
     @Override
-    public Integer remove(StickerPack stickerPack) throws StickerException {
-        return remove(stickerPack.getIdentifier());
+    public void remove(StickerPack stickerPack) throws StickerException {
+        remove(stickerPack.getIdentifier());
     }
 
     @Override
-    public Integer remove(UUID identifier) throws StickerException {
+    public void remove(UUID identifier) throws StickerException {
         try {
             stickerRepository.removeByPackIdentifier(identifier);
 
@@ -105,7 +105,6 @@ public class StickerPackRepository extends CommonRepository implements Repositor
         } catch (Exception ex) {
             throw new StickerDataBaseException(ex, StickerDataBaseExceptionEnum.DELETE, "Erro ao deletar pacote de figurinhas");
         }
-        return null;
     }
 
     @Override

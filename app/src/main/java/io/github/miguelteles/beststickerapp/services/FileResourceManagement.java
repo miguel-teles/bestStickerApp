@@ -157,8 +157,14 @@ public class FileResourceManagement implements ResourcesManagement {
     }
 
     private String getFileExtensionFromFileSchemeFile(Uri file, boolean withDot) {
+        MethodInputValidator.requireNotNull(file.getLastPathSegment(), "file last path segment");
+
         String fileName = file.getLastPathSegment();
-        String result = fileName.substring(fileName.lastIndexOf("."));
+        int dotIndex = fileName.lastIndexOf(".");
+        if (dotIndex < 0) {
+            throw new IllegalArgumentException("Uri não é um arquivo e sim um diretório");
+        }
+        String result = fileName.substring(dotIndex);
         if (!withDot) {
             result = result.replace(".", "");
         }

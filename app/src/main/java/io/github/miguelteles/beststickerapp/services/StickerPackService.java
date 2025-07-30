@@ -89,10 +89,10 @@ public class StickerPackService {
         return instance;
     }
 
-    public void createStickerPack(String authorNameInput,
-                                  String packNameInput,
-                                  Uri selectedImagemUri,
-                                  EntityOperationCallback<StickerPack> callbackClass) {
+    public void createStickerPack(@NonNull String authorNameInput,
+                                  @NonNull String packNameInput,
+                                  @NonNull Uri selectedImagemUri,
+                                  @NonNull EntityOperationCallback<StickerPack> callbackClass) {
         validateParametersCreateStickerPack(packNameInput, selectedImagemUri, callbackClass);
         if (Utils.isNothing(authorNameInput)) {
             authorNameInput = resources.getString(R.string.defaultPublisher);
@@ -241,7 +241,7 @@ public class StickerPackService {
         });
     }
 
-    public StickerPack fetchStickerPackByIdWithAssets(StickerPack stickerPack) throws StickerException {
+    public StickerPack fetchStickerPackAssets(StickerPack stickerPack) throws StickerException {
         StickerPack pack = stickerPackRepository.findById(stickerPack.getIdentifier());
         loadStickerPackAssets(pack);
         return pack;
@@ -256,17 +256,19 @@ public class StickerPackService {
     }
 
     private void loadStickerPackAssets(StickerPack pack) throws StickerException {
-        pack.setStickers(stickerService.fetchAllStickerFromPackWithAssets(pack.getIdentifier()));
-        final byte[] bytes;
-        try {
-            bytes = fetchStickerPackAsset(pack.getIdentifier(),
-                    pack.getResizedTrayImageFile());
-            if (bytes.length == 0) {
-                throw new IllegalStateException("Asset file is empty, pack identifier: " + pack.getIdentifier());
+        if (pack != null) {
+            pack.setStickers(stickerService.fetchAllStickerFromPackWithAssets(pack.getIdentifier()));
+            final byte[] bytes;
+            try {
+                bytes = fetchStickerPackAsset(pack.getIdentifier(),
+                        pack.getResizedTrayImageFile());
+                if (bytes.length == 0) {
+                    throw new IllegalStateException("Asset file is empty, pack identifier: " + pack.getIdentifier());
+                }
+                pack.setResizedTrayImageFileInBytes(bytes);
+            } catch (IllegalArgumentException e) {
+                throw new StickerException(e, StickerExceptionEnum.FS, "Erro ao buscar figurinhas do pacote " + pack.getIdentifier());
             }
-            pack.setResizedTrayImageFileInBytes(bytes);
-        } catch (IllegalArgumentException e) {
-            throw new StickerException(e, StickerExceptionEnum.FS, "Erro ao buscar figurinhas do pacote " + pack.getIdentifier());
         }
     }
 
