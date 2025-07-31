@@ -21,10 +21,12 @@ abstract class HttpClient {
     private final String baseUrl;
     private final OkHttpClient okHttpClient;
     private final String secureToken;
+    private final Context context;
 
-    protected HttpClient(String baseUrl) throws StickerFatalErrorException {
+    protected HttpClient(String baseUrl, Context context) throws StickerFatalErrorException {
         this.baseUrl = baseUrl;
         this.secureToken = BuildConfig.SECURE_TOKEN;
+        this.context = context;
         if (Utils.isNothing(secureToken)) {
             throw new StickerFatalErrorException(null, StickerFatalExceptionEnum.NO_SECURE_TOKEN_FOUND, "Ops! Há algo de muito errado com esta versão do aplicativo.");
         }
@@ -48,7 +50,7 @@ abstract class HttpClient {
 
     protected boolean isNetworkAvailable() {
         ConnectivityManager connectivityManager
-                = (ConnectivityManager) Utils.getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+                = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo activeNetworkInfo = connectivityManager != null ? connectivityManager.getActiveNetworkInfo() : null;
         return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }

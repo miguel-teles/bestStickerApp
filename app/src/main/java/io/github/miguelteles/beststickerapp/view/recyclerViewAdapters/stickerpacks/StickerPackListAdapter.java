@@ -20,8 +20,13 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import io.github.miguelteles.beststickerapp.R;
+import io.github.miguelteles.beststickerapp.domain.entity.Sticker;
 import io.github.miguelteles.beststickerapp.domain.entity.StickerPack;
+import io.github.miguelteles.beststickerapp.exception.StickerException;
+import io.github.miguelteles.beststickerapp.exception.handler.StickerExceptionHandler;
 import io.github.miguelteles.beststickerapp.repository.contentProvider.StickerUriProvider;
+import io.github.miguelteles.beststickerapp.services.FileResourceManagement;
+import io.github.miguelteles.beststickerapp.utils.Utils;
 import io.github.miguelteles.beststickerapp.view.StickerPackDetailsActivity;
 
 import com.facebook.drawee.view.SimpleDraweeView;
@@ -49,6 +54,7 @@ public class StickerPackListAdapter extends RecyclerView.Adapter<StickerPackList
 
     @Override
     public void onBindViewHolder(@NonNull final StickerPackListItemViewHolder viewHolder, final int index) {
+
         StickerPack pack = stickerPacks.get(index);
         final Context context = viewHolder.getPublisherView().getContext();
         viewHolder.getPublisherView().setText(pack.getPublisher());
@@ -64,18 +70,23 @@ public class StickerPackListAdapter extends RecyclerView.Adapter<StickerPackList
         viewHolder.getImageRowView().removeAllViews();
         //if this sticker pack contains less stickers than the max, then take the smaller size.
         int actualNumberOfStickersToShow = Math.min(maxNumberOfStickersInARow, pack.getStickers().size());
-        for (int i = 0; i < actualNumberOfStickersToShow; i++) {
-            final SimpleDraweeView rowImage = (SimpleDraweeView) LayoutInflater.from(context).inflate(R.layout.sticker_packs_list_image_item, viewHolder.getImageRowView(), false);
-            rowImage.setImageURI(StickerUriProvider.getInstance().getStickerAssetUri(pack.getIdentifier(), pack.getStickers().get(i).getStickerImageFile()));
-            final LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams) rowImage.getLayoutParams();
-            final int marginBetweenImages = minMarginBetweenImages - lp.leftMargin - lp.rightMargin;
-            if (i != actualNumberOfStickersToShow - 1 && marginBetweenImages > 0) { //do not set the margin for the last image
-                lp.setMargins(lp.leftMargin, lp.topMargin, lp.rightMargin + marginBetweenImages, lp.bottomMargin);
-                rowImage.setLayoutParams(lp);
+
+        try {
+            for (int i = 0; i < actualNumberOfStickersToShow; i++) {
+                final SimpleDraweeView rowImage = (SimpleDraweeView) LayoutInflater.from(context).inflate(R.layout.sticker_packs_list_image_item, viewHolder.getImageRowView(), false);
+                rowImage.setImageURI(FileResourceManagement.getInstance().getFile(pack.getFolderName(), pack.getStickers().get(i).getStickerImageFile()));
+                final LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams) rowImage.getLayoutParams();
+                final int marginBetweenImages = minMarginBetweenImages - lp.leftMargin - lp.rightMargin;
+                if (i != actualNumberOfStickersToShow - 1 && marginBetweenImages > 0) { //do not set the margin for the last image
+                    lp.setMargins(lp.leftMargin, lp.topMargin, lp.rightMargin + marginBetweenImages, lp.bottomMargin);
+                    rowImage.setLayoutParams(lp);
+                }
+                viewHolder.getImageRowView().addView(rowImage);
             }
-            viewHolder.getImageRowView().addView(rowImage);
+            viewHolder.getAnimatedStickerPackIndicator().setVisibility(pack.isAnimatedStickerPack() ? View.VISIBLE : View.GONE);
+        } catch (StickerException ex) {
+            StickerExceptionHandler.handleException(ex, Utils.getApplicationContext());
         }
-        viewHolder.getAnimatedStickerPackIndicator().setVisibility(pack.isAnimatedStickerPack() ? View.VISIBLE : View.GONE);
     }
 
     @Override

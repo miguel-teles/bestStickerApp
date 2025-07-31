@@ -32,7 +32,7 @@ public class ProductionStickerExceptionNotifier implements StickerExceptionNotif
 
     protected ProductionStickerExceptionNotifier() throws StickerException {
         this.resourcesManagement = FileResourceManagement.getInstance();
-        this.exceptionNotifierAPI = new ExceptionNotifierAPIImpl();
+        this.exceptionNotifierAPI = new ExceptionNotifierAPIImpl(Utils.getApplicationContext());
         this.notificationQueue = new ConcurrentLinkedQueue<>();
         this.executor = Executors.newSingleThreadExecutor();
     }

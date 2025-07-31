@@ -38,7 +38,7 @@ public class StickerImageConvertionService {
 
     private StickerImageConvertionService() throws StickerException {
         resourcesManagement = FileResourceManagement.getInstance();
-        imageConverterWebpAPI = new ImageConverterWebpAPIImpl();
+        imageConverterWebpAPI = new ImageConverterWebpAPIImpl(Utils.getApplicationContext());
         contentResolver = Utils.getApplicationContext().getContentResolver();
     }
 

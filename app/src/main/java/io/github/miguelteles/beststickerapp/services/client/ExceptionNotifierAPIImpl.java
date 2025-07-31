@@ -1,5 +1,7 @@
 package io.github.miguelteles.beststickerapp.services.client;
 
+import android.content.Context;
+
 import com.google.gson.Gson;
 
 import java.io.IOException;
@@ -11,6 +13,7 @@ import io.github.miguelteles.beststickerapp.exception.StickerFatalErrorException
 import io.github.miguelteles.beststickerapp.exception.StickerHttpClientException;
 import io.github.miguelteles.beststickerapp.exception.enums.StickerHttpClientExceptionEnum;
 import io.github.miguelteles.beststickerapp.services.client.interfaces.ExceptionNotifierAPI;
+import io.github.miguelteles.beststickerapp.utils.Utils;
 import okhttp3.Call;
 import okhttp3.Response;
 
@@ -18,8 +21,8 @@ public class ExceptionNotifierAPIImpl extends HttpClient implements ExceptionNot
 
     private final Gson gson;
 
-    public ExceptionNotifierAPIImpl() throws StickerException {
-        super(BuildConfig.API_ENDPOINT);
+    public ExceptionNotifierAPIImpl(Context context) throws StickerException {
+        super(BuildConfig.API_ENDPOINT, context);
         gson = new Gson();
     }
 

@@ -11,7 +11,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Date;
 import java.util.List;
-import java.util.UUID;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
@@ -130,7 +129,6 @@ public class StickerPackService {
                 stickerPackRepository.save(stickerPack);
                 callbackClass.onProgressUpdate(70);
 
-                addStickerPackToContentProvider(stickerPack);
             } catch (StickerException ex) {
                 deletePackFolderOnException(stickerPackFolder);
                 exception = ex;
@@ -162,14 +160,6 @@ public class StickerPackService {
         return "packImg" + Utils.formatData(new Date(), "yyyyMMddHHmmss");
     }
 
-    private void addStickerPackToContentProvider(StickerPack stickerPack) throws StickerException {
-        if (stickerPack.getIdentifier() != null) {
-            contentResolver.insert(stickerUriProvider.getStickerPackInsertUri(), stickerPack.toContentValues());
-        } else {
-            throw new StickerException(null, StickerExceptionEnum.CSP, "Erro ao salvar pacote no banco");
-        }
-    }
-
     private void deletePackFolderOnException(Uri stickerPackFolder) {
         try {
             resourceManagement.deleteFile(stickerPackFolder);
@@ -197,7 +187,6 @@ public class StickerPackService {
 
                 updatedStickerPack = stickerPackRepository.update(stickerPack);
                 callback.onProgressUpdate(70);
-                contentResolver.update(stickerUriProvider.getStickerPackUpdateUri(), stickerPack.toContentValues(), null, null);
                 callback.onProgressUpdate(90);
             } catch (StickerException ex) {
                 exception = ex;
@@ -232,7 +221,6 @@ public class StickerPackService {
                 resourceManagement.deleteFile(resourceManagement.getOrCreateStickerPackDirectory(stickerPack.getFolderName()));
 
                 callbackClass.onProgressUpdate(90);
-                contentResolver.delete(stickerUriProvider.getStickerDeleteUri(), null, null);
             } catch (StickerException ex) {
                 exception = ex;
             }
@@ -257,10 +245,10 @@ public class StickerPackService {
 
     private void loadStickerPackAssets(StickerPack pack) throws StickerException {
         if (pack != null) {
-            pack.setStickers(stickerService.fetchAllStickerFromPackWithAssets(pack.getIdentifier()));
+            pack.setStickers(stickerService.fetchAllStickerFromPackWithAssets(pack.getIdentifier(), pack.getFolderName()));
             final byte[] bytes;
             try {
-                bytes = fetchStickerPackAsset(pack.getIdentifier(),
+                bytes = fetchStickerPackAsset(pack.getFolderName(),
                         pack.getResizedTrayImageFile());
                 if (bytes.length == 0) {
                     throw new IllegalStateException("Asset file is empty, pack identifier: " + pack.getIdentifier());
@@ -280,11 +268,11 @@ public class StickerPackService {
         return packs;
     }
 
-    public byte[] fetchStickerPackAsset(@NonNull UUID packIdentifier, @NonNull String stickerPackImageFileName) throws StickerFolderException {
-        try (final InputStream inputStream = contentResolver.openInputStream(stickerUriProvider.getStickerPackResizedAssetUri(packIdentifier, stickerPackImageFileName));
+    public byte[] fetchStickerPackAsset(@NonNull String folderName, @NonNull String stickerPackImageFileName) throws StickerFolderException {
+        try (final InputStream inputStream = contentResolver.openInputStream(this.resourceManagement.getFile(folderName, stickerPackImageFileName));
              final ByteArrayOutputStream buffer = new ByteArrayOutputStream()) {
             if (inputStream == null) {
-                throw new IOException("cannot read sticker pack asset id: " + packIdentifier + "; name: " + stickerPackImageFileName);
+                throw new IOException("cannot read sticker pack asset folder: " + folderName + "; name: " + stickerPackImageFileName);
             }
             int read;
             byte[] data = new byte[16384];

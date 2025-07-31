@@ -105,6 +105,7 @@ public class AddStickerActivity extends AppCompatActivity {
                     onProgressUpdate(100);
                     finish();
                 } else {
+                    enableBtnAddSticker();
                     creationProgressBar.setProgress(0);
                     creationProgressBar.setVisibility(View.GONE);
                     StickerExceptionHandler.handleException(stickerException, context);

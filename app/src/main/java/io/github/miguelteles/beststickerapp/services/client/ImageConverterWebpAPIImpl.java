@@ -1,5 +1,7 @@
 package io.github.miguelteles.beststickerapp.services.client;
 
+import android.content.Context;
+
 import com.google.gson.Gson;
 
 import java.io.IOException;
@@ -18,8 +20,8 @@ public class ImageConverterWebpAPIImpl extends HttpClient implements ImageConver
 
     private final Gson gson;
 
-    public ImageConverterWebpAPIImpl() throws StickerFatalErrorException {
-        super(BuildConfig.API_ENDPOINT);
+    public ImageConverterWebpAPIImpl(Context context) throws StickerFatalErrorException {
+        super(BuildConfig.API_ENDPOINT, context);
         gson = new Gson();
     }
 

@@ -30,16 +30,16 @@ public class FileResourcesManagementTest {
 
     private ResourcesManagement resourcesManagement = null;
     private Uri uri;
-    File resourcesFile = new File("src/service/resources");
-    File doNotDelete = new File("src/service/resources/doNotDeleteText.txt");
-    File doNotDeleteResult = new File("src/service/resources/doNotDeleteResult.txt");
-    File doNotDeleteEmptyFile = new File("src/service/resources/doNotDeleteEmptyFile.txt");
+    File resourcesFile = new File("src/test/resources/io/github/miguelteles/beststickerapp/unit/service/resources");
+    File doNotDelete = new File("src/test/resources/io/github/miguelteles/beststickerapp/unit/service/doNotDeleteText.txt");
+    File doNotDeleteResult = new File("src/test/resources/io/github/miguelteles/beststickerapp/unit/service/doNotDeleteResult.txt");
+    File doNotDeleteEmptyFile = new File("src/test/resources/io/github/miguelteles/beststickerapp/unit/service/doNotDeleteEmptyFile.txt");
     Uri tempFile;
     Uri tempFolder;
 
     @Before
     public void test() throws StickerFolderException {
-        resourcesManagement = new FileResourceManagement(ApplicationProvider.getApplicationContext());
+        resourcesManagement = new FileResourceManagement(ApplicationProvider.getApplicationContext(), ApplicationProvider.getApplicationContext().getContentResolver());
         uri = Uri.fromFile(resourcesFile);
         File tempFolder = new File(resourcesManagement.getCacheFolder().getPath(), "tempFolder");
         tempFolder.mkdir();
@@ -62,16 +62,19 @@ public class FileResourcesManagementTest {
 
     @Test
     public void testGetOrCreateFile() throws StickerFolderException {
-        Uri createdFile = resourcesManagement.getOrCreateFile(uri, "io/github/miguelteles/beststickerapp/resources/fileTest.jpg");
+
+        Uri folder = Uri.fromFile(new File("src/test/resources/io/github/miguelteles/beststickerapp/unit/service/"));
+
+        Uri createdFile = resourcesManagement.getOrCreateFile(folder, "fileTest.jpg");
         assertUriValues(createdFile);
 
-        createdFile = resourcesManagement.getOrCreateFile(uri, "io/github/miguelteles/beststickerapp/resources/fileTest.jpg");
+        createdFile = resourcesManagement.getOrCreateFile(folder, "fileTest.jpg");
         assertUriValues(createdFile);
     }
 
     @Test
     public void testGetOrCreateFileInvalidInput() throws StickerFolderException {
-        assertThrows(IllegalArgumentException.class, () -> resourcesManagement.getOrCreateFile(null, "io/github/miguelteles/beststickerapp/resources/fileTest.jpg"));
+        assertThrows(IllegalArgumentException.class, () -> resourcesManagement.getOrCreateFile((Uri) null, "src/test/resources/io/github/miguelteles/beststickerapp/unit/service/fileTest.jpg"));
         assertThrows(IllegalArgumentException.class, () -> resourcesManagement.getOrCreateFile(uri, null));
         assertThrows(IllegalArgumentException.class, () -> resourcesManagement.getOrCreateFile(uri, ""));
     }
@@ -102,7 +105,7 @@ public class FileResourcesManagementTest {
 
     @Test
     public void testGetFilesFromDirectory() throws StickerFolderException {
-        Uri resourcesFolder = Uri.fromFile(new File("src/service/resources"));
+        Uri resourcesFolder = Uri.fromFile(new File("src/test/resources/io/github/miguelteles/beststickerapp/unit/service/"));
 
         List<Uri> filesFromDirectory = resourcesManagement.getFilesFromDirectory(resourcesFolder);
         assertNotNull(filesFromDirectory);

@@ -21,8 +21,10 @@ import io.github.miguelteles.beststickerapp.exception.handler.StickerExceptionHa
 import io.github.miguelteles.beststickerapp.exception.enums.StickerExceptionEnum;
 import io.github.miguelteles.beststickerapp.domain.entity.StickerPack;
 import io.github.miguelteles.beststickerapp.repository.contentProvider.StickerUriProvider;
+import io.github.miguelteles.beststickerapp.services.FileResourceManagement;
 import io.github.miguelteles.beststickerapp.services.StickerPackService;
 import io.github.miguelteles.beststickerapp.services.interfaces.EntityOperationCallback;
+import io.github.miguelteles.beststickerapp.services.interfaces.ResourcesManagement;
 import io.github.miguelteles.beststickerapp.utils.Utils;
 
 import com.google.android.material.textfield.TextInputEditText;
@@ -36,6 +38,7 @@ public class AddStickerPackActivity extends AppCompatActivity {
     private ImageView stickerPackImageView;
     private Uri uriImagemStickerPack;
     private StickerPackService stickerPackService;
+    private ResourcesManagement resourcesManagement;
     private ProgressBar creationProgressBar;
 
     @Override
@@ -48,6 +51,7 @@ public class AddStickerPackActivity extends AppCompatActivity {
         try {
             setaOnClickListeners();
             stickerPackService = StickerPackService.getInstance();
+            resourcesManagement = FileResourceManagement.getInstance();
         } catch (StickerException ex) {
             StickerExceptionHandler.handleException(ex, this);
         }
@@ -69,11 +73,16 @@ public class AddStickerPackActivity extends AppCompatActivity {
             this.stickerPackBeingEdited = (StickerPack) intent.getExtras().get(Extras.STICKER_PACK);
             txtNomePacote.setText(stickerPackBeingEdited.getName());
             txtAutor.setText(stickerPackBeingEdited.getPublisher());
-            uriImagemStickerPack = StickerUriProvider.getInstance().getStickerPackOriginalAssetUri(stickerPackBeingEdited.getIdentifier(), stickerPackBeingEdited.getOriginalTrayImageFile());
-            stickerPackImageView.setImageURI(uriImagemStickerPack);
-            stickerPackImageView.setScaleType(ImageView.ScaleType.FIT_XY);
-            stickerPackImageView.setTag("modified");
-            this.btnAddStickerPack.setText(R.string.SAVE_PACK);
+            try {
+                uriImagemStickerPack = this.resourcesManagement.getFile(stickerPackBeingEdited.getFolderName(), stickerPackBeingEdited.getOriginalTrayImageFile());
+                stickerPackImageView.setImageURI(uriImagemStickerPack);
+                stickerPackImageView.setScaleType(ImageView.ScaleType.FIT_XY);
+                stickerPackImageView.setTag("modified");
+                this.btnAddStickerPack.setText(R.string.SAVE_PACK);
+            } catch (StickerException ex) {
+                StickerExceptionHandler.handleException(ex, this);
+                this.finish();
+            }
         }
     }
 
@@ -198,6 +207,7 @@ public class AddStickerPackActivity extends AppCompatActivity {
             public void onCreationFinish(StickerPack createdStickerPack, StickerException stickerException) {
                 stickerPackBeingEdited = createdStickerPack;
                 if (stickerException != null) {
+                    enableBtnAddStickerPack();
                     creationProgressBar.setVisibility(View.GONE);
                     creationProgressBar.setProgress(0);
                     StickerExceptionHandler.handleException(stickerException, context);

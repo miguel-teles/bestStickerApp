@@ -4,7 +4,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.verify;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -21,6 +20,7 @@ import org.robolectric.annotation.Config;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.util.List;
 
 import io.github.miguelteles.beststickerapp.domain.entity.Sticker;
 import io.github.miguelteles.beststickerapp.domain.entity.StickerPack;
@@ -41,6 +41,8 @@ import io.github.miguelteles.beststickerapp.validator.StickerPackValidator;
 public class StickerAndStickerPackCreationIntegrationTest {
 
     StickerPackService stickerPackService;
+    StickerService stickerService;
+
     Uri stickerPackImage;
     Uri stickerImage;
     StickerPack createdStickerPack;
@@ -53,19 +55,23 @@ public class StickerAndStickerPackCreationIntegrationTest {
     public void init() throws StickerException {
         stickerPackImage = Uri.fromFile(new File("src/test/resources/io/github/miguelteles/beststickerapp/unit/service/test_image.jpg"));
 
-        resourcesManagement = new FileResourceManagement(ApplicationProvider.getApplicationContext());
-        StickerImageConvertionService stickerImageConvertionService = new StickerImageConvertionService(resourcesManagement, new ImageConverterWebpAPIImpl(), ApplicationProvider.getApplicationContext().getContentResolver());
+        resourcesManagement = new FileResourceManagement(ApplicationProvider.getApplicationContext(),
+                ApplicationProvider.getApplicationContext().getContentResolver());
+        StickerImageConvertionService stickerImageConvertionService = new StickerImageConvertionService(resourcesManagement,
+                new ImageConverterWebpAPIImpl(ApplicationProvider.getApplicationContext()),
+                ApplicationProvider.getApplicationContext().getContentResolver());
 
+        stickerService = new StickerService(new StickerMockRepository(),
+                resourcesManagement,
+                StickerUriProvider.getInstance(),
+                ApplicationProvider.getApplicationContext().getContentResolver(),
+                StickerPackValidator.getInstance(),
+                stickerImageConvertionService);
         stickerPackService = new StickerPackService(resourcesManagement,
                 StickerUriProvider.getInstance(),
                 new StickerPackMockRepository(),
                 ApplicationProvider.getApplicationContext().getContentResolver(),
-                new StickerService(new StickerMockRepository(),
-                        resourcesManagement,
-                        StickerUriProvider.getInstance(),
-                        ApplicationProvider.getApplicationContext().getContentResolver(),
-                        StickerPackValidator.getInstance(),
-                        stickerImageConvertionService),
+                stickerService,
                 StickerPackValidator.getInstance(),
                 stickerImageConvertionService,
                 ApplicationProvider.getApplicationContext().getResources());
@@ -209,17 +215,27 @@ public class StickerAndStickerPackCreationIntegrationTest {
     }
 
     @Test
-    public void deleteSticker() throws StickerException{
+    public void deleteSticker() throws StickerException {
         addStickerToStickerPack();
 
+        stickerPackService.deleteSticker(createdSticker, createdStickerPack);
+
+        List<Sticker> stickersFromPack = stickerService.fetchAllStickerFromPackWithoutAssets(createdStickerPack.getIdentifier());
+
+        assertTrue(stickersFromPack.isEmpty());
     }
 
     @Test
     public void fetchStickerPackAssetsTest() throws StickerException {
-        stickerPackCreationTest();
-
+        addStickerToStickerPack();
 
         stickerPackService.fetchStickerPackAssets(createdStickerPack);
+
+        assertNotNull(createdStickerPack.getResizedTrayImageFileInBytes());
+        for (Sticker sticker : createdStickerPack.getStickers()) {
+            assertNotNull(sticker.getStickerImageFileInBytes());
+            assertTrue(sticker.getSize() > 0);
+        }
     }
 
 

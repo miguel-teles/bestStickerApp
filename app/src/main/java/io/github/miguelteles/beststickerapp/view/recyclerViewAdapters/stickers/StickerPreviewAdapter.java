@@ -22,7 +22,11 @@ import androidx.recyclerview.widget.RecyclerView;
 import io.github.miguelteles.beststickerapp.R;
 import io.github.miguelteles.beststickerapp.domain.entity.Sticker;
 import io.github.miguelteles.beststickerapp.domain.entity.StickerPack;
+import io.github.miguelteles.beststickerapp.exception.StickerException;
+import io.github.miguelteles.beststickerapp.exception.handler.StickerExceptionHandler;
 import io.github.miguelteles.beststickerapp.repository.contentProvider.StickerUriProvider;
+import io.github.miguelteles.beststickerapp.services.FileResourceManagement;
+import io.github.miguelteles.beststickerapp.services.interfaces.ResourcesManagement;
 import io.github.miguelteles.beststickerapp.view.StickerPackDetailsActivity;
 
 import com.facebook.drawee.backends.pipeline.Fresco;
@@ -48,6 +52,7 @@ public class StickerPreviewAdapter extends RecyclerView.Adapter<StickerPreviewVi
     private View clickedStickerPreview;
 
     private StickerPackDetailsActivity stickerPackDetailsActivity;
+    private ResourcesManagement resourcesManagement;
     float expandedViewLeftX;
     float expandedViewTopY;
 
@@ -71,6 +76,7 @@ public class StickerPreviewAdapter extends RecyclerView.Adapter<StickerPreviewVi
         this.expandedPreview = expandedStickerView;
         this.context = context;
         this.stickerPackDetailsActivity = stickerPackDetailsActivity;
+        this.resourcesManagement = FileResourceManagement.getInstance();
 
         for (int childComponentIndex = 0; childComponentIndex < expandedPreview.getChildCount(); childComponentIndex++) {
             View childComponent = expandedPreview.getChildAt(childComponentIndex);
@@ -100,8 +106,12 @@ public class StickerPreviewAdapter extends RecyclerView.Adapter<StickerPreviewVi
     @Override
     public void onBindViewHolder(@NonNull final StickerPreviewViewHolder stickerPreviewViewHolder, final int i) {
         stickerPreviewViewHolder.stickerPreviewView.setImageResource(errorResource);
-        stickerPreviewViewHolder.stickerPreviewView.setImageURI(StickerUriProvider.getInstance().getStickerAssetUri(stickerPack.getIdentifier(), stickerPack.getStickers().get(i).getStickerImageFile()));
-        stickerPreviewViewHolder.stickerPreviewView.setOnClickListener(v -> expandPreview(i, stickerPreviewViewHolder.stickerPreviewView));
+        try {
+            stickerPreviewViewHolder.stickerPreviewView.setImageURI(this.resourcesManagement.getFile(stickerPack.getFolderName(), stickerPack.getStickers().get(i).getStickerImageFile()));
+            stickerPreviewViewHolder.stickerPreviewView.setOnClickListener(v -> expandPreview(i, stickerPreviewViewHolder.stickerPreviewView));
+        } catch (StickerException ex) {
+            StickerExceptionHandler.handleException(ex, stickerPackDetailsActivity);
+        }
     }
 
     @Override
@@ -195,19 +205,23 @@ public class StickerPreviewAdapter extends RecyclerView.Adapter<StickerPreviewVi
         if (expandedPreview != null) {
             positionExpandedStickerPreview(position);
             this.expandedSticker = stickerPack.getStickers().get(position);
-            final Uri stickerAssetUri = StickerUriProvider.getInstance().getStickerAssetUri(stickerPack.getIdentifier(), expandedSticker.getStickerImageFile());
-            DraweeController controller = Fresco.newDraweeControllerBuilder()
-                    .setUri(stickerAssetUri)
-                    .setAutoPlayAnimations(true)
-                    .build();
-            expandedStickerPreview.setImageResource(errorResource);
-            expandedStickerPreview.setController(controller);
+            try {
+                final Uri stickerAssetUri = this.resourcesManagement.getFile(stickerPack.getFolderName(), expandedSticker.getStickerImageFile());
+                DraweeController controller = Fresco.newDraweeControllerBuilder()
+                        .setUri(stickerAssetUri)
+                        .setAutoPlayAnimations(true)
+                        .build();
+                expandedStickerPreview.setImageResource(errorResource);
+                expandedStickerPreview.setController(controller);
 
-            expandedPreview.setVisibility(View.VISIBLE);
-            recyclerView.setAlpha(EXPANDED_STICKER_PREVIEW_BACKGROUND_ALPHA);
+                expandedPreview.setVisibility(View.VISIBLE);
+                recyclerView.setAlpha(EXPANDED_STICKER_PREVIEW_BACKGROUND_ALPHA);
 
-            expandedPreview.setOnClickListener(v -> hideExpandedStickerPreview());
-            btnDeleteSticker.setOnClickListener(v -> deleteSticker(expandedSticker));
+                expandedPreview.setOnClickListener(v -> hideExpandedStickerPreview());
+                btnDeleteSticker.setOnClickListener(v -> deleteSticker(expandedSticker));
+            } catch (StickerException ex) {
+                StickerExceptionHandler.handleException(ex, stickerPackDetailsActivity);
+            }
         }
     }
 

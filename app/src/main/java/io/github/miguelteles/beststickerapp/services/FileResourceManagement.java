@@ -6,10 +6,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.provider.OpenableColumns;
 
-import androidx.annotation.NonNull;
-
 import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -27,20 +24,21 @@ import io.github.miguelteles.beststickerapp.validator.MethodInputValidator;
 public class FileResourceManagement implements ResourcesManagement {
 
     private final Context context;
-    private static FileResourceManagement filesManagement;
+    private final ContentResolver contentResolver;
 
-    private static ContentResolver contentResolver;
+    private static FileResourceManagement instance;
 
-    public FileResourceManagement(Context context) {
+
+    public FileResourceManagement(Context context, ContentResolver contentResolver) {
         this.context = context;
-        this.contentResolver = context.getContentResolver();
+        this.contentResolver = contentResolver;
     }
 
     public static FileResourceManagement getInstance() {
-        if (filesManagement == null) {
-            filesManagement = new FileResourceManagement(Utils.getApplicationContext());
+        if (instance == null) {
+            instance = new FileResourceManagement(Utils.getApplicationContext(), Utils.getApplicationContext().getContentResolver());
         }
-        return filesManagement;
+        return instance;
     }
 
     @Override
@@ -115,6 +113,23 @@ public class FileResourceManagement implements ResourcesManagement {
         }
     }
 
+    @Override
+    public Uri getFile(String folder, String fileName) throws StickerFolderException {
+        return this.getFile(this.getOrCreateStickerPackDirectory(folder), fileName);
+    }
+
+    @Override
+    public Uri getFile(Uri folder, String fileName) throws StickerFolderException {
+        MethodInputValidator.requireNotNull(folder, "Folder");
+        MethodInputValidator.requireNotEmpty(fileName, "FileName");
+
+        File file = new File(folder.getPath(), fileName);
+        if (!file.exists()) {
+            throw new StickerFolderException(null, StickerFolderExceptionEnum.GET_FILE, "Arquivo não existe");
+        }
+        return Uri.fromFile(file);
+    }
+
     private void deleteFile(File stickerPackFolderName) throws StickerFolderException {
         try {
             if (stickerPackFolderName.exists()) {
@@ -171,8 +186,7 @@ public class FileResourceManagement implements ResourcesManagement {
         return result;
     }
 
-    @NonNull
-    private static String getFileExtensionFromFileSchemeContent(Uri file, boolean withDot) {
+    private String getFileExtensionFromFileSchemeContent(Uri file, boolean withDot) {
         String result;
         try (Cursor cursor = contentResolver.query(file, null, null, null, null)) {
             cursor.moveToFirst();

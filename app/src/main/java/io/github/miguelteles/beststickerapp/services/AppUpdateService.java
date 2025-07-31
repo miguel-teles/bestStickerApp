@@ -11,6 +11,7 @@ import io.github.miguelteles.beststickerapp.exception.StickerFatalErrorException
 import io.github.miguelteles.beststickerapp.exception.StickerHttpClientException;
 import io.github.miguelteles.beststickerapp.services.client.GetLatestAppVersionAPIImpl;
 import io.github.miguelteles.beststickerapp.services.client.interfaces.GetLatestAppVersionAPI;
+import io.github.miguelteles.beststickerapp.utils.Utils;
 import io.github.miguelteles.beststickerapp.view.interfaces.UiThreadPoster;
 import io.github.miguelteles.beststickerapp.view.threadHandlers.AndroidUiThreadPoster;
 
@@ -22,7 +23,7 @@ public class AppUpdateService {
     private final UiThreadPoster threadResultPoster;
 
     private AppUpdateService() throws StickerFatalErrorException {
-        this.getLatestAppVersionAPI = new GetLatestAppVersionAPIImpl();
+        this.getLatestAppVersionAPI = new GetLatestAppVersionAPIImpl(Utils.getApplicationContext());
         this.executor = Executors.newSingleThreadExecutor();
         this.threadResultPoster = new AndroidUiThreadPoster();
     }

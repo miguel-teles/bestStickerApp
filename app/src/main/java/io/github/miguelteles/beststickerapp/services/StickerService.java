@@ -8,12 +8,9 @@ import androidx.annotation.NonNull;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.Method;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 
 import io.github.miguelteles.beststickerapp.domain.entity.Sticker;
 import io.github.miguelteles.beststickerapp.domain.entity.StickerPack;
@@ -29,9 +26,6 @@ import io.github.miguelteles.beststickerapp.services.interfaces.ResourcesManagem
 import io.github.miguelteles.beststickerapp.utils.Utils;
 import io.github.miguelteles.beststickerapp.validator.MethodInputValidator;
 import io.github.miguelteles.beststickerapp.validator.StickerPackValidator;
-import io.github.miguelteles.beststickerapp.view.interfaces.UiThreadPoster;
-import io.github.miguelteles.beststickerapp.view.threadHandlers.AndroidUiThreadPoster;
-import io.github.miguelteles.beststickerapp.view.threadHandlers.ImmediateUiThreadPoster;
 
 public class StickerService {
 
@@ -93,7 +87,6 @@ public class StickerService {
             stickerRepository.save(sticker);
 
             callbackClass.onProgressUpdate(70);
-            insertStickerIntoContentProvider(sticker);
             return sticker;
         } catch (StickerException ex) {
             throw ex;
@@ -102,14 +95,6 @@ public class StickerService {
             throw new StickerException(ex, StickerExceptionEnum.CSP, null);
         }
 
-    }
-
-    private void insertStickerIntoContentProvider(Sticker sticker) throws StickerException {
-        if (sticker.getIdentifier() != null) {
-            contentResolver.insert(stickerUriProvider.getStickerInsertUri(), sticker.toContentValues());
-        } else {
-            throw new StickerException(null, StickerExceptionEnum.CS, "Erro ao salvar pacote no banco");
-        }
     }
 
     private void deleteStickerImages(ResourcesManagement.Image copiedImages) {
@@ -135,8 +120,6 @@ public class StickerService {
         Uri stickerPackFolder = resourcesManagement.getOrCreateStickerPackDirectory(stickerPack.getFolderName());
         resourcesManagement.deleteFile(Uri.withAppendedPath(stickerPackFolder, sticker.getStickerImageFile()));
         stickerRepository.remove(sticker);
-
-        contentResolver.delete(stickerUriProvider.getStickerDeleteUri(), null);
     }
 
     private void validateParametersDeleteSticker(Sticker sticker, StickerPack stickerPack) {
@@ -148,14 +131,14 @@ public class StickerService {
         }
     }
 
-    public List<Sticker> fetchAllStickerFromPackWithAssets(UUID packIdentifier) throws StickerException {
+    public List<Sticker> fetchAllStickerFromPackWithAssets(UUID packIdentifier, String folderName) throws StickerException {
         validateParametersFetchAllStickerFromPack(packIdentifier);
         List<Sticker> stickers = stickerRepository.findByPackIdentifier(packIdentifier);
 
         for (Sticker sticker : stickers) {
             final byte[] bytes;
             try {
-                bytes = fetchStickerAsset(packIdentifier,
+                bytes = fetchStickerAsset(folderName,
                         sticker.getStickerImageFile());
                 if (bytes.length == 0) {
                     throw new IllegalStateException("Asset file is empty, pack identifier: " + packIdentifier + ", sticker: " + sticker.getStickerImageFile());
@@ -183,9 +166,9 @@ public class StickerService {
     /**
      * Busca um asset da pasta (imagem da figurinha ou da capa do sticker pack)
      **/
-    public byte[] fetchStickerAsset(@NonNull UUID packIdentifier, @NonNull String stickerImageFileName) throws StickerFolderException {
+    public byte[] fetchStickerAsset(@NonNull String folderName, @NonNull String stickerImageFileName) throws StickerFolderException {
         //o contentResolver.openInputStream vai pro método openAssetFile do contentProvider
-        try (final InputStream inputStream = contentResolver.openInputStream(stickerUriProvider.getStickerAssetUri(packIdentifier, stickerImageFileName))) {
+        try (final InputStream inputStream = contentResolver.openInputStream(resourcesManagement.getOrCreateFile(resourcesManagement.getOrCreateStickerPackDirectory(folderName), stickerImageFileName))) {
             return resourcesManagement.readBytesFromInputStream(inputStream);
         } catch (IOException ex) {
             throw new StickerFolderException(ex, StickerFolderExceptionEnum.GET_FILE, "Erro when fetching sticker asset");

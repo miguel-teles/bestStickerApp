@@ -1,5 +1,7 @@
 package io.github.miguelteles.beststickerapp.services.client;
 
+import android.content.Context;
+
 import java.io.IOException;
 
 import io.github.miguelteles.beststickerapp.domain.pojo.ResponseAPIAppLatestVersion;
@@ -14,8 +16,8 @@ import okhttp3.Response;
 
 public class GetLatestAppVersionAPIImpl extends HttpClient implements GetLatestAppVersionAPI {
 
-    public GetLatestAppVersionAPIImpl() throws StickerFatalErrorException {
-        super("http://192.168.68.103:8081/beststickerapp");
+    public GetLatestAppVersionAPIImpl(Context context) throws StickerFatalErrorException {
+        super("http://192.168.68.103:8081/beststickerapp", context);
     }
 
     @Override

@@ -33,9 +33,11 @@ import io.github.miguelteles.beststickerapp.domain.entity.StickerPack;
 import io.github.miguelteles.beststickerapp.exception.StickerException;
 import io.github.miguelteles.beststickerapp.exception.handler.StickerExceptionHandler;
 import io.github.miguelteles.beststickerapp.repository.contentProvider.StickerUriProvider;
+import io.github.miguelteles.beststickerapp.services.FileResourceManagement;
 import io.github.miguelteles.beststickerapp.services.StickerPackService;
 import io.github.miguelteles.beststickerapp.services.StickerService;
 import io.github.miguelteles.beststickerapp.services.interfaces.EntityOperationCallback;
+import io.github.miguelteles.beststickerapp.services.interfaces.ResourcesManagement;
 import io.github.miguelteles.beststickerapp.view.recyclerViewAdapters.stickers.StickerPreviewAdapter;
 
 public class StickerPackDetailsActivity extends AddStickerPackToWhatsappActivity {
@@ -52,7 +54,7 @@ public class StickerPackDetailsActivity extends AddStickerPackToWhatsappActivity
     private ImageView btnDeleteStickerPack;
     private ImageView btnGoBack;
     private StickerPackService stickerPackService;
-    private StickerService stickerService;
+    private ResourcesManagement resourcesManagement;
     private ProgressBar progressBar;
 
     private TextView txtNotEnoughStickers;
@@ -66,7 +68,7 @@ public class StickerPackDetailsActivity extends AddStickerPackToWhatsappActivity
         declareGlobalComponents();
         try {
             stickerPackService = StickerPackService.getInstance();
-            stickerService = StickerService.getInstance();
+            resourcesManagement = FileResourceManagement.getInstance();
         } catch (StickerException ex) {
             StickerExceptionHandler.handleException(ex, this);
         }
@@ -117,8 +119,13 @@ public class StickerPackDetailsActivity extends AddStickerPackToWhatsappActivity
 
         packNameTextView.setText(stickerPack.getName());
         packPublisherTextView.setText("Autor: " + stickerPack.getPublisher());
-        packTrayIcon.setImageURI(StickerUriProvider.getInstance().getStickerPackResizedAssetUri(stickerPack.getIdentifier(), stickerPack.getResizedTrayImageFile()));
-        packSizeTextView.setText(Formatter.formatShortFileSize(this, stickerPack.getTotalSize()));
+        try {
+            packTrayIcon.setImageURI(this.resourcesManagement.getFile(stickerPack.getFolderName(), stickerPack.getResizedTrayImageFile()));
+            packSizeTextView.setText(Formatter.formatShortFileSize(this, stickerPack.getTotalSize()));
+        } catch (StickerException ex) {
+            StickerExceptionHandler.handleException(ex, this);
+            this.finish();
+        }
     }
 
     private void assembleRecyclerView() {

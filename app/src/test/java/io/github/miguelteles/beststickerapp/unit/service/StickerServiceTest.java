@@ -15,11 +15,8 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
 import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.Executor;
@@ -111,12 +108,6 @@ public class StickerServiceTest {
                         new byte[]{1,1,1,1,1,1,1,1});
             }
         });
-        when(stickerUriProvider.getStickerInsertUri()).then(new Answer<Uri>() {
-            @Override
-            public Uri answer(InvocationOnMock invocation) throws Throwable {
-                return uri;
-            }
-        });
         when(contentResolver.insert(any(Uri.class), any(ContentValues.class))).then(new Answer<Object>() {
             @Override
             public Object answer(InvocationOnMock invocation) throws Throwable {
@@ -187,7 +178,7 @@ public class StickerServiceTest {
 
     @Test
     public void testFetchAllStickerFromPackWithAssets() throws StickerException {
-        List<Sticker> stickers = stickerService.fetchAllStickerFromPackWithAssets(validStickerPack.getIdentifier());
+        List<Sticker> stickers = stickerService.fetchAllStickerFromPackWithAssets(validStickerPack.getIdentifier(), validStickerPack.getFolderName());
         assertNotNull("Sticker list cannot be null, even thought the sticker pack is empty", stickers);
         for(Sticker sticker : stickers) {
             assertNotNull(sticker.getIdentifier());
