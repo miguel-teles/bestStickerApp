@@ -10,8 +10,8 @@ import io.github.miguelteles.beststickerapp.BuildConfig;
 import io.github.miguelteles.beststickerapp.domain.pojo.ResponseAPIConvertedWebp;
 import io.github.miguelteles.beststickerapp.exception.StickerException;
 import io.github.miguelteles.beststickerapp.exception.StickerFatalErrorException;
-import io.github.miguelteles.beststickerapp.exception.StickerHttpClientException;
-import io.github.miguelteles.beststickerapp.exception.enums.StickerHttpClientExceptionEnum;
+import io.github.miguelteles.beststickerapp.exception.StickerWebCommunicationException;
+import io.github.miguelteles.beststickerapp.exception.enums.StickerWebCommunicationExceptionEnum;
 import io.github.miguelteles.beststickerapp.services.client.interfaces.ImageConverterWebpAPI;
 import okhttp3.Call;
 import okhttp3.Response;
@@ -35,11 +35,11 @@ public class ImageConverterWebpAPIImpl extends HttpClient implements ImageConver
         }
     }
 
-    private void handleIOException(IOException ex) throws StickerHttpClientException {
+    private void handleIOException(IOException ex) throws StickerWebCommunicationException {
         if (this.isNetworkAvailable()) {
-            throw new StickerHttpClientException(ex, StickerHttpClientExceptionEnum.POST, "Error converting image to webp via web service");
+            throw new StickerWebCommunicationException(ex, StickerWebCommunicationExceptionEnum.POST, "Error converting image to webp via web service");
         } else {
-            throw new StickerHttpClientException(null, StickerHttpClientExceptionEnum.NO_INTERNET_ACCESS, null);
+            throw new StickerWebCommunicationException(null, StickerWebCommunicationExceptionEnum.NO_INTERNET_ACCESS, null);
         }
     }
 

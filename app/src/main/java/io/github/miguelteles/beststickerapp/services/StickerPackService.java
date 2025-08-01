@@ -23,8 +23,7 @@ import io.github.miguelteles.beststickerapp.exception.enums.StickerExceptionEnum
 import io.github.miguelteles.beststickerapp.exception.enums.StickerFolderExceptionEnum;
 import io.github.miguelteles.beststickerapp.repository.MyDatabase;
 import io.github.miguelteles.beststickerapp.repository.StickerPackRepository;
-import io.github.miguelteles.beststickerapp.repository.contentProvider.StickerUriProvider;
-import io.github.miguelteles.beststickerapp.services.interfaces.EntityOperationCallback;
+import io.github.miguelteles.beststickerapp.services.interfaces.OperationCallback;
 import io.github.miguelteles.beststickerapp.services.interfaces.ResourcesManagement;
 import io.github.miguelteles.beststickerapp.utils.Utils;
 import io.github.miguelteles.beststickerapp.validator.MethodInputValidator;
@@ -87,7 +86,7 @@ public class StickerPackService {
     public void createStickerPack(@NonNull String authorNameInput,
                                   @NonNull String packNameInput,
                                   @NonNull Uri selectedImagemUri,
-                                  @NonNull EntityOperationCallback<StickerPack> callbackClass) {
+                                  @NonNull OperationCallback<StickerPack> callbackClass) {
         validateParametersCreateStickerPack(packNameInput, selectedImagemUri, callbackClass);
         if (Utils.isNothing(authorNameInput)) {
             authorNameInput = resources.getString(R.string.defaultPublisher);
@@ -143,7 +142,7 @@ public class StickerPackService {
 
     }
 
-    private void validateParametersCreateStickerPack(String packName, Uri packImageUri, EntityOperationCallback<StickerPack> callback) {
+    private void validateParametersCreateStickerPack(String packName, Uri packImageUri, OperationCallback<StickerPack> callback) {
         MethodInputValidator.requireNotNull(packName, "Pack name");
         MethodInputValidator.requireNotEmpty(packName, "Pack name");
 
@@ -166,7 +165,7 @@ public class StickerPackService {
     public void updateStickerPack(StickerPack stickerPack,
                                   String editedAuthorName,
                                   String editedPackName,
-                                  EntityOperationCallback<StickerPack> callback) {
+                                  OperationCallback<StickerPack> callback) {
         if (Utils.isNothing(editedAuthorName)) {
             editedAuthorName = resources.getString(R.string.defaultPublisher);
         }
@@ -206,7 +205,7 @@ public class StickerPackService {
     }
 
     public void deleteStickerPack(StickerPack stickerPack,
-                                  EntityOperationCallback<StickerPack> callbackClass) {
+                                  OperationCallback<StickerPack> callbackClass) {
         executor.execute(() -> {
             StickerException exception = null;
             try {
@@ -282,7 +281,7 @@ public class StickerPackService {
         }
     }
 
-    public void createSticker(StickerPack stickerPack, Uri uriStickerImage, EntityOperationCallback<Sticker> stickerCreationCallback) {
+    public void createSticker(StickerPack stickerPack, Uri uriStickerImage, OperationCallback<Sticker> stickerCreationCallback) {
         executor.execute(() -> {
             Sticker sticker = null;
             StickerException exception = null;

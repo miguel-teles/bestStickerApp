@@ -9,11 +9,9 @@ import java.io.IOException;
 import io.github.miguelteles.beststickerapp.BuildConfig;
 import io.github.miguelteles.beststickerapp.domain.pojo.ResponseAPIBase;
 import io.github.miguelteles.beststickerapp.exception.StickerException;
-import io.github.miguelteles.beststickerapp.exception.StickerFatalErrorException;
-import io.github.miguelteles.beststickerapp.exception.StickerHttpClientException;
-import io.github.miguelteles.beststickerapp.exception.enums.StickerHttpClientExceptionEnum;
+import io.github.miguelteles.beststickerapp.exception.StickerWebCommunicationException;
+import io.github.miguelteles.beststickerapp.exception.enums.StickerWebCommunicationExceptionEnum;
 import io.github.miguelteles.beststickerapp.services.client.interfaces.ExceptionNotifierAPI;
-import io.github.miguelteles.beststickerapp.utils.Utils;
 import okhttp3.Call;
 import okhttp3.Response;
 
@@ -31,7 +29,7 @@ public class ExceptionNotifierAPIImpl extends HttpClient implements ExceptionNot
         try (Response response = call.execute()) {
             return gson.fromJson(response.body().string(), ResponseAPIBase.class);
         } catch (IOException ex) {
-            throw new StickerHttpClientException(ex, StickerHttpClientExceptionEnum.POST, "Erro ao notificar erro no aplicativo");
+            throw new StickerWebCommunicationException(ex, StickerWebCommunicationExceptionEnum.POST, "Erro ao notificar erro no aplicativo");
         }
     }
 }

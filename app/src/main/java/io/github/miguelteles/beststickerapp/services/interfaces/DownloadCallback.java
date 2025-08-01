@@ -2,8 +2,9 @@ package io.github.miguelteles.beststickerapp.services.interfaces;
 
 import io.github.miguelteles.beststickerapp.exception.StickerException;
 
-public interface EntityOperationCallback<T> {
-    void onCreationFinish(T createdEntity, StickerException stickerException);
+public interface DownloadCallback {
 
     void onProgressUpdate(int process);
+
+    void onDownloadException(StickerException ex);
 }

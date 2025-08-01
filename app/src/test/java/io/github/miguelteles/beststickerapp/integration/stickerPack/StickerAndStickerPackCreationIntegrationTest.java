@@ -26,13 +26,12 @@ import io.github.miguelteles.beststickerapp.domain.entity.Sticker;
 import io.github.miguelteles.beststickerapp.domain.entity.StickerPack;
 import io.github.miguelteles.beststickerapp.exception.StickerException;
 import io.github.miguelteles.beststickerapp.exception.StickerFolderException;
-import io.github.miguelteles.beststickerapp.repository.contentProvider.StickerUriProvider;
 import io.github.miguelteles.beststickerapp.services.FileResourceManagement;
 import io.github.miguelteles.beststickerapp.services.StickerImageConvertionService;
 import io.github.miguelteles.beststickerapp.services.StickerPackService;
 import io.github.miguelteles.beststickerapp.services.StickerService;
 import io.github.miguelteles.beststickerapp.services.client.ImageConverterWebpAPIImpl;
-import io.github.miguelteles.beststickerapp.services.interfaces.EntityOperationCallback;
+import io.github.miguelteles.beststickerapp.services.interfaces.OperationCallback;
 import io.github.miguelteles.beststickerapp.services.interfaces.ResourcesManagement;
 import io.github.miguelteles.beststickerapp.validator.StickerPackValidator;
 
@@ -48,7 +47,7 @@ public class StickerAndStickerPackCreationIntegrationTest {
     StickerPack createdStickerPack;
     Sticker createdSticker;
     Exception exception;
-    EntityOperationCallback<StickerPack> stickerPackCreationCallback;
+    OperationCallback<StickerPack> stickerPackCreationCallback;
     ResourcesManagement resourcesManagement;
 
     @Before
@@ -74,7 +73,7 @@ public class StickerAndStickerPackCreationIntegrationTest {
                 stickerImageConvertionService,
                 ApplicationProvider.getApplicationContext().getResources());
 
-        stickerPackCreationCallback = new EntityOperationCallback<StickerPack>() {
+        stickerPackCreationCallback = new OperationCallback<StickerPack>() {
             @Override
             public void onCreationFinish(StickerPack createdEntity, StickerException stickerException) {
                 createdStickerPack = createdEntity;
@@ -123,7 +122,7 @@ public class StickerAndStickerPackCreationIntegrationTest {
         stickerPackService.createStickerPack("teste",
                 "teste",
                 stickerPackImage,
-                new EntityOperationCallback<StickerPack>() {
+                new OperationCallback<StickerPack>() {
                     @Override
                     public void onCreationFinish(StickerPack createdEntity, StickerException stickerException) {
                         finalStickerPackArray[0] = createdStickerPack;
@@ -142,7 +141,7 @@ public class StickerAndStickerPackCreationIntegrationTest {
     public void stickerPackDeletionTest() throws StickerException {
         stickerPackCreationTest();
 
-        stickerPackService.deleteStickerPack(createdStickerPack, new EntityOperationCallback<StickerPack>() {
+        stickerPackService.deleteStickerPack(createdStickerPack, new OperationCallback<StickerPack>() {
             @Override
             public void onCreationFinish(StickerPack createdEntity, StickerException stickerException) {
             }
@@ -163,7 +162,7 @@ public class StickerAndStickerPackCreationIntegrationTest {
         stickerPackService.updateStickerPack(createdStickerPack,
                 "nome do autor atualizado",
                 "nome atualizado",
-                new EntityOperationCallback<StickerPack>() {
+                new OperationCallback<StickerPack>() {
                     @Override
                     public void onCreationFinish(StickerPack createdEntity, StickerException stickerException) {
                         createdStickerPack = createdEntity;
@@ -186,7 +185,7 @@ public class StickerAndStickerPackCreationIntegrationTest {
 
         stickerPackService.createSticker(createdStickerPack,
                 stickerImage,
-                new EntityOperationCallback<Sticker>() {
+                new OperationCallback<Sticker>() {
                     @Override
                     public void onCreationFinish(Sticker createdEntity, StickerException stickerException) {
                         createdSticker = createdEntity;

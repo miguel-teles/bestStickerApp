@@ -23,7 +23,7 @@ import io.github.miguelteles.beststickerapp.domain.entity.StickerPack;
 import io.github.miguelteles.beststickerapp.exception.StickerException;
 import io.github.miguelteles.beststickerapp.exception.handler.StickerExceptionHandler;
 import io.github.miguelteles.beststickerapp.services.StickerPackService;
-import io.github.miguelteles.beststickerapp.services.interfaces.EntityOperationCallback;
+import io.github.miguelteles.beststickerapp.services.interfaces.OperationCallback;
 
 public class AddStickerActivity extends AppCompatActivity {
 
@@ -96,8 +96,8 @@ public class AddStickerActivity extends AppCompatActivity {
     }
 
     @NonNull
-    private EntityOperationCallback<Sticker> createStickerCreationCallback(Context context) {
-        return new EntityOperationCallback<>() {
+    private OperationCallback<Sticker> createStickerCreationCallback(Context context) {
+        return new OperationCallback<>() {
 
             @Override
             public void onCreationFinish(Sticker createdEntity, StickerException stickerException) {

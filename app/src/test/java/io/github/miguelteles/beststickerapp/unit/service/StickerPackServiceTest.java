@@ -26,7 +26,7 @@ import io.github.miguelteles.beststickerapp.repository.StickerPackRepository;
 import io.github.miguelteles.beststickerapp.services.StickerImageConvertionService;
 import io.github.miguelteles.beststickerapp.services.StickerPackService;
 import io.github.miguelteles.beststickerapp.services.StickerService;
-import io.github.miguelteles.beststickerapp.services.interfaces.EntityOperationCallback;
+import io.github.miguelteles.beststickerapp.services.interfaces.OperationCallback;
 import io.github.miguelteles.beststickerapp.services.interfaces.ResourcesManagement;
 import io.github.miguelteles.beststickerapp.validator.StickerPackValidator;
 
@@ -42,7 +42,7 @@ public class StickerPackServiceTest {
     Resources resources = mock(Resources.class);
     Uri uri = mock(Uri.class);
 
-    EntityOperationCallback<StickerPack> callback = new EntityOperationCallback<>() {
+    OperationCallback<StickerPack> callback = new OperationCallback<>() {
         @Override
         public void onCreationFinish(StickerPack createdStickerPack, StickerException stickerException) {
             generatedStickerPack = createdStickerPack;

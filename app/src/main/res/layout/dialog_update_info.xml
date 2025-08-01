@@ -48,6 +48,7 @@
             android:ellipsize="end"
             android:textAllCaps="true"
             android:gravity="center"
+            android:clickable="true"
             android:textColor="@color/white"
             android:background="@drawable/shape_btn_default" />
         <TextView

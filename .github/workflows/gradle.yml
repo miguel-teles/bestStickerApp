@@ -51,6 +51,11 @@ jobs:
         KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         API_ENDPOINT_FIELDNAME: ${{ secrets.API_ENDPOINT }}
         SECURE_TOKEN: ${{ steps.get_api_key.outputs.apiKey }}
+        AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_KEY }}
+        AWS_S3_BUCKET_NAME_UPDATE_APP: ${{ secrets.S3_BUCKET_NAME }}
+        AWS_S3_BUCKET_REGION_UPDATE_APP: ${{ secrets.S3_BUCKET_REGION }}
+
 
       run: ./gradlew assembleRelease
 

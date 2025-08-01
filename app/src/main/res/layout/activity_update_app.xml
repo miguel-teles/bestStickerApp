@@ -46,7 +46,8 @@
             <ScrollView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_marginTop="5dp">
+                android:layout_marginTop="5dp"
+                android:scrollbars="none">
 
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/changesList"
@@ -73,20 +74,36 @@
         android:text="@string/github_project_link"
         android:autoLink="web" />
 
-    <TextView
-        android:id="@+id/btn_download_update"
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:background="@drawable/shape_btn_default"
-        android:ellipsize="end"
-        android:gravity="center"
-        android:clickable="true"
-        android:layout_marginTop="16dp"
-        android:singleLine="true"
-        android:text="@string/download_update"
-        android:textAllCaps="true"
-        android:textColor="@color/white"
-        android:textSize="14sp"
-        android:textStyle="bold" />
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp">
+        <TextView
+            android:id="@+id/btn_download_update"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:background="@drawable/shape_btn_default"
+            android:ellipsize="end"
+            android:gravity="center"
+            android:clickable="true"
+            android:singleLine="true"
+            android:text="@string/download_update"
+            android:textAllCaps="true"
+            android:textColor="@color/white"
+            android:textSize="14sp"
+            android:translationZ="10dp"
+            android:textStyle="bold" />
+
+        <ProgressBar
+            android:id="@+id/pgb_download_update"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:minHeight="50dp"
+            style="@style/ProgressBarHorizontal"
+            android:max="100"
+            android:translationZ="0dp"
+            android:visibility="invisible" />
+    </FrameLayout>
+
 
 </LinearLayout>

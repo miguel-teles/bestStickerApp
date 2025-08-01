@@ -61,7 +61,7 @@ import io.github.miguelteles.beststickerapp.services.StickerImageConvertionServi
 import io.github.miguelteles.beststickerapp.services.StickerPackService;
 import io.github.miguelteles.beststickerapp.services.StickerService;
 import io.github.miguelteles.beststickerapp.services.client.ImageConverterWebpAPIImpl;
-import io.github.miguelteles.beststickerapp.services.interfaces.EntityOperationCallback;
+import io.github.miguelteles.beststickerapp.services.interfaces.OperationCallback;
 import io.github.miguelteles.beststickerapp.services.interfaces.ResourcesManagement;
 import io.github.miguelteles.beststickerapp.validator.StickerPackValidator;
 
@@ -109,7 +109,7 @@ public class StickerContentProviderTest {
         stickerPackService.createStickerPack("teste",
                 "teste",
                 stickerPackImage,
-                new EntityOperationCallback<StickerPack>() {
+                new OperationCallback<StickerPack>() {
                     @Override
                     public void onCreationFinish(StickerPack createdEntity, StickerException stickerException) {
                         createdStickerPack = createdEntity;
@@ -200,7 +200,7 @@ public class StickerContentProviderTest {
         Sticker[] sticker = new Sticker[]{null};
         stickerPackService.createSticker(createdStickerPack,
                 stickerImage,
-                new EntityOperationCallback<Sticker>() {
+                new OperationCallback<Sticker>() {
                     @Override
                     public void onCreationFinish(Sticker createdEntity, StickerException stickerException) {
                         sticker[0] = createdEntity;

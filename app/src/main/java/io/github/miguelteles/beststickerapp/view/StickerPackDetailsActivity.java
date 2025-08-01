@@ -34,7 +34,7 @@ import io.github.miguelteles.beststickerapp.exception.StickerException;
 import io.github.miguelteles.beststickerapp.exception.handler.StickerExceptionHandler;
 import io.github.miguelteles.beststickerapp.services.FileResourceManagement;
 import io.github.miguelteles.beststickerapp.services.StickerPackService;
-import io.github.miguelteles.beststickerapp.services.interfaces.EntityOperationCallback;
+import io.github.miguelteles.beststickerapp.services.interfaces.OperationCallback;
 import io.github.miguelteles.beststickerapp.services.interfaces.ResourcesManagement;
 import io.github.miguelteles.beststickerapp.view.recyclerViewAdapters.stickers.StickerPreviewAdapter;
 
@@ -209,8 +209,8 @@ public class StickerPackDetailsActivity extends AddStickerPackToWhatsappActivity
                 }).create().show();
     }
 
-    private EntityOperationCallback<StickerPack> createStickerPackDeletionCallback(Context context) {
-        return new EntityOperationCallback<StickerPack>() {
+    private OperationCallback<StickerPack> createStickerPackDeletionCallback(Context context) {
+        return new OperationCallback<StickerPack>() {
             @Override
             public void onCreationFinish(StickerPack createdEntity, StickerException stickerException) {
                 if (stickerException == null) {

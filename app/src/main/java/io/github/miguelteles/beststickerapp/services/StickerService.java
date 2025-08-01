@@ -20,8 +20,7 @@ import io.github.miguelteles.beststickerapp.exception.enums.StickerExceptionEnum
 import io.github.miguelteles.beststickerapp.exception.enums.StickerFolderExceptionEnum;
 import io.github.miguelteles.beststickerapp.repository.MyDatabase;
 import io.github.miguelteles.beststickerapp.repository.StickerRepository;
-import io.github.miguelteles.beststickerapp.repository.contentProvider.StickerUriProvider;
-import io.github.miguelteles.beststickerapp.services.interfaces.EntityOperationCallback;
+import io.github.miguelteles.beststickerapp.services.interfaces.OperationCallback;
 import io.github.miguelteles.beststickerapp.services.interfaces.ResourcesManagement;
 import io.github.miguelteles.beststickerapp.utils.Utils;
 import io.github.miguelteles.beststickerapp.validator.MethodInputValidator;
@@ -65,7 +64,7 @@ public class StickerService {
 
     public Sticker createSticker(StickerPack stickerPack,
                                  Uri selectedStickerImage,
-                                 EntityOperationCallback<Sticker> callbackClass) throws StickerException {
+                                 OperationCallback<Sticker> callbackClass) throws StickerException {
         validateParametersCreateSticker(stickerPack, selectedStickerImage, callbackClass);
         ResourcesManagement.Image copiedImages = null;
         try {
@@ -101,7 +100,7 @@ public class StickerService {
         }
     }
 
-    private void validateParametersCreateSticker(StickerPack stickerPack, Uri selectedStickerImage, EntityOperationCallback<Sticker> callbackClass) {
+    private void validateParametersCreateSticker(StickerPack stickerPack, Uri selectedStickerImage, OperationCallback<Sticker> callbackClass) {
         MethodInputValidator.requireNotNull(stickerPack, "StickerPack");
         MethodInputValidator.requireNotNull(stickerPack.getIdentifier(), "StickerPack identifier");
         MethodInputValidator.requireNotEmpty(stickerPack.getFolderName(), "StickerPack folder");

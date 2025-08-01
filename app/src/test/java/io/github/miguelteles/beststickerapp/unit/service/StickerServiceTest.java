@@ -28,7 +28,7 @@ import io.github.miguelteles.beststickerapp.repository.StickerRepository;
 import io.github.miguelteles.beststickerapp.repository.contentProvider.StickerUriProvider;
 import io.github.miguelteles.beststickerapp.services.StickerImageConvertionService;
 import io.github.miguelteles.beststickerapp.services.StickerService;
-import io.github.miguelteles.beststickerapp.services.interfaces.EntityOperationCallback;
+import io.github.miguelteles.beststickerapp.services.interfaces.OperationCallback;
 import io.github.miguelteles.beststickerapp.services.interfaces.ResourcesManagement;
 import io.github.miguelteles.beststickerapp.utils.Utils;
 import io.github.miguelteles.beststickerapp.validator.StickerPackValidator;
@@ -45,7 +45,7 @@ public class StickerServiceTest {
     Uri uri = mock(Uri.class);
     Executor testExecutor = Runnable::run;
 
-    EntityOperationCallback<Sticker> callback = new EntityOperationCallback<Sticker>() {
+    OperationCallback<Sticker> callback = new OperationCallback<Sticker>() {
         @Override
         public void onCreationFinish(Sticker createdEntity, StickerException stickerException) {
             generatedSticker = createdEntity;

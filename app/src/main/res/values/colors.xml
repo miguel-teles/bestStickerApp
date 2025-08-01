@@ -6,6 +6,7 @@
     <color name="colorRed">#D53737</color>
     <color name="inactiveAddButtonColor">#B3B3B3</color>
     <color name="buttonColor">#128C7E</color>
+    <color name="progressColor">#14A090</color>
     <color name="buttonBorderColor">#10786B</color>
     <color name="infoPageBackgroundColor">#EBEBEB</color>
     <color name="actionBarArrowColor">@color/colorAccent</color>

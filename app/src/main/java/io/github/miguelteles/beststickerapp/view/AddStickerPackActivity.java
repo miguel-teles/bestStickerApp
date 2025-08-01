@@ -22,7 +22,7 @@ import io.github.miguelteles.beststickerapp.exception.enums.StickerExceptionEnum
 import io.github.miguelteles.beststickerapp.domain.entity.StickerPack;
 import io.github.miguelteles.beststickerapp.services.FileResourceManagement;
 import io.github.miguelteles.beststickerapp.services.StickerPackService;
-import io.github.miguelteles.beststickerapp.services.interfaces.EntityOperationCallback;
+import io.github.miguelteles.beststickerapp.services.interfaces.OperationCallback;
 import io.github.miguelteles.beststickerapp.services.interfaces.ResourcesManagement;
 import io.github.miguelteles.beststickerapp.utils.Utils;
 
@@ -199,9 +199,9 @@ public class AddStickerPackActivity extends AppCompatActivity {
         }
     }
 
-    private EntityOperationCallback<StickerPack> createStickerPackCreationCallback() {
+    private OperationCallback<StickerPack> createStickerPackCreationCallback() {
         Context context = this;
-        return new EntityOperationCallback<>() {
+        return new OperationCallback<>() {
             @Override
             public void onCreationFinish(StickerPack createdStickerPack, StickerException stickerException) {
                 stickerPackBeingEdited = createdStickerPack;
