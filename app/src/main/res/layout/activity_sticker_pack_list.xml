@@ -52,7 +52,7 @@
         android:gravity="center|center"
         android:padding="16dp">
         <TextView
-            android:id="@+id/createNewStickerPack"
+            android:id="@+id/btn_create_new_stickerpack"
             android:layout_width="match_parent"
             android:layout_height="50dp"
             android:text="CRIAR NOVO PACOTE"

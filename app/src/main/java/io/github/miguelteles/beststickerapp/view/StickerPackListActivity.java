@@ -54,7 +54,7 @@ public class StickerPackListActivity extends AddStickerPackToWhatsappActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sticker_pack_list);
         packRecyclerView = findViewById(R.id.sticker_pack_list);
-        btnCreateNewStickerPack = findViewById(R.id.createNewStickerPack);
+        btnCreateNewStickerPack = findViewById(R.id.btn_create_new_stickerpack);
         btnCreateNewStickerPack.setOnClickListener(createNewStickerPack());
 
         initializeServices();

@@ -32,10 +32,8 @@ import io.github.miguelteles.beststickerapp.domain.entity.Sticker;
 import io.github.miguelteles.beststickerapp.domain.entity.StickerPack;
 import io.github.miguelteles.beststickerapp.exception.StickerException;
 import io.github.miguelteles.beststickerapp.exception.handler.StickerExceptionHandler;
-import io.github.miguelteles.beststickerapp.repository.contentProvider.StickerUriProvider;
 import io.github.miguelteles.beststickerapp.services.FileResourceManagement;
 import io.github.miguelteles.beststickerapp.services.StickerPackService;
-import io.github.miguelteles.beststickerapp.services.StickerService;
 import io.github.miguelteles.beststickerapp.services.interfaces.EntityOperationCallback;
 import io.github.miguelteles.beststickerapp.services.interfaces.ResourcesManagement;
 import io.github.miguelteles.beststickerapp.view.recyclerViewAdapters.stickers.StickerPreviewAdapter;
@@ -167,7 +165,7 @@ public class StickerPackDetailsActivity extends AddStickerPackToWhatsappActivity
         recyclerView = findViewById(R.id.sticker_list);
         divider = findViewById(R.id.divider);
         progressBar = findViewById(R.id.pg_sticker_pack_edit);
-        txtNotEnoughStickers = findViewById(R.id.txtNotEnoughStickers);
+        txtNotEnoughStickers = findViewById(R.id.txt_not_enough_stickers);
     }
 
     private void setOnClickListeners() {

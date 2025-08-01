@@ -22,7 +22,7 @@
         app:layout_constraintVertical_bias="0.050000012" />
 
     <ImageView
-        android:id="@+id/pacoteImageView"
+        android:id="@+id/pacote_imageview"
         android:layout_width="300dp"
         android:layout_height="300dp"
         android:layout_marginTop="10dp"
@@ -33,7 +33,7 @@
         app:layout_constraintTop_toBottomOf="@+id/textView2" />
 
     <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/txtInpLayAutor"
+        android:id="@+id/txt_input_layout_autor"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="30dp"
@@ -44,10 +44,10 @@
         android:hint=""
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/txtInpLayNomePacote">
+        app:layout_constraintTop_toBottomOf="@+id/txt_input_layout_nome_pacote">
 
         <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/txtInpEdtAutor"
+            android:id="@+id/txt_input_edit_autor"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@color/transparent"
@@ -56,7 +56,7 @@
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/txtInpLayNomePacote"
+        android:id="@+id/txt_input_layout_nome_pacote"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="30dp"
@@ -66,10 +66,10 @@
         android:layout_marginRight="30dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/pacoteImageView">
+        app:layout_constraintTop_toBottomOf="@+id/pacote_imageview">
 
         <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/txtInpEdtNomePacote"
+            android:id="@+id/txt_input_edit_nome_pacote"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@color/transparent"
@@ -83,14 +83,14 @@
         style="?android:attr/progressBarStyleHorizontal"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        app:layout_constraintBottom_toTopOf="@+id/adicionarStickerPack"
+        app:layout_constraintBottom_toTopOf="@+id/btn_adicionar_sticker_pack"
         app:layout_constraintEnd_toEndOf="parent"
         android:visibility="invisible"
         android:max="100"
         app:layout_constraintStart_toStartOf="parent" />
 
     <TextView
-        android:id="@+id/adicionarStickerPack"
+        android:id="@+id/btn_adicionar_sticker_pack"
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:background="@drawable/shape_btn_default_disabled"

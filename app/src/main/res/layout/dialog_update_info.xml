@@ -10,7 +10,7 @@
         android:id="@+id/updateTitle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/NEW_UPDATE_AVAILABLE"
+        android:text="@string/new_update_available"
         android:textAlignment="center"
         android:textAppearance="?android:attr/textAppearanceLarge"/>
 
@@ -18,7 +18,7 @@
         android:id="@+id/txtAppVersion"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/MANDATORY_VERSION_NAME"
+        android:text="@string/mandatory_version_name"
         android:textAlignment="center"
         android:textColor="@color/colorRed"
         android:textAppearance="?android:attr/textAppearanceMedium"/>
@@ -27,7 +27,7 @@
         android:id="@+id/txtUpdateDialogMessage"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/NEW_OPTIONAL_UPDATE_TEXT"
+        android:text="@string/new_optional_update_text"
         android:justificationMode="inter_word"
         android:layout_marginTop="8dp"/>
 

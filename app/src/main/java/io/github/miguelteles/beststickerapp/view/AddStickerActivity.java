@@ -67,8 +67,8 @@ public class AddStickerActivity extends AppCompatActivity {
     }
 
     private void declaraCampos() {
-        this.stickerImageView = findViewById(R.id.stickerImageView);
-        this.btnAdicionarSticker = findViewById(R.id.adicionarSticker);
+        this.stickerImageView = findViewById(R.id.sticker_imageview);
+        this.btnAdicionarSticker = findViewById(R.id.btn_adicionar_sticker);
         this.creationProgressBar = findViewById(R.id.pg_sticker_creation);
         this.pickMedia =
                 registerForActivityResult(new ActivityResultContracts.PickVisualMedia(), uri -> {

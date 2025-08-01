@@ -20,7 +20,6 @@ import io.github.miguelteles.beststickerapp.exception.StickerException;
 import io.github.miguelteles.beststickerapp.exception.handler.StickerExceptionHandler;
 import io.github.miguelteles.beststickerapp.exception.enums.StickerExceptionEnum;
 import io.github.miguelteles.beststickerapp.domain.entity.StickerPack;
-import io.github.miguelteles.beststickerapp.repository.contentProvider.StickerUriProvider;
 import io.github.miguelteles.beststickerapp.services.FileResourceManagement;
 import io.github.miguelteles.beststickerapp.services.StickerPackService;
 import io.github.miguelteles.beststickerapp.services.interfaces.EntityOperationCallback;
@@ -91,11 +90,11 @@ public class AddStickerPackActivity extends AppCompatActivity {
     }
 
     private void declaraCampos() {
-        btnAddStickerPack = findViewById(R.id.adicionarStickerPack);
+        btnAddStickerPack = findViewById(R.id.btn_adicionar_sticker_pack);
         btnAddStickerPack.setEnabled(false);
-        txtNomePacote = findViewById(R.id.txtInpEdtNomePacote);
-        txtAutor = findViewById(R.id.txtInpEdtAutor);
-        stickerPackImageView = findViewById(R.id.pacoteImageView);
+        txtNomePacote = findViewById(R.id.txt_input_edit_nome_pacote);
+        txtAutor = findViewById(R.id.txt_input_edit_autor);
+        stickerPackImageView = findViewById(R.id.pacote_imageview);
         creationProgressBar = findViewById(R.id.pg_sticker_pack_creation);
     }
 

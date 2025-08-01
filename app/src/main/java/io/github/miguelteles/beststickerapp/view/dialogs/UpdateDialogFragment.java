@@ -58,8 +58,8 @@ public class UpdateDialogFragment extends DialogFragment {
         TextView txtUpdateText = view.findViewById(R.id.txtUpdateDialogMessage);
         TextView txtPressOutsideToCloseUpdateDialog = view.findViewById(R.id.txtPressOutsideToCloseUpdateDialog);
 
-        txtAppVersion.setText(getContext().getString(R.string.MANDATORY_VERSION_NAME, version.getVersion()));
-        txtUpdateText.setText(R.string.NEW_MANDATORY_UPDATE_TEXT);
+        txtAppVersion.setText(getContext().getString(R.string.mandatory_version_name, version.getVersion()));
+        txtUpdateText.setText(R.string.new_mandatory_update_text);
         txtAppVersion.setTextColor(getResources().getColor(R.color.colorRed));
         getDialog().setCanceledOnTouchOutside(false);
         txtPressOutsideToCloseUpdateDialog.setVisibility(View.GONE);
@@ -69,8 +69,8 @@ public class UpdateDialogFragment extends DialogFragment {
         TextView txtAppVersion = view.findViewById(R.id.txtAppVersion);
         TextView txtUpdateText = view.findViewById(R.id.txtUpdateDialogMessage);
 
-        txtAppVersion.setText(getContext().getString(R.string.OPTIONAL_VERSION_NAME, version.getVersion()));
-        txtUpdateText.setText(R.string.NEW_OPTIONAL_UPDATE_TEXT);
+        txtAppVersion.setText(getContext().getString(R.string.optional_version_name, version.getVersion()));
+        txtUpdateText.setText(R.string.new_optional_update_text);
         txtAppVersion.setTextColor(getResources().getColor(R.color.colorAccent));
     }
 

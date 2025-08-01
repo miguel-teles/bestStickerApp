@@ -5,8 +5,8 @@ import io.github.miguelteles.beststickerapp.utils.Utils;
 
 public enum StickerFatalExceptionEnum {
 
-    NO_SECURE_TOKEN_FOUND(R.string.NO_SECURE_TOKEN_FOUND),
-    NO_API_ENDPOINT_FOUND(R.string.NO_API_ENDPOINT_FOUND);
+    NO_SECURE_TOKEN_FOUND(R.string.no_secure_token_found),
+    NO_API_ENDPOINT_FOUND(R.string.no_api_endpoint_found);
 
 
     final int resourceId;

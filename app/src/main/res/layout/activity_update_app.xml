@@ -8,15 +8,15 @@
     android:paddingTop="32dp">
 
     <TextView
-        android:id="@+id/txtUpdateActivityTitle"
+        android:id="@+id/txt_update_activity_title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/VERSION"
+        android:text="@string/version"
         android:textAlignment="center"
         android:textAppearance="?android:attr/textAppearanceLarge" />
 
     <TextView
-        android:id="@+id/txtUpdateActivityMessage"
+        android:id="@+id/txt_update_activity_message"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
@@ -39,7 +39,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/CHANGES">
+                android:text="@string/changes">
 
             </TextView>
 
@@ -65,24 +65,25 @@
         android:justificationMode="inter_word"
         android:textAppearance="?android:attr/textAppearanceSmall"
         android:textColor="@color/gray"
-        android:text="@string/UPDATE_ACTIVITY_OPEN_CODE_GITHUB" />
+        android:text="@string/update_activity_open_code_github" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/GITHUB_PROJECT_LINK"
+        android:text="@string/github_project_link"
         android:autoLink="web" />
 
     <TextView
-        android:id="@+id/btnUpdateApp"
+        android:id="@+id/btn_download_update"
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:background="@drawable/shape_btn_default"
         android:ellipsize="end"
         android:gravity="center"
+        android:clickable="true"
         android:layout_marginTop="16dp"
         android:singleLine="true"
-        android:text="@string/DOWNLOAD_UPDATE"
+        android:text="@string/download_update"
         android:textAllCaps="true"
         android:textColor="@color/white"
         android:textSize="14sp"
