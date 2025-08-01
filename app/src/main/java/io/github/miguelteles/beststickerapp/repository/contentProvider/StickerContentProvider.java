@@ -97,8 +97,6 @@ public class StickerContentProvider extends ContentProvider {
     boolean isStickerPackListOutdated = true;
 
     public StickerContentProvider() {
-        context = getContext();
-        contentResolver = context.getContentResolver();
     }
 
     public StickerContentProvider(StickerPackService stickerPackService,
@@ -117,6 +115,9 @@ public class StickerContentProvider extends ContentProvider {
     @Override
     public boolean onCreate() {
         try {
+            context = getContext();
+            contentResolver = context.getContentResolver();
+
             Utils.setApplicationContext(context);
             stickerPackService = StickerPackService.getInstance();
             resourcesManagement = FileResourceManagement.getInstance();
@@ -165,8 +166,8 @@ public class StickerContentProvider extends ContentProvider {
     public Cursor query(@NonNull Uri uri, @Nullable String[] projection, String selection,
                         String[] selectionArgs, String sortOrder) {
         final int code = MATCHER.match(uri);
+        loadStickerPackAndStickerMatchers();
         if (code == METADATA_CODE) {
-            loadStickerPackAndStickerMatchers();
             return getPackForAllStickerPacks(uri);
         } else if (code == METADATA_CODE_FOR_SINGLE_PACK) {
             return getCursorForSingleStickerPack(uri);
