@@ -37,7 +37,6 @@ public class StickerPackService {
 
     private static StickerPackService instance;
     private final ResourcesManagement resourceManagement;
-    private final StickerUriProvider stickerUriProvider;
     private final StickerPackRepository stickerPackRepository;
     private final ContentResolver contentResolver;
     private final StickerService stickerService;
@@ -51,7 +50,6 @@ public class StickerPackService {
     private StickerPackService() throws StickerException {
         this.stickerPackRepository = new StickerPackRepository(MyDatabase.getInstance().getSqLiteDatabase());
         this.resourceManagement = FileResourceManagement.getInstance();
-        this.stickerUriProvider = StickerUriProvider.getInstance();
         this.contentResolver = Utils.getApplicationContext().getContentResolver();
         this.stickerPackValidator = StickerPackValidator.getInstance();
         this.stickerService = StickerService.getInstance();
@@ -62,7 +60,6 @@ public class StickerPackService {
     }
 
     public StickerPackService(ResourcesManagement resourceManagement,
-                              StickerUriProvider stickerUriProvider,
                               StickerPackRepository stickerPackRepository,
                               ContentResolver contentResolver,
                               StickerService stickerService,
@@ -70,7 +67,6 @@ public class StickerPackService {
                               StickerImageConvertionService stickerImageConvertionService,
                               Resources resources) {
         this.resourceManagement = resourceManagement;
-        this.stickerUriProvider = stickerUriProvider;
         this.stickerPackRepository = stickerPackRepository;
         this.contentResolver = contentResolver;
         this.stickerService = stickerService;

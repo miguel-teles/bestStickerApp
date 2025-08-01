@@ -71,7 +71,9 @@ public class StickerServiceTest {
             "teste",
             1,
             true,
-            false);
+            false,
+            "androidAppDownloadLinkInQuery",
+            "iosAppDownloadLinkInQuery");
 
     Sticker validSticker = new Sticker(UUID.randomUUID(), UUID.randomUUID(), "/home/miguel/StudioProjects/stickersProjeto/app/src/main/assets/test_image.jpg");
 
@@ -132,7 +134,7 @@ public class StickerServiceTest {
         } catch (FileNotFoundException ex) {
             throw new RuntimeException(ex);
         }
-        when(stickerUriProvider.getStickerAssetUri(any(UUID.class), any(String.class))).then(new Answer<Uri>() {
+        when(stickerUriProvider.getStickerAsset(any(UUID.class), any(String.class))).then(new Answer<Uri>() {
             @Override
             public Uri answer(InvocationOnMock invocation) throws Throwable {
                 return uri;
@@ -146,7 +148,7 @@ public class StickerServiceTest {
             }
         });
 
-        stickerService = new StickerService(stickerRepository, stickerFilesManagementService, stickerUriProvider, contentResolver, stickerPackValidator, stickerImageConvertionService);
+        stickerService = new StickerService(stickerRepository, stickerFilesManagementService, contentResolver, stickerPackValidator, stickerImageConvertionService);
     }
 
     @Test

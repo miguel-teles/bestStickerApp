@@ -14,9 +14,12 @@ import android.os.Parcelable;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
+import io.github.miguelteles.beststickerapp.utils.Utils;
 import kotlin.jvm.Transient;
 
 public class Sticker implements Parcelable, Cloneable {
@@ -35,6 +38,19 @@ public class Sticker implements Parcelable, Cloneable {
     private final List<String> emojis;
     private long size;
     private byte[] stickerImageFileInBytes;
+    private String accessibilityText;
+
+    public Sticker(String stickerImageFile,
+                   List<String> emojis,
+                   String accessibilityText,
+                   UUID identifier,
+                   UUID packIdentifier) {
+        this.stickerImageFile = stickerImageFile;
+        this.emojis = emojis;
+        this.accessibilityText = accessibilityText;
+        this.identifier = identifier;
+        this.packIdentifier= packIdentifier;
+    }
 
     public Sticker(UUID identifier,
                    UUID packIdentifier,
@@ -61,7 +77,7 @@ public class Sticker implements Parcelable, Cloneable {
         size = in.readLong();
     }
 
-    public static final Creator<Sticker> CREATOR = new Creator<Sticker>() {
+    public static final Creator<Sticker> CREATOR = new Creator<>() {
         @Override
         public Sticker createFromParcel(Parcel in) {
             return new Sticker(in);
@@ -72,24 +88,6 @@ public class Sticker implements Parcelable, Cloneable {
             return new Sticker[size];
         }
     };
-
-    public static Sticker fromContentValues(ContentValues values) {
-        return new Sticker(UUID.fromString(values.getAsString(IDENTIFIER)),
-                UUID.fromString(values.getAsString(PACK_IDENTIFIER)),
-                values.getAsString(STICKER_IMAGE_FILE));
-    }
-
-    public ContentValues toContentValues() {
-        ContentValues contentValues = new ContentValues();
-        contentValues.put(IDENTIFIER, this.getIdentifier().toString());
-        contentValues.put(PACK_IDENTIFIER, this.getPackIdentifier().toString());
-        contentValues.put(STICKER_IMAGE_FILE, this.getStickerImageFile());
-        return contentValues;
-    }
-
-    public void setSize(long size) {
-        this.size = size;
-    }
 
     @Override
     public int describeContents() {
@@ -103,16 +101,29 @@ public class Sticker implements Parcelable, Cloneable {
         dest.writeLong(size);
     }
 
+    @Override
+    public Sticker clone() {
+        try {
+            Sticker clone = (Sticker) super.clone();
+            return clone;
+        } catch (CloneNotSupportedException e) {
+            throw new AssertionError();
+        }
+    }
+
     public String getStickerImageFile() {
         return stickerImageFile;
     }
-
     public List<String> getEmojis() {
         return emojis;
     }
 
     public long getSize() {
         return size;
+    }
+
+    public void setSize(long size) {
+        this.size = size;
     }
 
     public UUID getIdentifier() {
@@ -135,17 +146,6 @@ public class Sticker implements Parcelable, Cloneable {
         }
     }
 
-    @Override
-    public Sticker clone() {
-        try {
-            Sticker clone = (Sticker) super.clone();
-            // TODO: copy mutable state here, so the clone can't change the internals of the original
-            return clone;
-        } catch (CloneNotSupportedException e) {
-            throw new AssertionError();
-        }
-    }
-
     public byte[] getStickerImageFileInBytes() {
         return stickerImageFileInBytes;
     }
@@ -153,4 +153,19 @@ public class Sticker implements Parcelable, Cloneable {
     public void setStickerImageFileInBytes(byte[] stickerImageFileInBytes) {
         this.stickerImageFileInBytes = stickerImageFileInBytes;
     }
+
+    public String getAccessibilityText() {
+        return accessibilityText;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        Sticker sticker = (Sticker) o;
+        return size == sticker.size &&
+                Objects.equals(identifier, sticker.identifier) &&
+                Objects.equals(packIdentifier, sticker.packIdentifier) &&
+                Objects.equals(stickerImageFile, sticker.stickerImageFile);
+    }
+
 }

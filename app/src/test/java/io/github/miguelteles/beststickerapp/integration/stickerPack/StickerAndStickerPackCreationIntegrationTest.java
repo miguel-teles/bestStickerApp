@@ -63,12 +63,10 @@ public class StickerAndStickerPackCreationIntegrationTest {
 
         stickerService = new StickerService(new StickerMockRepository(),
                 resourcesManagement,
-                StickerUriProvider.getInstance(),
                 ApplicationProvider.getApplicationContext().getContentResolver(),
                 StickerPackValidator.getInstance(),
                 stickerImageConvertionService);
         stickerPackService = new StickerPackService(resourcesManagement,
-                StickerUriProvider.getInstance(),
                 new StickerPackMockRepository(),
                 ApplicationProvider.getApplicationContext().getContentResolver(),
                 stickerService,

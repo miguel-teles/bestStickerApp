@@ -15,8 +15,12 @@ import android.os.Parcelable;
 import androidx.annotation.NonNull;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
+
+import io.github.miguelteles.beststickerapp.utils.Utils;
 
 public class StickerPack implements Parcelable {
 
@@ -51,9 +55,9 @@ public class StickerPack implements Parcelable {
     private final boolean avoidCache;
     private final boolean animatedStickerPack;
     private String iosAppStoreLink;
+    private String androidPlayStoreLink;
     private List<Sticker> stickers;
     private long totalSize;
-    private String androidPlayStoreLink;
     private boolean isWhitelisted;
     private byte[] resizedTrayImageFileInBytes;
 
@@ -114,7 +118,9 @@ public class StickerPack implements Parcelable {
                        String licenseAgreementWebsite,
                        Integer imageDataVersion,
                        boolean avoidCache,
-                       boolean animatedStickerPack) {
+                       boolean animatedStickerPack,
+                       String androidAppDownloadLinkInQuery,
+                       String iosAppDownloadLinkInQuery) {
         this.identifier = identifier;
         this.name = name;
         this.publisher = publisher;
@@ -128,6 +134,8 @@ public class StickerPack implements Parcelable {
         this.imageDataVersion = imageDataVersion;
         this.avoidCache = avoidCache;
         this.animatedStickerPack = animatedStickerPack;
+        this.androidPlayStoreLink = androidAppDownloadLinkInQuery;
+        this.iosAppStoreLink = iosAppDownloadLinkInQuery;
     }
 
     public StickerPack(UUID identifier,
@@ -231,33 +239,6 @@ public class StickerPack implements Parcelable {
         }
     };
 
-    public void setStickers(List<Sticker> stickers) {
-        this.stickers = stickers;
-        totalSize = 0;
-        for (Sticker sticker : stickers) {
-            totalSize += sticker.getSize();
-        }
-    }
-
-    public void setAndroidPlayStoreLink(String androidPlayStoreLink) {
-        this.androidPlayStoreLink = androidPlayStoreLink;
-    }
-
-    public void setIosAppStoreLink(String iosAppStoreLink) {
-        this.iosAppStoreLink = iosAppStoreLink;
-    }
-
-    public List<Sticker> getStickers() {
-        if (stickers == null) {
-            stickers = new ArrayList<>();
-        }
-        return stickers;
-    }
-
-    public long getTotalSize() {
-        return totalSize;
-    }
-
     @Override
     public int describeContents() {
         return 0;
@@ -283,6 +264,25 @@ public class StickerPack implements Parcelable {
         dest.writeInt(imageDataVersion);
         dest.writeByte((byte) (avoidCache ? 1 : 0));
         dest.writeByte((byte) (animatedStickerPack ? 1 : 0));
+    }
+
+    public void setStickers(List<Sticker> stickers) {
+        this.stickers = stickers;
+        totalSize = 0;
+        for (Sticker sticker : stickers) {
+            totalSize += sticker.getSize();
+        }
+    }
+
+    public List<Sticker> getStickers() {
+        if (stickers == null) {
+            stickers = new ArrayList<>();
+        }
+        return stickers;
+    }
+
+    public long getTotalSize() {
+        return totalSize;
     }
 
     public UUID getIdentifier() {
@@ -321,10 +321,6 @@ public class StickerPack implements Parcelable {
         return imageDataVersion;
     }
 
-    public void addImageDataVersionNumber() {
-        this.imageDataVersion = this.imageDataVersion + 1;
-    }
-
     public boolean isAvoidCache() {
         return avoidCache;
     }
@@ -337,20 +333,8 @@ public class StickerPack implements Parcelable {
         return iosAppStoreLink;
     }
 
-    public void setTotalSize(long totalSize) {
-        this.totalSize = totalSize;
-    }
-
     public String getAndroidPlayStoreLink() {
         return androidPlayStoreLink;
-    }
-
-    public boolean isWhitelisted() {
-        return isWhitelisted;
-    }
-
-    public void setWhitelisted(boolean whitelisted) {
-        isWhitelisted = whitelisted;
     }
 
     public String getFolderName() {
@@ -375,14 +359,6 @@ public class StickerPack implements Parcelable {
         this.publisher = publisher;
     }
 
-    public void setOriginalTrayImageFile(String originalTrayImageFile) {
-        this.originalTrayImageFile = originalTrayImageFile;
-    }
-
-    public void setResizedTrayImageFile(String resizedTrayImageFile) {
-        this.resizedTrayImageFile = resizedTrayImageFile;
-    }
-
     public byte[] getResizedTrayImageFileInBytes() {
         return resizedTrayImageFileInBytes;
     }
@@ -390,4 +366,34 @@ public class StickerPack implements Parcelable {
     public void setResizedTrayImageFileInBytes(byte[] resizedTrayImageFileInBytes) {
         this.resizedTrayImageFileInBytes = resizedTrayImageFileInBytes;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        StickerPack that = (StickerPack) o;
+
+        for (Sticker sticker : stickers) {
+            if (that.getStickers().stream().noneMatch(s->s.equals(sticker))) {
+                return false;
+            }
+        }
+        return avoidCache == that.avoidCache &&
+                animatedStickerPack == that.animatedStickerPack &&
+                totalSize == that.totalSize &&
+                isWhitelisted == that.isWhitelisted &&
+                Objects.equals(identifier, that.identifier) &&
+                Objects.equals(name, that.name) &&
+                Objects.equals(publisher, that.publisher) &&
+                Objects.equals(originalTrayImageFile, that.originalTrayImageFile) &&
+                Objects.equals(resizedTrayImageFile, that.resizedTrayImageFile) &&
+                Objects.equals(publisherEmail, that.publisherEmail) &&
+                Objects.equals(publisherWebsite, that.publisherWebsite) &&
+                Objects.equals(privacyPolicyWebsite, that.privacyPolicyWebsite) &&
+                Objects.equals(licenseAgreementWebsite, that.licenseAgreementWebsite) &&
+                Objects.equals(imageDataVersion, that.imageDataVersion) &&
+                Objects.equals(folderName, that.folderName) &&
+                (Objects.equals(iosAppStoreLink, that.iosAppStoreLink) || (Utils.isNothing(iosAppStoreLink) && Utils.isNothing(that.iosAppStoreLink))) &&
+                (Objects.equals(androidPlayStoreLink, that.androidPlayStoreLink) || (Utils.isNothing(androidPlayStoreLink) && Utils.isNothing(that.androidPlayStoreLink)));
+    }
+
 }

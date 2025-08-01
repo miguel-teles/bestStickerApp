@@ -46,6 +46,10 @@ public class Utils {
         return str == null || str.trim().isEmpty();
     }
 
+    public static boolean isNothing(List<?> list) {
+        return list == null || list.isEmpty();
+    }
+
     public static boolean isNothing(Editable editable) {
         return editable == null || editable.toString() == null || editable.toString().trim().isEmpty();
     }

@@ -11,6 +11,7 @@ package io.github.miguelteles.beststickerapp.repository.contentProvider;
 import android.content.ContentProvider;
 import android.content.ContentResolver;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.UriMatcher;
 import android.database.Cursor;
 import android.database.MatrixCursor;
@@ -67,11 +68,8 @@ public class StickerContentProvider extends ContentProvider {
     public static final String STICKER_IDENTIFIER = "identifier";
     public static final String STICKER_PACK_IDENTIFIER = "packIdentifier";
     public static final String STICKER_PACK_ICON_ORIGINAL_IMAGE_FILE = "originalTrayImageFile";
-    private static final String METADATA = "metadata";
+    public static final String METADATA = "metadata";
     public static final String FOLDER = "folder";
-    static final String METHODS_ADD = "methods_add";
-    public static final String METHODS_DELETE = "methods_delete";
-    public static final String METHODS_UPDATE = "methods_update";
     public static final String STICKERS = "stickers";
     static final String STICKERS_ASSET = "stickers_asset";
     static final String STICKERS_ASSET_ORIGINAL = "stickers_asset_original";
@@ -90,17 +88,28 @@ public class StickerContentProvider extends ContentProvider {
     private static final int STICKERS_CODE = 3;
     private static final int STICKERS_ASSET_CODE = 4;
     private static final int STICKER_PACK_TRAY_ICON_CODE = 5;
-    private static final int ADD_NEW_STICKER_PACK = 6;
-    private static final int UPDATE_STICKER_PACK = 6;
-    private static final int ADD_NEW_STICKER = 7;
-    private static final int UPDATE_STICKER_PACK_LIST = 8;
-    private static final int DELETE_STICKER_PACKPACK = 9;
 
     private List<StickerPack> stickerPackList;
     private StickerPackService stickerPackService;
     private ResourcesManagement resourcesManagement;
-
+    private Context context;
+    private ContentResolver contentResolver;
     boolean isStickerPackListOutdated = true;
+
+    public StickerContentProvider() {
+        context = getContext();
+        contentResolver = context.getContentResolver();
+    }
+
+    public StickerContentProvider(StickerPackService stickerPackService,
+                                  ResourcesManagement resourcesManagement,
+                                  Context context) {
+        this.stickerPackService = stickerPackService;
+        this.resourcesManagement = resourcesManagement;
+        this.context = context;
+        this.contentResolver = context.getContentResolver();
+        carregaMatcher();
+    }
 
     /**
      * NÃO MUDAR ESSES MATCHERS E NEM AS URIS SE NÃO O WHATSAPP NÃO CONSEGUE BUSCAR DESTE CONTENTPROVIDER
@@ -108,23 +117,21 @@ public class StickerContentProvider extends ContentProvider {
     @Override
     public boolean onCreate() {
         try {
-            Utils.setApplicationContext(getContext());
+            Utils.setApplicationContext(context);
             stickerPackService = StickerPackService.getInstance();
             resourcesManagement = FileResourceManagement.getInstance();
 
-            AUTHORITY = BuildConfig.CONTENT_PROVIDER_AUTHORITY;
-            if (!AUTHORITY.startsWith(Objects.requireNonNull(getContext()).getPackageName())) {
-                throw new IllegalStateException("your authority (" + AUTHORITY + ") for the content provider should start with your package name: " + getContext().getPackageName());
-            }
             carregaMatcher();
             return true;
         } catch (StickerException ex) {
-            StickerExceptionHandler.handleException(ex, this.getContext());
+            StickerExceptionHandler.handleException(ex, this.context);
             return false;
         }
     }
 
     private void carregaMatcher() {
+        AUTHORITY = BuildConfig.CONTENT_PROVIDER_AUTHORITY;
+
         MATCHER = new UriMatcher(UriMatcher.NO_MATCH);
         //the call to get the metadata for the sticker packs.
         MATCHER.addURI(AUTHORITY, METADATA, METADATA_CODE); // this returns information about all the sticker packs in your app.
@@ -132,13 +139,11 @@ public class StickerContentProvider extends ContentProvider {
         //the call to get the metadata for single sticker pack. * represent the identifier
         MATCHER.addURI(AUTHORITY, METADATA + "/*", METADATA_CODE_FOR_SINGLE_PACK); //this returns information about a single pack.
 
-        MATCHER.addURI(AUTHORITY, METHODS_ADD + "/" + PACK, ADD_NEW_STICKER_PACK);
-        MATCHER.addURI(AUTHORITY, METHODS_ADD + "/" + STICKERS, ADD_NEW_STICKER);
-        MATCHER.addURI(AUTHORITY, METHODS_UPDATE + "/" + PACK, UPDATE_STICKER_PACK);
-        MATCHER.addURI(AUTHORITY, METHODS_DELETE + "/" + PACK, DELETE_STICKER_PACKPACK);
-
         //gets the list of stickers for a sticker pack, * respresent the identifier.
         MATCHER.addURI(AUTHORITY, STICKERS + "/*", STICKERS_CODE); //this returns information about the  stickers in a pack.
+    }
+
+    private void loadStickerPackAndStickerMatchers() {
         for (StickerPack stickerPack : getStickerPackList()) {
             insertStickerPackUri(AUTHORITY, stickerPack);
             for (Sticker sticker : stickerPack.getStickers()) {
@@ -161,6 +166,7 @@ public class StickerContentProvider extends ContentProvider {
                         String[] selectionArgs, String sortOrder) {
         final int code = MATCHER.match(uri);
         if (code == METADATA_CODE) {
+            loadStickerPackAndStickerMatchers();
             return getPackForAllStickerPacks(uri);
         } else if (code == METADATA_CODE_FOR_SINGLE_PACK) {
             return getCursorForSingleStickerPack(uri);
@@ -212,7 +218,7 @@ public class StickerContentProvider extends ContentProvider {
             }
             return stickerPackList;
         } catch (StickerException ex) {
-            StickerExceptionHandler.handleException(ex, this.getContext());
+            StickerExceptionHandler.handleException(ex, this.context);
             throw new RuntimeException(ex);
         }
     }
@@ -270,7 +276,7 @@ public class StickerContentProvider extends ContentProvider {
             builder.add(stickerPack.getOriginalTrayImageFile()); //STICKER_PACK_ICON_RESIZED_IMAGE_FILE
             builder.add(stickerPack.getFolderName()); //FOLDER
         }
-        cursor.setNotificationUri(Objects.requireNonNull(getContext()).getContentResolver(), uri);
+        cursor.setNotificationUri(contentResolver, uri);
         return cursor;
     }
 
@@ -294,7 +300,7 @@ public class StickerContentProvider extends ContentProvider {
                 break;
             }
         }
-        cursor.setNotificationUri(Objects.requireNonNull(getContext()).getContentResolver(), uri);
+        cursor.setNotificationUri(contentResolver, uri);
         return cursor;
     }
 
@@ -330,9 +336,7 @@ public class StickerContentProvider extends ContentProvider {
 
     private ParcelFileDescriptor fetchFile(@NonNull String fileName, @NonNull String folder) throws StickerException {
         try {
-            return this
-                    .getContext()
-                    .getContentResolver()
+            return contentResolver
                     .openFileDescriptor(Uri.withAppendedPath(resourcesManagement.getOrCreateStickerPackDirectory(folder), fileName), "r");
         } catch (IOException e) {
             return fetchFileStickerErrorImage();
@@ -341,9 +345,7 @@ public class StickerContentProvider extends ContentProvider {
 
     private ParcelFileDescriptor fetchFileStickerErrorImage() throws StickerFolderException {
         try {
-            return this
-                    .getContext()
-                    .getContentResolver()
+            return contentResolver
                     .openFileDescriptor(copyStickerErroImageAssetToCache(), "r");
         } catch (StickerException e) {
             throw e;
@@ -355,7 +357,7 @@ public class StickerContentProvider extends ContentProvider {
     private Uri copyStickerErroImageAssetToCache() throws StickerFolderException {
         Uri cacheFile = resourcesManagement.getOrCreateFile(resourcesManagement.getCacheFolder(), Sticker.STICKER_ERROR_IMAGE);
 
-        try (InputStream in = getContext().getAssets().open(Sticker.STICKER_ERROR_IMAGE)) {
+        try (InputStream in = context.getAssets().open(Sticker.STICKER_ERROR_IMAGE)) {
             resourcesManagement.writeToFile(cacheFile, in);
         } catch (IOException e) {
             throw new StickerFolderException(e, StickerFolderExceptionEnum.GET_FILE, "Erro ao copiar sticker_error.");
@@ -364,44 +366,19 @@ public class StickerContentProvider extends ContentProvider {
         return cacheFile;
     }
 
-
+    @Nullable
     @Override
-    public int delete(@NonNull Uri uri, @Nullable String selection, String[] selectionArgs) {
-        this.isStickerPackListOutdated = true;
-        return 1;
+    public Uri insert(@NonNull Uri uri, @Nullable ContentValues values) {
+        return null;
     }
 
     @Override
-    public Uri insert(@NonNull Uri uri, ContentValues values) {
-        int method = MATCHER.match(uri);
-        switch (method) {
-            case ADD_NEW_STICKER_PACK:
-                insertStickerPackUri(AUTHORITY, StickerPack.fromContentValues(values));
-                isStickerPackListOutdated = true;
-                return uri;
-            case ADD_NEW_STICKER:
-                insertStickerUri(AUTHORITY, Sticker.fromContentValues(values));
-                isStickerPackListOutdated = true;
-                return uri;
-            default:
-                throw new UnsupportedOperationException("Método não esperado / não implementado");
-        }
+    public int delete(@NonNull Uri uri, @Nullable String selection, @Nullable String[] selectionArgs) {
+        return 0;
     }
 
     @Override
-    public int update(@NonNull Uri uri, ContentValues values, String selection,
-                      String[] selectionArgs) {
-        int method = MATCHER.match(uri);
-        switch (method) {
-            case UPDATE_STICKER_PACK_LIST:
-            case UPDATE_STICKER_PACK:
-                StickerPack stickerPack = StickerPack.fromContentValues(values);
-                insertStickerPackUri(AUTHORITY, stickerPack);
-                isStickerPackListOutdated = true;
-                carregaMatcher();
-                return 1;
-            default:
-                throw new UnsupportedOperationException("Método não esperado / não implementado");
-        }
+    public int update(@NonNull Uri uri, @Nullable ContentValues values, @Nullable String selection, @Nullable String[] selectionArgs) {
+        return 0;
     }
 }

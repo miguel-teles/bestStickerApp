@@ -13,20 +13,16 @@ import android.net.Uri;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
-import java.io.File;
 import java.util.UUID;
-import java.util.concurrent.Executor;
 
 import io.github.miguelteles.beststickerapp.domain.entity.StickerPack;
 import io.github.miguelteles.beststickerapp.exception.StickerException;
 import io.github.miguelteles.beststickerapp.repository.StickerPackRepository;
-import io.github.miguelteles.beststickerapp.repository.contentProvider.StickerUriProvider;
 import io.github.miguelteles.beststickerapp.services.StickerImageConvertionService;
 import io.github.miguelteles.beststickerapp.services.StickerPackService;
 import io.github.miguelteles.beststickerapp.services.StickerService;
@@ -37,7 +33,6 @@ import io.github.miguelteles.beststickerapp.validator.StickerPackValidator;
 public class StickerPackServiceTest {
 
     ResourcesManagement resourcesManagement = mock(ResourcesManagement.class);
-    StickerUriProvider stickerUriProvider = mock(StickerUriProvider.class);
     StickerPackRepository stickerPackRepository = mock(StickerPackRepository.class);
     ContentResolver contentResolver = mock(ContentResolver.class);
     StickerService stickerService = mock(StickerService.class);
@@ -75,7 +70,9 @@ public class StickerPackServiceTest {
             "teste",
             1,
             true,
-            false);
+            false,
+            "androidAppDownloadLinkInQuery",
+            "iosAppDownloadLinkInQuery");
 
     @Before
     public void mockingDepedencies() throws StickerException {
@@ -130,7 +127,6 @@ public class StickerPackServiceTest {
         });
 
         stickerPackService = new StickerPackService(resourcesManagement,
-                stickerUriProvider,
                 stickerPackRepository,
                 contentResolver,
                 stickerService,
