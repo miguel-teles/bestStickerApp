@@ -73,7 +73,7 @@ public class AddStickerPackActivity extends AppCompatActivity {
             txtNomePacote.setText(stickerPackBeingEdited.getName());
             txtAutor.setText(stickerPackBeingEdited.getPublisher());
             try {
-                uriImagemStickerPack = this.resourcesManagement.getFile(stickerPackBeingEdited.getFolderName(), stickerPackBeingEdited.getOriginalTrayImageFile());
+                uriImagemStickerPack = this.resourcesManagement.getStickerRelatedFile(stickerPackBeingEdited.getFolderName(), stickerPackBeingEdited.getOriginalTrayImageFile());
                 stickerPackImageView.setImageURI(uriImagemStickerPack);
                 stickerPackImageView.setScaleType(ImageView.ScaleType.FIT_XY);
                 stickerPackImageView.setTag("modified");

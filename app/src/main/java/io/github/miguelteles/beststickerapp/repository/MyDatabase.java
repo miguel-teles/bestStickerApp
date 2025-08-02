@@ -16,7 +16,7 @@ public class MyDatabase extends SQLiteOpenHelper {
     final private static String dbName = "stickersDB.db";
 
     private MyDatabase(Context context) throws StickerException {
-        super(context, dbName, null, 10);
+        super(context, dbName, null, 11);
         sqLiteDatabase = getWritableDatabase();
         criaTabelas(sqLiteDatabase);
     }

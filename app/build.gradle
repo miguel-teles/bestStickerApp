@@ -25,7 +25,7 @@ android {
         minSdkVersion 30
         targetSdkVersion 33
         versionCode 1
-        versionName "1.0"
+        versionName "0.1"
 
         def contentProviderAuthority = applicationId + ".stickercontentprovider"
         // Creates a placeholder property to use in the manifest.
@@ -42,13 +42,13 @@ android {
         def apiProductionUrl = System.getenv(API_ENDPOINT_FIELDNAME) != null ? System.getenv(API_ENDPOINT_FIELDNAME) : "https://q7h1mc4qwh.execute-api.sa-east-1.amazonaws.com/prod/"
         buildConfigField "String", API_ENDPOINT_FIELDNAME, "\"${apiProductionUrl}\""
 
-        def awsAccessKey = System.getenv(AWS_ACCESS_KEY_FIELDNAME) != null ? System.getenv(AWS_ACCESS_KEY_FIELDNAME) : ""
+        def awsAccessKey = System.getenv(AWS_ACCESS_KEY_FIELDNAME) != null ? System.getenv(AWS_ACCESS_KEY_FIELDNAME) : "AKIA2N47735ECE2EHJTD"
         buildConfigField "String", AWS_ACCESS_KEY_FIELDNAME, "\"${awsAccessKey}\""
 
-        def awsSecretKey = System.getenv(AWS_SECRET_KEY_FIELDNAME) != null ? System.getenv(AWS_SECRET_KEY_FIELDNAME) : ""
+        def awsSecretKey = System.getenv(AWS_SECRET_KEY_FIELDNAME) != null ? System.getenv(AWS_SECRET_KEY_FIELDNAME) : "CvvMcumussnDZKu9ssSb8i4puIjAX69cjDxz+TYv"
         buildConfigField "String", AWS_SECRET_KEY_FIELDNAME, "\"${awsSecretKey}\""
 
-        def awsS3BucketNameUpdateApp = System.getenv(AWS_S3_BUCKET_NAME_UPDATE_APP_FIELDNAME) != null ? System.getProperty(AWS_S3_BUCKET_NAME_UPDATE_APP_FIELDNAME) : ""
+        def awsS3BucketNameUpdateApp = System.getenv(AWS_S3_BUCKET_NAME_UPDATE_APP_FIELDNAME) != null ? System.getProperty(AWS_S3_BUCKET_NAME_UPDATE_APP_FIELDNAME) : "beststickerapp-latestversion"
         buildConfigField "String", AWS_S3_BUCKET_NAME_UPDATE_APP_FIELDNAME , "\"${awsS3BucketNameUpdateApp}\""
 
         def awsS3BucketRegionUpdateApp = System.getenv(AWS_S3_BUCKET_REGION_UPDATE_APP_FIELDNAME) != null ? System.getProperty(AWS_S3_BUCKET_REGION_UPDATE_APP_FIELDNAME) : "sa-east-1"
@@ -139,8 +139,8 @@ dependencies {
     implementation 'com.google.code.gson:gson:2.11.0'
     implementation("com.squareup.okhttp3:okhttp:5.1.0")
     implementation 'org.bouncycastle:bcpkix-jdk18on:1.72'
-    implementation(platform("software.amazon.awssdk:bom:2.27.21"))
-    implementation("software.amazon.awssdk:s3")
+    implementation 'com.amazonaws:aws-android-sdk-s3:2.72.0'
+    implementation 'com.amazonaws:aws-android-sdk-core:2.72.0'
 
 
     testImplementation 'junit:junit:4.13.2'

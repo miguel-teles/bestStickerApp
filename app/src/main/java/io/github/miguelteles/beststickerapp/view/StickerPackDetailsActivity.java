@@ -118,7 +118,7 @@ public class StickerPackDetailsActivity extends AddStickerPackToWhatsappActivity
         packNameTextView.setText(stickerPack.getName());
         packPublisherTextView.setText("Autor: " + stickerPack.getPublisher());
         try {
-            packTrayIcon.setImageURI(this.resourcesManagement.getFile(stickerPack.getFolderName(), stickerPack.getResizedTrayImageFile()));
+            packTrayIcon.setImageURI(this.resourcesManagement.getStickerRelatedFile(stickerPack.getFolderName(), stickerPack.getResizedTrayImageFile()));
             packSizeTextView.setText(Formatter.formatShortFileSize(this, stickerPack.getTotalSize()));
         } catch (StickerException ex) {
             StickerExceptionHandler.handleException(ex, this);

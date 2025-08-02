@@ -24,7 +24,6 @@ import io.github.miguelteles.beststickerapp.domain.entity.Sticker;
 import io.github.miguelteles.beststickerapp.domain.entity.StickerPack;
 import io.github.miguelteles.beststickerapp.exception.StickerException;
 import io.github.miguelteles.beststickerapp.exception.handler.StickerExceptionHandler;
-import io.github.miguelteles.beststickerapp.repository.contentProvider.StickerUriProvider;
 import io.github.miguelteles.beststickerapp.services.FileResourceManagement;
 import io.github.miguelteles.beststickerapp.services.interfaces.ResourcesManagement;
 import io.github.miguelteles.beststickerapp.view.StickerPackDetailsActivity;
@@ -107,7 +106,7 @@ public class StickerPreviewAdapter extends RecyclerView.Adapter<StickerPreviewVi
     public void onBindViewHolder(@NonNull final StickerPreviewViewHolder stickerPreviewViewHolder, final int i) {
         stickerPreviewViewHolder.stickerPreviewView.setImageResource(errorResource);
         try {
-            stickerPreviewViewHolder.stickerPreviewView.setImageURI(this.resourcesManagement.getFile(stickerPack.getFolderName(), stickerPack.getStickers().get(i).getStickerImageFile()));
+            stickerPreviewViewHolder.stickerPreviewView.setImageURI(this.resourcesManagement.getStickerRelatedFile(stickerPack.getFolderName(), stickerPack.getStickers().get(i).getStickerImageFile()));
             stickerPreviewViewHolder.stickerPreviewView.setOnClickListener(v -> expandPreview(i, stickerPreviewViewHolder.stickerPreviewView));
         } catch (StickerException ex) {
             StickerExceptionHandler.handleException(ex, stickerPackDetailsActivity);
@@ -206,7 +205,7 @@ public class StickerPreviewAdapter extends RecyclerView.Adapter<StickerPreviewVi
             positionExpandedStickerPreview(position);
             this.expandedSticker = stickerPack.getStickers().get(position);
             try {
-                final Uri stickerAssetUri = this.resourcesManagement.getFile(stickerPack.getFolderName(), expandedSticker.getStickerImageFile());
+                final Uri stickerAssetUri = this.resourcesManagement.getStickerRelatedFile(stickerPack.getFolderName(), expandedSticker.getStickerImageFile());
                 DraweeController controller = Fresco.newDraweeControllerBuilder()
                         .setUri(stickerAssetUri)
                         .setAutoPlayAnimations(true)

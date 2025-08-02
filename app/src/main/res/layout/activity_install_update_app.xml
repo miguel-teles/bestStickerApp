@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:paddingHorizontal="25dp"
+    android:paddingTop="32dp"
+    android:paddingBottom="25dp">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/installing_new_version_title"
+        android:textAlignment="center"
+        android:textAppearance="?android:attr/textAppearanceLarge" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:justificationMode="inter_word"
+        android:text="@string/installing_new_version_text1" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:justificationMode="inter_word"
+        android:text="@string/installing_new_version_text2" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:justificationMode="inter_word"
+        android:text="@string/installing_new_version_text3" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center">
+            <ImageView
+                android:id="@+id/allowed_imageview"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:src="@drawable/outline_check_24" />
+
+            <TextView
+                android:id="@+id/txt_allowed"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:text="@string/allowed" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/btn_ask_permission_install_unknown_app"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/give_permission_here"
+            android:autoLink="web"
+            android:textColor="@color/gray"
+            />
+
+
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/btn_install"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:background="@drawable/shape_btn_default"
+        android:clickable="true"
+        android:ellipsize="end"
+        android:gravity="center"
+        android:singleLine="true"
+        android:text="Instalar nova versão"
+        android:textAllCaps="true"
+        android:textColor="@color/white"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        android:translationZ="10dp" />
+
+
+</LinearLayout>

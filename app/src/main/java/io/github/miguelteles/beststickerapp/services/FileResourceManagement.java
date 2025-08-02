@@ -73,12 +73,18 @@ public class FileResourceManagement implements ResourcesManagement {
     @Override
     public Uri getOrCreateStickerPackDirectory(String folderName) {
         MethodInputValidator.requireNotEmpty(folderName, "FolderName");
-        return getOrCreateDirectory(getOrCreateDirectory(getOrCreateLogsDirectory(),
+        return getOrCreateDirectory(getOrCreateDirectory(getBaseFolder(),
                 DirectoryNames.PACKS), folderName);
     }
 
     private Uri getOrCreateDirectory(Uri folder, String folderName) {
         File file = new File(folder.getPath(), folderName);
+        file.mkdir();
+        return Uri.fromFile(file);
+    }
+
+    private Uri getOrCreateDirectory(String folder) {
+        File file = new File(folder);
         file.mkdir();
         return Uri.fromFile(file);
     }
@@ -114,16 +120,25 @@ public class FileResourceManagement implements ResourcesManagement {
     }
 
     @Override
-    public Uri getFile(String folder, String fileName) throws StickerFolderException {
-        return this.getFile(this.getOrCreateStickerPackDirectory(folder), fileName);
+    public Uri getStickerRelatedFile(String stickerPackFolderName, String fileName) throws StickerFolderException {
+        return this.getStickerRelatedFile(this.getOrCreateStickerPackDirectory(stickerPackFolderName), fileName);
     }
 
     @Override
-    public Uri getFile(Uri folder, String fileName) throws StickerFolderException {
-        MethodInputValidator.requireNotNull(folder, "Folder");
+    public Uri getStickerRelatedFile(Uri stickerPackFolder, String fileName) throws StickerFolderException {
+        MethodInputValidator.requireNotNull(stickerPackFolder, "Folder");
         MethodInputValidator.requireNotEmpty(fileName, "FileName");
 
-        File file = new File(folder.getPath(), fileName);
+        File file = new File(stickerPackFolder.getPath(), fileName);
+        if (!file.exists()) {
+            throw new StickerFolderException(null, StickerFolderExceptionEnum.GET_FILE, "Arquivo não existe");
+        }
+        return Uri.fromFile(file);
+    }
+
+    @Override
+    public Uri getFile(String folder, String fileName) throws StickerFolderException {
+        File file = new File(folder, fileName);
         if (!file.exists()) {
             throw new StickerFolderException(null, StickerFolderExceptionEnum.GET_FILE, "Arquivo não existe");
         }

@@ -4,9 +4,8 @@
     package="io.github.miguelteles.beststickerapp">
 
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
     <!--
  to be able to query the whitelist status in WhatsApp 
      https://developer.android.com/training/basics/intents/package-visibility#package-name
@@ -28,7 +27,10 @@
         android:usesCleartextTraffic="true"
         tools:ignore="GoogleAppIndexingWarning">
         <activity
-            android:name=".view.UpdateAppActivity"
+            android:name=".view.InstallUpdateAppActivity"
+            android:exported="false" />
+        <activity
+            android:name=".view.DownloadUpdateAppActivity"
             android:exported="false" />
         <activity
             android:name=".view.EntryActivity"
@@ -57,6 +59,15 @@
             android:enabled="true"
             android:exported="true"
             android:readPermission="com.whatsapp.sticker.READ" />
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.provider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
     </application>
 
 </manifest>

@@ -264,7 +264,7 @@ public class StickerPackService {
     }
 
     public byte[] fetchStickerPackAsset(@NonNull String folderName, @NonNull String stickerPackImageFileName) throws StickerFolderException {
-        try (final InputStream inputStream = contentResolver.openInputStream(this.resourceManagement.getFile(folderName, stickerPackImageFileName));
+        try (final InputStream inputStream = contentResolver.openInputStream(this.resourceManagement.getStickerRelatedFile(folderName, stickerPackImageFileName));
              final ByteArrayOutputStream buffer = new ByteArrayOutputStream()) {
             if (inputStream == null) {
                 throw new IOException("cannot read sticker pack asset folder: " + folderName + "; name: " + stickerPackImageFileName);

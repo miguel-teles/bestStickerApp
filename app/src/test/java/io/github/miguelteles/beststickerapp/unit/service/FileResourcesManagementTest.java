@@ -104,7 +104,7 @@ public class FileResourcesManagementTest {
     }
 
     @Test
-    public void testGetFilesFromDirectory() throws StickerFolderException {
+    public void testGetStickerRelatedFilesFromDirectory() throws StickerFolderException {
         Uri resourcesFolder = Uri.fromFile(new File("src/test/resources/io/github/miguelteles/beststickerapp/unit/service/"));
 
         List<Uri> filesFromDirectory = resourcesManagement.getFilesFromDirectory(resourcesFolder);
@@ -116,7 +116,7 @@ public class FileResourcesManagementTest {
     }
 
     @Test
-    public void testGetFilesFromDirectoryInvalidInput() {
+    public void testGetStickerRelatedFilesFromDirectoryInvalidInput() {
         assertThrows(IllegalArgumentException.class, () -> resourcesManagement.getFilesFromDirectory(null));
     }
 
@@ -150,13 +150,13 @@ public class FileResourcesManagementTest {
     }
 
     @Test
-    public void testGetFileExtension() throws StickerFolderException {
+    public void testGetStickerRelatedFileExtension() throws StickerFolderException {
         String content = resourcesManagement.getContentAsString(Uri.fromFile(doNotDeleteResult));
         assertFalse(Utils.isNothing(content));
     }
 
     @Test
-    public void testGetFileExtensionInvalidInput() {
+    public void testGetStickerRelatedFileExtensionInvalidInput() {
         assertThrows(IllegalArgumentException.class, () -> resourcesManagement.getContentAsString(null));
     }
 

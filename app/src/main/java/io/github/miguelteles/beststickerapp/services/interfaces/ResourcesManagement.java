@@ -20,9 +20,9 @@ public interface ResourcesManagement {
     Uri getOrCreateLogsDirectory();
     Uri getOrCreateLogErrorsDirectory();
     List<Uri> getFilesFromDirectory(Uri folder) throws StickerFolderException;
-
+    Uri getStickerRelatedFile(String stickerPackFolderName, String fileName) throws StickerFolderException;
+    Uri getStickerRelatedFile(Uri stickerPackFolder, String fileName) throws StickerFolderException;
     Uri getFile(String folder, String fileName) throws StickerFolderException;
-    Uri getFile(Uri folder, String fileName) throws StickerFolderException;
 
 //    void copyImageToStickerPackFolder(Uri sourceFile, Uri destinationFile) throws StickerFolderException;
 

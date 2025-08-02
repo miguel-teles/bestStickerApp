@@ -15,7 +15,7 @@ import androidx.fragment.app.DialogFragment;
 
 import io.github.miguelteles.beststickerapp.R;
 import io.github.miguelteles.beststickerapp.domain.pojo.Version;
-import io.github.miguelteles.beststickerapp.view.UpdateAppActivity;
+import io.github.miguelteles.beststickerapp.view.DownloadUpdateAppActivity;
 
 public class UpdateDialogFragment extends DialogFragment {
 
@@ -47,8 +47,8 @@ public class UpdateDialogFragment extends DialogFragment {
     private void createUpdateButtonOnClickListener(View view, Version version) {
         TextView btnUpdateApp = view.findViewById(R.id.btnUpdateApp);
         btnUpdateApp.setOnClickListener(v -> {
-            Intent intent = new Intent(getContext(), UpdateAppActivity.class);
-            intent.putExtra(UpdateAppActivity.Extras.EXTRA_VERSION, version);
+            Intent intent = new Intent(getContext(), DownloadUpdateAppActivity.class);
+            intent.putExtra(DownloadUpdateAppActivity.Extras.EXTRA_VERSION, version);
             startActivity(intent);
         });
     }
