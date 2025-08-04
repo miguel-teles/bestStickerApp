@@ -54,7 +54,7 @@ jobs:
         cat "$FILENAME"
         aws s3 cp $FILENAME \
             s3://${{ secrets.S3_BUCKET_VERSION }}/$FILENAME \
-            --region ${{ secrets.S3_BUCKET_VERSION_REGION }}
+            --region ${{ secrets.S3_BUCKET_VERSION_REGION }} \
             --acl private
       env:
           VERSION_NAME: ${{ steps.get_version.outputs.versionName }}
