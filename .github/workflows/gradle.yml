@@ -53,8 +53,8 @@ jobs:
         echo "Created $FILENAME with content:"
         cat "$FILENAME"
         aws s3 cp $FILENAME \
-            s3://${{ secrets.S3_BUCKET_VERSION }}/$FILENAME \
-            --region ${{ secrets.S3_BUCKET_VERSION_REGION }} \
+            s3://${{ secrets.S3_BUCKET_API_KEY }}/$FILENAME \
+            --region ${{ secrets.S3_BUCKET_API_KEY_REGION }} \
             --acl private
       env:
           VERSION_NAME: ${{ steps.get_version.outputs.versionName }}
