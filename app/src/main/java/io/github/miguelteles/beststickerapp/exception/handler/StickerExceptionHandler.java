@@ -2,6 +2,7 @@ package io.github.miguelteles.beststickerapp.exception.handler;
 
 import android.app.AlertDialog;
 import android.content.Context;
+import android.util.Log;
 
 import io.github.miguelteles.beststickerapp.BuildConfig;
 import io.github.miguelteles.beststickerapp.exception.StickerException;
@@ -25,6 +26,7 @@ public class StickerExceptionHandler {
         try {
             getStickerExceptionNotifier().writeExceptionIntoLogFile(ex);
         } catch (Exception e) {
+            e.printStackTrace();
         }
         new AlertDialog.Builder(context)
                 .setTitle("Erro :(")

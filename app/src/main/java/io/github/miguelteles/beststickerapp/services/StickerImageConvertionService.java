@@ -174,7 +174,7 @@ public class StickerImageConvertionService {
     private Uri convertImageToWebp(Uri file, Uri destinationFolder) throws StickerException {
         String originalFormatImageBase64 = convertFileIntoBase64(file);
         ResponseAPIConvertedWebp responseAPIConvertedWebp = this.imageConverterWebpAPI.convertImageToWebp(originalFormatImageBase64);
-        if (responseAPIConvertedWebp.getMessage() != null) {
+        if (responseAPIConvertedWebp.getMessage() != null || responseAPIConvertedWebp.getWebpImageBase64() == null) {
             throw new StickerFolderException(null, StickerFolderExceptionEnum.CONVERT_FILE, responseAPIConvertedWebp.getMessage());
         }
 

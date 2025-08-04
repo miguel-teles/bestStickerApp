@@ -19,3 +19,11 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+
+# Keep everything Gson needs
+-keep class com.google.gson.** { *; }
+-keep class * {
+    @com.google.gson.annotations.SerializedName <fields>;
+}
+# Keep all model classes used in Gson
+-keep class io.github.miguelteles.beststickerapp.domain.pojo.** { *; }

@@ -7,6 +7,7 @@ import com.google.gson.Gson;
 import java.io.IOException;
 
 import io.github.miguelteles.beststickerapp.BuildConfig;
+import io.github.miguelteles.beststickerapp.domain.pojo.ConvertImageToWebpRQ;
 import io.github.miguelteles.beststickerapp.domain.pojo.ResponseAPIConvertedWebp;
 import io.github.miguelteles.beststickerapp.exception.StickerException;
 import io.github.miguelteles.beststickerapp.exception.StickerFatalErrorException;
@@ -41,8 +42,5 @@ public class ImageConverterWebpAPIImpl extends HttpClient implements ImageConver
         } else {
             throw new StickerWebCommunicationException(null, StickerWebCommunicationExceptionEnum.NO_INTERNET_ACCESS, null);
         }
-    }
-
-    private record ConvertImageToWebpRQ(String originalImageBase64) {
     }
 }

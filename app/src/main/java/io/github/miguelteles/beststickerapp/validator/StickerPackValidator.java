@@ -106,9 +106,6 @@ public class StickerPackValidator {
             checkStringValidity(stickerPack.getIdentifier().toString());
             validateStickerPack(stickerPack);
             final List<Sticker> stickers = stickerPack.getStickers();
-            if ((stickers.size() < STICKER_SIZE_MIN || stickers.size() > STICKER_SIZE_MAX) && Utils.tpAmbiente.equals("P")) {
-                throw new IllegalStateException("sticker pack sticker count should be between 3 to 30 inclusive, it currently has " + stickers.size() + ", sticker pack identifier: " + stickerPack.getIdentifier());
-            }
             for (final Sticker sticker : stickers) {
                 validateSticker(stickerPack.getIdentifier(), sticker, stickerPack.isAnimatedStickerPack());
             }

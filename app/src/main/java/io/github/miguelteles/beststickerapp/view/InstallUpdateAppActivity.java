@@ -38,7 +38,6 @@ public class InstallUpdateAppActivity extends AppCompatActivity {
     ImageView imgAllowed;
     TextView txtAllowed;
     File apkFile;
-    private static final int REQUEST_INSTALL_PACKAGE = 100; //apenas uma constante que eu defino aqui e uso para identificar depois que a permissão for permitida. O número 100 não tem relação com nada, eu apenas escolhi.
 
     private ActivityResultLauncher<Intent> requestPermissionLauncher =
             registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
@@ -127,7 +126,7 @@ public class InstallUpdateAppActivity extends AppCompatActivity {
     }
 
     private boolean isInstallationPermissionGranted() {
-        return getPackageManager().canRequestPackageInstalls();
+        return true;
     }
 
     private void installAPK(File downloadedUpdateFile) {
