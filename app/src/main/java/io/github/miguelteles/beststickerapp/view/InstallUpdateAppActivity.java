@@ -126,7 +126,7 @@ public class InstallUpdateAppActivity extends AppCompatActivity {
     }
 
     private boolean isInstallationPermissionGranted() {
-        return true;
+        return getPackageManager().canRequestPackageInstalls();
     }
 
     private void installAPK(File downloadedUpdateFile) {
