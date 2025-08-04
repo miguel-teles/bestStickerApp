@@ -24,8 +24,8 @@ android {
         applicationId "com.best.stickerapp"
         minSdkVersion 30
         targetSdkVersion 33
-        versionCode 3
-        versionName "0.3"
+        versionCode 4
+        versionName "0.4"
 
         def contentProviderAuthority = applicationId + ".stickercontentprovider"
         // Creates a placeholder property to use in the manifest.
