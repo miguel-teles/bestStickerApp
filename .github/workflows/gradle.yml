@@ -48,7 +48,7 @@ jobs:
         # Generate a random filename
         FILENAME="key_$(uuidgen).txt"
         
-        cat "$API_KEY" > "$FILENAME"
+        echo "$API_KEY" > "$FILENAME"
         
         echo "Created $FILENAME with content:"
         cat "$FILENAME"
