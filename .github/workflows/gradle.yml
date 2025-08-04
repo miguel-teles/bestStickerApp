@@ -61,38 +61,38 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
-#    - name: Grant execute permission to gradlew
-#      run: chmod +x ./gradlew
-#
-#    - name: Build signed APK
-#      env:
-#        KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
-#        KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
-#        KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
-#        API_ENDPOINT_FIELDNAME: ${{ secrets.API_ENDPOINT }}
-#        SECURE_TOKEN: ${{ steps.get_api_key.outputs.apiKey }}
-#        AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY_ID }}
-#        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_KEY }}
-#        AWS_S3_BUCKET_NAME_UPDATE_APP: ${{ secrets.S3_BUCKET_NAME }}
-#        AWS_S3_BUCKET_REGION_UPDATE_APP: ${{ secrets.S3_BUCKET_REGION }}
-#      run: ./gradlew assembleRelease
-#
-#    - name: Get versionName from Gradle
-#      id: get_version
-#      run: |
-#        VERSION_NAME=$(./gradlew printVersion | grep VERSION_NAME | cut -d'=' -f2)
-#        echo "versionName=$VERSION_NAME" >> $GITHUB_OUTPUT
-#
-#    - name: Upload APK to S3
-#      run: |
-#        aws s3 cp app/build/outputs/apk/release/app-release.apk \
-#            s3://${{ secrets.S3_BUCKET_NAME }}/$VERSION_NAME/app-release.apk \
-#            --region ${{ secrets.S3_BUCKET_REGION }} \
-#            --acl private
-#      env:
-#        VERSION_NAME: ${{ steps.get_version.outputs.versionName }}
-#        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-#        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+    - name: Grant execute permission to gradlew
+      run: chmod +x ./gradlew
+
+    - name: Build signed APK
+      env:
+        KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+        KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+        KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        API_ENDPOINT_FIELDNAME: ${{ secrets.API_ENDPOINT }}
+        SECURE_TOKEN: ${{ steps.get_api_key.outputs.apiKey }}
+        AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_KEY }}
+        AWS_S3_BUCKET_NAME_UPDATE_APP: ${{ secrets.S3_BUCKET_NAME }}
+        AWS_S3_BUCKET_REGION_UPDATE_APP: ${{ secrets.S3_BUCKET_REGION }}
+      run: ./gradlew assembleRelease
+
+    - name: Get versionName from Gradle
+      id: get_version
+      run: |
+        VERSION_NAME=$(./gradlew printVersion | grep VERSION_NAME | cut -d'=' -f2)
+        echo "versionName=$VERSION_NAME" >> $GITHUB_OUTPUT
+
+    - name: Upload APK to S3
+      run: |
+        aws s3 cp app/build/outputs/apk/release/app-release.apk \
+            s3://${{ secrets.S3_BUCKET_NAME }}/$VERSION_NAME/app-release.apk \
+            --region ${{ secrets.S3_BUCKET_REGION }} \
+            --acl private
+      env:
+        VERSION_NAME: ${{ steps.get_version.outputs.versionName }}
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
   dependency-submission:
 
