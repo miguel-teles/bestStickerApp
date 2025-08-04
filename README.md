@@ -16,7 +16,7 @@ Utilizei o projeto do WhatsApp como base, construí a minha versão em cima do c
 
 ### Pendências inadiáveis
 
-#### Atualização do aplicativo
+#### ~~Atualização do aplicativo~~
 Implementar uma funcionalidade de atualização do aplicativo, baixando e instalando novas versões caso o usuário aceite. 
 
 ### Pendências adiáveis

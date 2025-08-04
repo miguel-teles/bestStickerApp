@@ -32,6 +32,15 @@
     <string name="download_update" translatable="false">BAIXAR ATUALIZAÇÃO</string>
     <string name="no_secure_token_found" translatable="false">SecureToken não foi encontrado</string>
     <string name="no_api_endpoint_found" translatable="false">API endpoint não foi encontrado</string>
+    <string name="installing_new_version_text2">Diferente da Google Play que baixa a atualização automaticamente sem necessidade de uma nova instalação, este aplicativo precisa que a nova versão seja instalada. Isso acontece porque este app não consegue baixar somente os trechos de código atualizados, coisa que a Google Play faz.</string>
+    <string name="installing_new_version_text1">Para prosseguir com a atualizaçãp, é preciso instalar a nova versão recém baixada. Já que este aplicativo não é distribuído via Google Play, o processo de atualização do Best Sticker App é totalmente gerenciado por ele mesmo.</string>
+    <string name="installing_new_version_title">Instalar a nova versão</string>
+    <string name="installing_new_version_text3">Para que o Best Sticker App possa instalar a nova versão por você, é necessário que você permita que este possa \'\'instalar apps desconhecidos\'\'.</string>
+    <string name="give_permission_here">Dê permissão aqui!</string>
+    <string name="not_allowed">Não permitido :(</string>
+    <string name="allowed">Permitido :D</string>
+    <string name="skip_already_downloaded">Já baixado, próxima etapa!</string>
+    <string name="install_version">Instalar nova versão</string>
 
 
     <!-- Exception enums   -->
@@ -66,12 +75,4 @@
     <string name="POST" translatable="false">Erro ao executar HTTP POST</string>
     <string name="NO_INTERNET_ACCESS" translatable="false">É preciso estar conectado a internet para acessar essa funcionalidade</string>
     <string name="DOWNLOAD_UPDATE_EXCEPTION">Erro ao baixar a atualização do app</string>
-    <string name="installing_new_version_text2">Diferente da Google Play que baixa a atualização automaticamente sem necessidade de uma nova instalação, este aplicativo precisa que a nova versão seja instalada. Isso acontece porque este app não consegue baixar somente os trechos de código atualizados, coisa que a Google Play faz.</string>
-    <string name="installing_new_version_text1">Para prosseguir com a atualizaçãp, é preciso instalar a nova versão recém baixada. Já que este aplicativo não é distribuído via Google Play, o processo de atualização do Best Sticker App é totalmente gerenciado por ele mesmo.</string>
-    <string name="installing_new_version_title">Instalar a nova versão</string>
-    <string name="installing_new_version_text3">Para que o Best Sticker App possa instalar a nova versão por você, é necessário que você permita que este possa \'\'instalar apps desconhecidos\'\'.</string>
-    <string name="give_permission_here">Dê permissão aqui!</string>
-    <string name="not_allowed">Não permitido :(</string>
-    <string name="allowed">Permitido :D</string>
-    <string name="skip_already_downloaded">Já baixado, próxima etapa!</string>
 </resources>

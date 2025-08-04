@@ -81,7 +81,7 @@
         android:ellipsize="end"
         android:gravity="center"
         android:singleLine="true"
-        android:text="Instalar nova versão"
+        android:text="@string/install_version"
         android:textAllCaps="true"
         android:textColor="@color/white"
         android:textSize="14sp"
