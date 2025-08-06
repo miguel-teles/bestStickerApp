@@ -14,22 +14,22 @@ import io.github.miguelteles.beststickerapp.utils.Utils;
 import io.github.miguelteles.beststickerapp.view.interfaces.UiThreadPoster;
 import io.github.miguelteles.beststickerapp.view.threadHandlers.AndroidUiThreadPoster;
 
-public class AppUpdateService {
+public class VersionValidatorService {
 
-    private static AppUpdateService instance;
+    private static VersionValidatorService instance;
     private final GetLatestAppVersionAPI getLatestAppVersionAPI;
     private final Executor executor;
     private final UiThreadPoster threadResultPoster;
 
-    private AppUpdateService() throws StickerFatalErrorException {
+    private VersionValidatorService() throws StickerFatalErrorException {
         this.getLatestAppVersionAPI = new GetLatestAppVersionAPIImpl(Utils.getApplicationContext());
         this.executor = Executors.newSingleThreadExecutor();
         this.threadResultPoster = new AndroidUiThreadPoster();
     }
 
-    public static AppUpdateService getInstance() throws StickerFatalErrorException {
+    public static VersionValidatorService getInstance() throws StickerFatalErrorException {
         if (instance == null) {
-            instance = new AppUpdateService();
+            instance = new VersionValidatorService();
         }
         return instance;
     }

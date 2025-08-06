@@ -98,6 +98,7 @@ public class ProductionStickerExceptionNotifier implements StickerExceptionNotif
                 .setCause()
                 .setMessage()
                 .setStackTrace()
+                .setAppVersion()
                 .build();
     }
 

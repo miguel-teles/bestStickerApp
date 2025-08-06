@@ -72,16 +72,13 @@ public class StickerImageConvertionService {
         try {
             int rotation = getImageOrientation(sourceImage);
 
-            String stickerPackImageFileName = destinationImageFileName + this.resourcesManagement.getFileExtension(sourceImage, true);
-            String stickerPackImageResizedFileName = destinationImageFileName + this.resourcesManagement.getFileExtension(sourceImage, true); //TEM QUE SER .webp se não o whatsapp não aceita
-
             if (keepOriginalCopy) {
-                originalImageCopy = generateImageCopy(sourceImage, stickerPackFolder, stickerPackImageFileName);
+                originalImageCopy = generateImageCopy(sourceImage, stickerPackFolder, buildImageFileName(sourceImage, destinationImageFileName));
                 rotateImage(originalImageCopy, rotation);
             }
-            resizedImageOriginalFormat = generateImageCopy(sourceImage, resourcesManagement.getCacheFolder(), stickerPackImageResizedFileName);
-            rotateImage(resizedImageOriginalFormat, rotation);
+            resizedImageOriginalFormat = generateImageCopy(sourceImage, resourcesManagement.getCacheFolder(), buildResizedImageFileName(sourceImage, destinationImageFileName));
             resizeImage(resizedImageOriginalFormat, imageWidthAndHeight);
+            rotateImage(resizedImageOriginalFormat, rotation);
 
             Uri resizedImageWebp = convertImageToWebp(resizedImageOriginalFormat, stickerPackFolder);
             byte[] bytes = readBytesFromGeneratedImageWebp(resizedImageWebp);
@@ -95,6 +92,16 @@ public class StickerImageConvertionService {
                 resourcesManagement.deleteFile(resizedImageOriginalFormat);
             }
         }
+    }
+
+    @NonNull
+    private String buildResizedImageFileName(@NonNull Uri sourceImage, @NonNull String destinationImageFileName) {
+        return destinationImageFileName + "Rzd" + this.resourcesManagement.getFileExtension(sourceImage, true);
+    }
+
+    @NonNull
+    private String buildImageFileName(@NonNull Uri sourceImage, @NonNull String destinationImageFileName) {
+        return destinationImageFileName + this.resourcesManagement.getFileExtension(sourceImage, true);
     }
 
     private byte[] readBytesFromGeneratedImageWebp(Uri resizedImageWebp) throws IOException, StickerFolderException {

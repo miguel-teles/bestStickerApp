@@ -20,9 +20,11 @@ public class StickerExceptionHandler {
         StringBuilder finalMessage = new StringBuilder();
         finalMessage.append(ex.getStickerExceptionEnumMessage());
         setExceptionCustomMessage(finalMessage, ex.getMsgErro());
-        setExceptionCauseDetails(ex, finalMessage);
 
-        System.out.println(ex.getLocationException());
+        if (BuildConfig.DEBUG) {
+            setExceptionCauseDetails(ex, finalMessage);
+            System.out.println(ex.getLocationException());
+        }
         try {
             getStickerExceptionNotifier().writeExceptionIntoLogFile(ex);
         } catch (Exception e) {

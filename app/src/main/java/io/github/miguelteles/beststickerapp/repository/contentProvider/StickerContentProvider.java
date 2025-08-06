@@ -254,7 +254,6 @@ public class StickerContentProvider extends ContentProvider {
                         PRIVACY_POLICY_WEBSITE,
                         LICENSE_AGREEMENT_WEBSITE,
                         IMAGE_DATA_VERSION,
-                        AVOID_CACHE,
                         ANIMATED_STICKER_PACK,
                         STICKER_PACK_ICON_ORIGINAL_IMAGE_FILE,
                         FOLDER,
@@ -272,7 +271,6 @@ public class StickerContentProvider extends ContentProvider {
             builder.add(""); //PRIVACY_POLICY_WEBSITE
             builder.add(""); //LICENSE_AGREEMENT_WEBSITE
             builder.add(stickerPack.getImageDataVersion()); //IMAGE_DATA_VERSION
-            builder.add(stickerPack.isAvoidCache() ? 1 : 0); //AVOID_CACHE
             builder.add(stickerPack.isAnimatedStickerPack() ? 1 : 0); //ANIMATED_STICKER_PACK
             builder.add(stickerPack.getOriginalTrayImageFile()); //STICKER_PACK_ICON_RESIZED_IMAGE_FILE
             builder.add(stickerPack.getFolderName()); //FOLDER

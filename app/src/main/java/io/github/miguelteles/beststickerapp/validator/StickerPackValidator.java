@@ -163,12 +163,6 @@ public class StickerPackValidator {
     public void validateSticker(@NonNull final UUID packIdentifier,
                                 @NonNull final Sticker sticker,
                                 final boolean animatedStickerPack) throws IllegalStateException, StickerFolderException {
-        if (sticker.getEmojis().size() > EMOJI_MAX_LIMIT) {
-            throw new IllegalStateException("emoji count exceed limit, sticker pack identifier: " + packIdentifier + ", filename: " + sticker.getStickerImageFile());
-        }
-//        if (sticker.getEmojis().size() < EMOJI_MIN_LIMIT) {
-//            throw new IllegalStateException("To provide best user experience, please associate at least 1 emoji to this sticker, sticker pack identifier: " + identifier + ", filename: " + sticker.getStickerImageFile());
-//        }
         if (TextUtils.isEmpty(sticker.getStickerImageFile())) {
             throw new IllegalStateException("no file path for sticker, sticker pack identifier:" + packIdentifier);
         }

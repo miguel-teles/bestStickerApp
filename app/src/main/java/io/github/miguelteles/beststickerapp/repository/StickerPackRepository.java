@@ -16,7 +16,7 @@ import java.util.UUID;
 
 public class StickerPackRepository extends CommonRepository implements Repository<StickerPack> {
 
-    private String PERSIST = "INSERT INTO packs VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    private String PERSIST = "INSERT INTO packs VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
     private String UPDATE = "UPDATE packs SET name=?, publisher=?, imageDataVersion=(imageDataVersion + 1) WHERE identifier=?";
 
     public StickerRepository stickerRepository;
@@ -41,8 +41,7 @@ public class StickerPackRepository extends CommonRepository implements Repositor
             stmt.bindString(5, stickerPack.getResizedTrayImageFile());
             stmt.bindString(6, stickerPack.getFolderName());
             stmt.bindLong(7, stickerPack.getImageDataVersion());
-            stmt.bindLong(8, stickerPack.isAvoidCache() ? 1 : 0);
-            stmt.bindLong(9, stickerPack.isAnimatedStickerPack() ? 1 : 0);
+            stmt.bindLong(8, stickerPack.isAnimatedStickerPack() ? 1 : 0);
 
             long result = stmt.executeInsert();
             if (result != -1) {
@@ -117,7 +116,6 @@ public class StickerPackRepository extends CommonRepository implements Repositor
                     cursor.getString(cursor.getColumnIndexOrThrow(StickerPack.RESIZED_TRAY_IMAGE_FILE)), //resizedTrayImageFile
                     cursor.getString(cursor.getColumnIndexOrThrow(StickerPack.FOLDER)), //folder
                     cursor.getInt(cursor.getColumnIndexOrThrow(StickerPack.IMAGE_DATA_VERSION)), //imageDataVersion
-                    cursor.getInt(cursor.getColumnIndexOrThrow(StickerPack.AVOID_CACHE)) == 1, //avoidCache
                     cursor.getInt(cursor.getColumnIndexOrThrow(StickerPack.ANIMATED_STICKER_PACK)) == 1,//animated
                     null);
         } catch (Exception ex) {
@@ -143,7 +141,6 @@ public class StickerPackRepository extends CommonRepository implements Repositor
                         cursor.getString(cursor.getColumnIndexOrThrow(StickerPack.RESIZED_TRAY_IMAGE_FILE)), //resizedTrayImageFile
                         cursor.getString(cursor.getColumnIndexOrThrow(StickerPack.FOLDER)), //folder
                         cursor.getInt(cursor.getColumnIndexOrThrow(StickerPack.IMAGE_DATA_VERSION)), //imageDataVersion
-                        cursor.getInt(cursor.getColumnIndexOrThrow(StickerPack.AVOID_CACHE)) == 1, //avoidCache
                         cursor.getInt(cursor.getColumnIndexOrThrow(StickerPack.ANIMATED_STICKER_PACK)) == 1,//animated
                         null);
 

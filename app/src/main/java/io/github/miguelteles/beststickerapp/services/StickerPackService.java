@@ -94,13 +94,12 @@ public class StickerPackService {
         executor.execute(() -> {
             StickerPack stickerPack = null;
             StickerException exception = null;
-
             Uri stickerPackFolder = null;
+
             try {
                 callbackClass.onProgressUpdate(10);
 
-                String stickerPackFolderName = packNameInput + Utils.formatData(new Date(), "yyyy.MM.dd.HH.mm.ss");
-                stickerPackFolder = resourceManagement.getOrCreateStickerPackDirectory(stickerPackFolderName);
+                stickerPackFolder = resourceManagement.getOrCreateStickerPackDirectory(packNameInput + Utils.formatData(new Date(), "yyyy.MM.dd.HH.mm.ss"));
                 ResourcesManagement.Image copiedImages = stickerImageConvertionService.generateStickerImages(stickerPackFolder,
                         selectedImagemUri,
                         generateStickerPackImageName(),
@@ -108,19 +107,19 @@ public class StickerPackService {
                         true);
                 callbackClass.onProgressUpdate(50);
 
-                stickerPack = new StickerPack(null,
-                        packNameInput,
+                stickerPack = new StickerPack(packNameInput,
                         authorName,
                         copiedImages.originalImageFile().getLastPathSegment(),
                         copiedImages.resizedImageFile().getLastPathSegment(),
-                        stickerPackFolderName,
+                        stickerPackFolder.getLastPathSegment(),
                         1,
                         false,
                         copiedImages.residezImageFileInBytes());
+
                 stickerPackValidator.verifyCreatedStickerPackValidity(stickerPack);
                 stickerPackRepository.save(stickerPack);
-                callbackClass.onProgressUpdate(70);
 
+                callbackClass.onProgressUpdate(70);
             } catch (StickerException ex) {
                 deletePackFolderOnException(stickerPackFolder);
                 exception = ex;
@@ -128,15 +127,19 @@ public class StickerPackService {
                 deletePackFolderOnException(stickerPackFolder);
                 exception = new StickerException(ex, StickerExceptionEnum.CSP, null);
             }
-            callbackClass.onProgressUpdate(90);
 
-            StickerException finalException = exception;
-            StickerPack finalStickerPack = stickerPack;
-            threadResultPoster.post(() -> {
-                callbackClass.onCreationFinish(finalStickerPack, finalException);
-            });
+            callbackClass.onProgressUpdate(90);
+            postResult(callbackClass, exception, stickerPack);
         });
 
+    }
+
+    private void postResult(@NonNull OperationCallback<StickerPack> callbackClass, StickerException exception, StickerPack stickerPack) {
+        StickerException finalException = exception;
+        StickerPack finalStickerPack = stickerPack;
+        threadResultPoster.post(() -> {
+            callbackClass.onCreationFinish(finalStickerPack, finalException);
+        });
     }
 
     @NonNull
@@ -189,11 +192,7 @@ public class StickerPackService {
             } catch (StickerException ex) {
                 exception = ex;
             }
-            StickerException finalException = exception;
-            StickerPack finalUpdatedStickerPack = updatedStickerPack;
-            threadResultPoster.post(() -> {
-                callback.onCreationFinish(finalUpdatedStickerPack, finalException);
-            });
+            postResult(callback, exception, updatedStickerPack);
         });
     }
 

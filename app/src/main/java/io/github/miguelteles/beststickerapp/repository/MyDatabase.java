@@ -16,7 +16,7 @@ public class MyDatabase extends SQLiteOpenHelper {
     final private static String dbName = "stickersDB.db";
 
     private MyDatabase(Context context) throws StickerException {
-        super(context, dbName, null, 11);
+        super(context, dbName, null, 12);
         sqLiteDatabase = getWritableDatabase();
         criaTabelas(sqLiteDatabase);
     }
@@ -65,7 +65,6 @@ public class MyDatabase extends SQLiteOpenHelper {
                     "resizedTrayImageFile TEXT NOT NULL," +
                     "folder TEXT NOT NULL," +
                     "imageDataVersion INTEGER NOT NULL," +
-                    "avoidCache INTEGER NOT NULL," +
                     "animatedStickerPack INTEGER NOT NULL" +
                     ")";
 

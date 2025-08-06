@@ -28,7 +28,7 @@ import io.github.miguelteles.beststickerapp.domain.entity.StickerPack;
 import io.github.miguelteles.beststickerapp.domain.pojo.Version;
 import io.github.miguelteles.beststickerapp.exception.StickerException;
 import io.github.miguelteles.beststickerapp.exception.handler.StickerExceptionHandler;
-import io.github.miguelteles.beststickerapp.services.AppUpdateService;
+import io.github.miguelteles.beststickerapp.services.VersionValidatorService;
 import io.github.miguelteles.beststickerapp.services.StickerPackService;
 import io.github.miguelteles.beststickerapp.validator.WhitelistCheck;
 import io.github.miguelteles.beststickerapp.view.dialogs.UpdateDialogFragment;
@@ -46,7 +46,7 @@ public class StickerPackListActivity extends AddStickerPackToWhatsappActivity {
     private ArrayList<StickerPack> stickerPackList;
     private TextView btnCreateNewStickerPack;
     private StickerPackService stickerPackService;
-    private AppUpdateService appUpdateService;
+    private VersionValidatorService versionValidatorService;
 
 
     @Override
@@ -63,11 +63,11 @@ public class StickerPackListActivity extends AddStickerPackToWhatsappActivity {
         if (getSupportActionBar() != null) {
             getSupportActionBar().hide();
         }
-        appUpdateService.isNewVersionAvailable(createNewVersionAvailableCallback());
+        versionValidatorService.isNewVersionAvailable(createNewVersionAvailableCallback());
     }
 
-    private AppUpdateService.CheckLatestVersionCallback createNewVersionAvailableCallback() {
-        return new AppUpdateService.CheckLatestVersionCallback() {
+    private VersionValidatorService.CheckLatestVersionCallback createNewVersionAvailableCallback() {
+        return new VersionValidatorService.CheckLatestVersionCallback() {
             @Override
             public void onUpdateAvailable(Version version) {
                 new UpdateDialogFragment(version).show(getSupportFragmentManager(), "updateDialog");
@@ -79,7 +79,7 @@ public class StickerPackListActivity extends AddStickerPackToWhatsappActivity {
         try {
             stickerPackService = StickerPackService.getInstance();
             stickerPackList = new ArrayList<>(stickerPackService.fetchAllStickerPacksWithAssets());
-            appUpdateService = AppUpdateService.getInstance();
+            versionValidatorService = VersionValidatorService.getInstance();
         } catch (StickerException ex) {
             StickerExceptionHandler.handleException(ex, this);
         }

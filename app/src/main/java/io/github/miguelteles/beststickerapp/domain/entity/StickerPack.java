@@ -32,7 +32,6 @@ public class StickerPack implements Parcelable {
     public static final String RESIZED_TRAY_IMAGE_FILE = "resizedTrayImageFile";
     public static final String IMAGE_DATA_VERSION = "imageDataVersion";
     public static final String FOLDER = "folder";
-    public static final String AVOID_CACHE = "avoidCache";
     public static final String ANIMATED_STICKER_PACK = "animatedStickerPack";
     public static final int TRAY_IMAGE_SIZE = 96; //96pxs
 
@@ -43,7 +42,6 @@ public class StickerPack implements Parcelable {
     private String resizedTrayImageFile;
     private Integer imageDataVersion;
     private final String folderName;
-    private final boolean avoidCache;
     private final boolean animatedStickerPack;
     private String iosAppStoreLink;
     private String androidPlayStoreLink;
@@ -74,7 +72,6 @@ public class StickerPack implements Parcelable {
                        @NonNull String resizedTrayImageFile,
                        @NonNull String folderName,
                        @NonNull Integer imageDataVersion,
-                       @NonNull Boolean avoidCache,
                        Boolean animatedStickerPack,
                        List<Sticker> stickerList) {
         this.identifier = identifier;
@@ -84,52 +81,24 @@ public class StickerPack implements Parcelable {
         this.resizedTrayImageFile = resizedTrayImageFile;
         this.folderName = folderName;
         this.imageDataVersion = imageDataVersion;
-        this.avoidCache = avoidCache;
         this.animatedStickerPack = animatedStickerPack!=null && animatedStickerPack ? true : false;
         this.stickers = stickerList;
     }
 
-    public StickerPack(UUID identifier,
-                       String name,
-                       String publisher,
-                       String originalTrayImageFile,
-                       String resizedTrayImageFile,
-                       String folderName,
-                       Integer imageDataVersion,
-                       boolean avoidCache,
-                       boolean animatedStickerPack,
-                       String androidAppDownloadLinkInQuery,
-                       String iosAppDownloadLinkInQuery) {
-        this.identifier = identifier;
-        this.name = name;
-        this.publisher = publisher;
-        this.originalTrayImageFile = originalTrayImageFile;
-        this.resizedTrayImageFile = resizedTrayImageFile;
-        this.folderName = folderName;
-        this.imageDataVersion = imageDataVersion;
-        this.avoidCache = avoidCache;
-        this.animatedStickerPack = animatedStickerPack;
-        this.androidPlayStoreLink = androidAppDownloadLinkInQuery;
-        this.iosAppStoreLink = iosAppDownloadLinkInQuery;
-    }
-
-    public StickerPack(UUID identifier,
-                       String name,
-                       String publisher,
-                       String originalTrayImageFile,
-                       String resizedTrayImageFile,
-                       String folderName,
-                       Integer imageDataVersion,
+    public StickerPack(@NonNull String name,
+                       @NonNull String publisher,
+                       @NonNull String originalTrayImageFile,
+                       @NonNull String resizedTrayImageFile,
+                       @NonNull String folderName,
+                       @NonNull Integer imageDataVersion,
                        boolean animatedStickerPack,
                        byte[] resizedTrayImageFileInBytes) {
-        this.identifier = identifier;
         this.name = name;
         this.publisher = publisher;
         this.originalTrayImageFile = originalTrayImageFile;
         this.resizedTrayImageFile = resizedTrayImageFile;
         this.imageDataVersion = imageDataVersion;
         this.folderName = folderName;
-        this.avoidCache = false;
         this.animatedStickerPack = animatedStickerPack;
         this.resizedTrayImageFileInBytes = resizedTrayImageFileInBytes;
     }
@@ -155,7 +124,6 @@ public class StickerPack implements Parcelable {
         androidPlayStoreLink = in.readString();
         isWhitelisted = in.readByte() != 0;
         imageDataVersion = in.readInt();
-        avoidCache = in.readByte() != 0;
         animatedStickerPack = in.readByte() != 0;
     }
 
@@ -190,7 +158,6 @@ public class StickerPack implements Parcelable {
         dest.writeString(androidPlayStoreLink);
         dest.writeByte((byte) (isWhitelisted ? 1 : 0));
         dest.writeInt(imageDataVersion);
-        dest.writeByte((byte) (avoidCache ? 1 : 0));
         dest.writeByte((byte) (animatedStickerPack ? 1 : 0));
     }
 
@@ -231,10 +198,6 @@ public class StickerPack implements Parcelable {
 
     public Integer getImageDataVersion() {
         return imageDataVersion;
-    }
-
-    public boolean isAvoidCache() {
-        return avoidCache;
     }
 
     public boolean isAnimatedStickerPack() {
@@ -289,8 +252,7 @@ public class StickerPack implements Parcelable {
                 return false;
             }
         }
-        return avoidCache == that.avoidCache &&
-                animatedStickerPack == that.animatedStickerPack &&
+        return animatedStickerPack == that.animatedStickerPack &&
                 totalSize == that.totalSize &&
                 isWhitelisted == that.isWhitelisted &&
                 Objects.equals(identifier, that.identifier) &&
