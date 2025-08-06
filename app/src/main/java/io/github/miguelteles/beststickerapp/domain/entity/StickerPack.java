@@ -30,15 +30,10 @@ public class StickerPack implements Parcelable {
     public static final String PUBLISHER = "publisher";
     public static final String ORIGINAL_TRAY_IMAGE_FILE = "originalTrayImageFile";
     public static final String RESIZED_TRAY_IMAGE_FILE = "resizedTrayImageFile";
-    public static final String PUBLISHER_EMAIL = "publisherEmail";
-    public static final String PUBLISHER_WEBSITE = "publisherWebsite";
-    public static final String PRIVACY_POLICY_WEBSITE = "privacyPolicyWebsite";
-    public static final String LICENSE_AGREEMENT_WEBSITE = "licenseAgreementWebsite";
     public static final String IMAGE_DATA_VERSION = "imageDataVersion";
     public static final String FOLDER = "folder";
     public static final String AVOID_CACHE = "avoidCache";
     public static final String ANIMATED_STICKER_PACK = "animatedStickerPack";
-
     public static final int TRAY_IMAGE_SIZE = 96; //96pxs
 
     private UUID identifier;
@@ -46,10 +41,6 @@ public class StickerPack implements Parcelable {
     private String publisher;
     private String originalTrayImageFile;
     private String resizedTrayImageFile;
-    private final String publisherEmail;
-    private final String publisherWebsite;
-    private final String privacyPolicyWebsite;
-    private final String licenseAgreementWebsite;
     private Integer imageDataVersion;
     private final String folderName;
     private final boolean avoidCache;
@@ -84,10 +75,6 @@ public class StickerPack implements Parcelable {
                        @NonNull String folderName,
                        @NonNull Integer imageDataVersion,
                        @NonNull Boolean avoidCache,
-                       String publisherEmail,
-                       String publisherWebsite,
-                       String privacyPolicyWebsite,
-                       String licenseAgreementWebsite,
                        Boolean animatedStickerPack,
                        List<Sticker> stickerList) {
         this.identifier = identifier;
@@ -98,10 +85,6 @@ public class StickerPack implements Parcelable {
         this.folderName = folderName;
         this.imageDataVersion = imageDataVersion;
         this.avoidCache = avoidCache;
-        this.publisherEmail = publisherEmail;
-        this.publisherWebsite = publisherWebsite;
-        this.licenseAgreementWebsite = licenseAgreementWebsite;
-        this.privacyPolicyWebsite = privacyPolicyWebsite;
         this.animatedStickerPack = animatedStickerPack!=null && animatedStickerPack ? true : false;
         this.stickers = stickerList;
     }
@@ -112,10 +95,6 @@ public class StickerPack implements Parcelable {
                        String originalTrayImageFile,
                        String resizedTrayImageFile,
                        String folderName,
-                       String publisherEmail,
-                       String publisherWebsite,
-                       String privacyPolicyWebsite,
-                       String licenseAgreementWebsite,
                        Integer imageDataVersion,
                        boolean avoidCache,
                        boolean animatedStickerPack,
@@ -127,10 +106,6 @@ public class StickerPack implements Parcelable {
         this.originalTrayImageFile = originalTrayImageFile;
         this.resizedTrayImageFile = resizedTrayImageFile;
         this.folderName = folderName;
-        this.publisherEmail = publisherEmail;
-        this.publisherWebsite = publisherWebsite;
-        this.privacyPolicyWebsite = privacyPolicyWebsite;
-        this.licenseAgreementWebsite = licenseAgreementWebsite;
         this.imageDataVersion = imageDataVersion;
         this.avoidCache = avoidCache;
         this.animatedStickerPack = animatedStickerPack;
@@ -155,47 +130,8 @@ public class StickerPack implements Parcelable {
         this.imageDataVersion = imageDataVersion;
         this.folderName = folderName;
         this.avoidCache = false;
-        this.publisherEmail = "";
-        this.publisherWebsite = "";
-        this.privacyPolicyWebsite = "";
-        this.licenseAgreementWebsite = "";
         this.animatedStickerPack = animatedStickerPack;
         this.resizedTrayImageFileInBytes = resizedTrayImageFileInBytes;
-    }
-
-    public static StickerPack fromContentValues(ContentValues values) {
-        return new StickerPack(UUID.fromString(values.getAsString(IDENTIFIER)),
-                values.getAsString(NAME),
-                values.getAsString(PUBLISHER),
-                values.getAsString(ORIGINAL_TRAY_IMAGE_FILE),
-                values.getAsString(RESIZED_TRAY_IMAGE_FILE),
-                values.getAsString(FOLDER),
-                values.getAsInteger(IMAGE_DATA_VERSION),
-                values.getAsBoolean(AVOID_CACHE),
-                values.getAsString(PUBLISHER_EMAIL),
-                values.getAsString(PUBLISHER_WEBSITE),
-                values.getAsString(PRIVACY_POLICY_WEBSITE),
-                values.getAsString(LICENSE_AGREEMENT_WEBSITE),
-                values.getAsBoolean(ANIMATED_STICKER_PACK),
-                null);
-    }
-
-    public ContentValues toContentValues() {
-        ContentValues contentValues = new ContentValues();
-        contentValues.put(IDENTIFIER, this.getIdentifier().toString());
-        contentValues.put(NAME, this.getName());
-        contentValues.put(PUBLISHER, this.getPublisher());
-        contentValues.put(ORIGINAL_TRAY_IMAGE_FILE, this.getOriginalTrayImageFile());
-        contentValues.put(RESIZED_TRAY_IMAGE_FILE, this.getResizedTrayImageFile());
-        contentValues.put(IMAGE_DATA_VERSION, this.getImageDataVersion());
-        contentValues.put(FOLDER, this.getFolderName());
-        contentValues.put(AVOID_CACHE, this.isAvoidCache());
-        contentValues.put(PUBLISHER_EMAIL, this.getPublisherEmail());
-        contentValues.put(PUBLISHER_WEBSITE, this.getPublisherWebsite());
-        contentValues.put(PRIVACY_POLICY_WEBSITE, this.getPrivacyPolicyWebsite());
-        contentValues.put(LICENSE_AGREEMENT_WEBSITE, this.getLicenseAgreementWebsite());
-        contentValues.put(ANIMATED_STICKER_PACK, this.isAnimatedStickerPack());
-        return contentValues;
     }
 
     public void setIsWhitelisted(boolean isWhitelisted) {
@@ -213,10 +149,6 @@ public class StickerPack implements Parcelable {
         originalTrayImageFile = in.readString();
         resizedTrayImageFile = in.readString();
         folderName = in.readString();
-        publisherEmail = in.readString();
-        publisherWebsite = in.readString();
-        privacyPolicyWebsite = in.readString();
-        licenseAgreementWebsite = in.readString();
         iosAppStoreLink = in.readString();
         stickers = in.createTypedArrayList(Sticker.CREATOR);
         totalSize = in.readLong();
@@ -252,10 +184,6 @@ public class StickerPack implements Parcelable {
         dest.writeString(originalTrayImageFile);
         dest.writeString(resizedTrayImageFile);
         dest.writeString(folderName);
-        dest.writeString(publisherEmail);
-        dest.writeString(publisherWebsite);
-        dest.writeString(privacyPolicyWebsite);
-        dest.writeString(licenseAgreementWebsite);
         dest.writeString(iosAppStoreLink);
         dest.writeTypedList(stickers);
         dest.writeLong(totalSize);
@@ -299,22 +227,6 @@ public class StickerPack implements Parcelable {
 
     public String getOriginalTrayImageFile() {
         return originalTrayImageFile;
-    }
-
-    public String getPublisherEmail() {
-        return publisherEmail;
-    }
-
-    public String getPublisherWebsite() {
-        return publisherWebsite;
-    }
-
-    public String getPrivacyPolicyWebsite() {
-        return privacyPolicyWebsite;
-    }
-
-    public String getLicenseAgreementWebsite() {
-        return licenseAgreementWebsite;
     }
 
     public Integer getImageDataVersion() {
@@ -386,10 +298,6 @@ public class StickerPack implements Parcelable {
                 Objects.equals(publisher, that.publisher) &&
                 Objects.equals(originalTrayImageFile, that.originalTrayImageFile) &&
                 Objects.equals(resizedTrayImageFile, that.resizedTrayImageFile) &&
-                Objects.equals(publisherEmail, that.publisherEmail) &&
-                Objects.equals(publisherWebsite, that.publisherWebsite) &&
-                Objects.equals(privacyPolicyWebsite, that.privacyPolicyWebsite) &&
-                Objects.equals(licenseAgreementWebsite, that.licenseAgreementWebsite) &&
                 Objects.equals(imageDataVersion, that.imageDataVersion) &&
                 Objects.equals(folderName, that.folderName) &&
                 (Objects.equals(iosAppStoreLink, that.iosAppStoreLink) || (Utils.isNothing(iosAppStoreLink) && Utils.isNothing(that.iosAppStoreLink))) &&

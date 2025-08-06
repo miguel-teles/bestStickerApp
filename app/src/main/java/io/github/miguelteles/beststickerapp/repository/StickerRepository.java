@@ -16,7 +16,7 @@ import java.util.UUID;
 
 public class StickerRepository extends CommonRepository implements io.github.miguelteles.beststickerapp.repository.interfaces.Repository<Sticker> {
 
-    private String SAVE = "INSERT INTO stickers VALUES (?, ?, ?, ?, ?)";
+    private String SAVE = "INSERT INTO stickers VALUES (?, ?, ?)";
     private String FIND_ALL_BY_PACKIDENTIFIER = "SELECT * FROM stickers WHERE packIdentifier='%s'";
 
     private SQLiteDatabase sqLiteDatabase;
@@ -31,22 +31,10 @@ public class StickerRepository extends CommonRepository implements io.github.mig
         try {
             SQLiteStatement stmt = sqLiteDatabase.compileStatement(SAVE);
 
-            /*
-            *  "id INTEGER PRIMARY KEY AUTOINCREMENT," +
-                    "emoji TEXT NOT NULL," +
-                    "imageFile TEXT NOT NULL," +
-                    "packIdentifier INTEGER, " +
-                    "size INTEGER, " +
-                    "FOREIGN KEY (packIdentifier) REFERENCES packs(identifier)" +
-                    ")";
-            * */
-
             UUID id = UUID.randomUUID();
             stmt.bindString(1, id.toString());
-            stmt.bindString(2, "");
-            stmt.bindString(3, sticker.getStickerImageFile());
-            stmt.bindString(4, sticker.getPackIdentifier().toString());
-            stmt.bindLong(5, sticker.getSize());
+            stmt.bindString(2, sticker.getStickerImageFile());
+            stmt.bindString(3, sticker.getPackIdentifier().toString());
 
             long result = stmt.executeInsert();
             if (result != -1) {

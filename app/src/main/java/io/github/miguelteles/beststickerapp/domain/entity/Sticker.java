@@ -27,7 +27,6 @@ public class Sticker implements Parcelable, Cloneable {
     public static String IDENTIFIER = "identifier";
     public static String PACK_IDENTIFIER = "packIdentifier";
     public static String STICKER_IMAGE_FILE = "stickerImageFile";
-    public static String EMOJIS = "emojis";
     public static final int STICKER_IMAGE_SIZE = 512; //512pxs
     public static final String STICKER_ERROR_IMAGE = "sticker_error_image.webp";
 

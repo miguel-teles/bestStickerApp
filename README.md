@@ -24,7 +24,7 @@ O Best Sticker App usa algumas tecnologias para funcionar. Vou listá-las aqui e
 - Testes: JUnit, Mockito e Robolectric;
 - Dependências importantes: OkHttp, Gson e Plugin Farebase;
 
-#### Serviços
+#### Serviços fora do aplicativo
 
 Para o aplicativo funcionar completamente, existem alguns serviços feitos por mim que ajudam o aplicativo a funcionar. Todos eles são funções Lambda AWS que estão disponíveis no mesmo API Gateway (AWS) :
 - **StickerImageConverter**: Recebe uma imagem em Base64 e converte ela para o formato WEBP (formato que o WhatsApp demanda que as figurinhas estejam);
@@ -37,6 +37,11 @@ Presumivelmente, as únicas entidades que existem no projeto, por enquanto, são
 - Sticker;
 - StickerPack;
 
+![image](readme-images/img.png)
+
+### Activities
+
+Não vou listar todas as activities do projeto, porém vou listar as principais:
 
 
 ## Pendências do projeto

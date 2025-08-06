@@ -88,10 +88,7 @@ public class StickerPackService {
                                   @NonNull Uri selectedImagemUri,
                                   @NonNull OperationCallback<StickerPack> callbackClass) {
         validateParametersCreateStickerPack(packNameInput, selectedImagemUri, callbackClass);
-        if (Utils.isNothing(authorNameInput)) {
-            authorNameInput = resources.getString(R.string.defaultPublisher);
-        }
-        final String authorName = authorNameInput;
+        final String authorName = determineAuthorName(authorNameInput);
 
         //esse cara aqui serve pra criar outra thread sem ser a principal pra processar
         executor.execute(() -> {
@@ -142,6 +139,15 @@ public class StickerPackService {
 
     }
 
+    @NonNull
+    private String determineAuthorName(@NonNull String authorNameInput) {
+        if (Utils.isNothing(authorNameInput)) {
+            authorNameInput = resources.getString(R.string.defaultPublisher);
+        }
+        final String authorName = authorNameInput;
+        return authorName;
+    }
+
     private void validateParametersCreateStickerPack(String packName, Uri packImageUri, OperationCallback<StickerPack> callback) {
         MethodInputValidator.requireNotNull(packName, "Pack name");
         MethodInputValidator.requireNotEmpty(packName, "Pack name");
@@ -166,10 +172,7 @@ public class StickerPackService {
                                   String editedAuthorName,
                                   String editedPackName,
                                   OperationCallback<StickerPack> callback) {
-        if (Utils.isNothing(editedAuthorName)) {
-            editedAuthorName = resources.getString(R.string.defaultPublisher);
-        }
-        final String _editedAuthorName = editedAuthorName;
+        final String _editedAuthorName = determineAuthorName(editedAuthorName);
         executor.execute(() -> {
             StickerException exception = null;
             StickerPack updatedStickerPack = null;

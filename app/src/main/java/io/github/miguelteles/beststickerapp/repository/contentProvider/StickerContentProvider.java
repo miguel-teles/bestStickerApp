@@ -267,10 +267,10 @@ public class StickerContentProvider extends ContentProvider {
             builder.add(stickerPack.getResizedTrayImageFile()); //STICKER_PACK_ICON_IN_QUERY
             builder.add(""); //ANDROID_APP_DOWNLOAD_LINK_IN_QUERY
             builder.add(""); //IOS_APP_DOWNLOAD_LINK_IN_QUERY
-            builder.add(stickerPack.getPublisherEmail()); //PUBLISHER_EMAIL
-            builder.add(stickerPack.getPublisherWebsite()); //PUBLISHER_WEBSITE
-            builder.add(stickerPack.getPrivacyPolicyWebsite()); //PRIVACY_POLICY_WEBSITE
-            builder.add(stickerPack.getLicenseAgreementWebsite()); //LICENSE_AGREEMENT_WEBSITE
+            builder.add(""); //PUBLISHER_EMAIL
+            builder.add(""); //PUBLISHER_WEBSITE
+            builder.add(""); //PRIVACY_POLICY_WEBSITE
+            builder.add(""); //LICENSE_AGREEMENT_WEBSITE
             builder.add(stickerPack.getImageDataVersion()); //IMAGE_DATA_VERSION
             builder.add(stickerPack.isAvoidCache() ? 1 : 0); //AVOID_CACHE
             builder.add(stickerPack.isAnimatedStickerPack() ? 1 : 0); //ANIMATED_STICKER_PACK

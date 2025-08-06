@@ -144,18 +144,6 @@ public class StickerPackValidator {
         if (!TextUtils.isEmpty(stickerPack.getIosAppStoreLink()) && !isURLInCorrectDomain(stickerPack.getIosAppStoreLink(), APPLE_STORE_DOMAIN)) {
             throw new IllegalStateException("iOS app store link should use app store domain: " + APPLE_STORE_DOMAIN);
         }
-        if (!TextUtils.isEmpty(stickerPack.getLicenseAgreementWebsite()) && !isValidWebsiteUrl(stickerPack.getLicenseAgreementWebsite())) {
-            throw new IllegalStateException("Make sure to include http or https in url links, license agreement link is not a valid url: " + stickerPack.getLicenseAgreementWebsite());
-        }
-        if (!TextUtils.isEmpty(stickerPack.getPrivacyPolicyWebsite()) && !isValidWebsiteUrl(stickerPack.getPrivacyPolicyWebsite())) {
-            throw new IllegalStateException("Make sure to include http or https in url links, privacy policy link is not a valid url: " + stickerPack.getPrivacyPolicyWebsite());
-        }
-        if (!TextUtils.isEmpty(stickerPack.getPublisherWebsite()) && !isValidWebsiteUrl(stickerPack.getPublisherWebsite())) {
-            throw new IllegalStateException("Make sure to include http or https in url links, publisher website link is not a valid url: " + stickerPack.getPublisherWebsite());
-        }
-        if (!TextUtils.isEmpty(stickerPack.getPublisherEmail()) && !Patterns.EMAIL_ADDRESS.matcher(stickerPack.getPublisherEmail()).matches()) {
-            throw new IllegalStateException("publisher email does not seem valid, email is: " + stickerPack.getPublisherEmail());
-        }
         if (stickerPack.getResizedTrayImageFileInBytes().length > TRAY_IMAGE_FILE_SIZE_MAX_KB * KB_IN_BYTES) {
             throw new IllegalStateException("tray image should be less than " + TRAY_IMAGE_FILE_SIZE_MAX_KB + " KB, tray image file: " + stickerPack.getOriginalTrayImageFile());
         }

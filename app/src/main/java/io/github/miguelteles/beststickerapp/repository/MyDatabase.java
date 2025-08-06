@@ -57,9 +57,6 @@ public class MyDatabase extends SQLiteOpenHelper {
     private void criaTabelaPacks(SQLiteDatabase db) throws StickerException {
         try {
 
-//            String deleta = "DROP TABLE packs";
-//            getMyDB(context).execSQL(deleta); //TODO: tirar isso
-
             String tbPack = "CREATE TABLE IF NOT EXISTS packs(" +
                     "identifier UUID PRIMARY KEY NOT NULL," +
                     "name TEXT NOT NULL," +
@@ -69,10 +66,6 @@ public class MyDatabase extends SQLiteOpenHelper {
                     "folder TEXT NOT NULL," +
                     "imageDataVersion INTEGER NOT NULL," +
                     "avoidCache INTEGER NOT NULL," +
-                    "publisherEmail TEXT," +
-                    "publisherWebsite TEXT," +
-                    "privacyPolicyWebsite TEXT," +
-                    "licenseAgreementWebsite TEXT," +
                     "animatedStickerPack INTEGER NOT NULL" +
                     ")";
 
@@ -86,10 +79,8 @@ public class MyDatabase extends SQLiteOpenHelper {
         try {
             String tbPack = "CREATE TABLE IF NOT EXISTS stickers(" +
                     "identifier UUID PRIMARY KEY NOT NULL," +
-                    "emoji TEXT NOT NULL," +
                     "stickerImageFile TEXT NOT NULL," +
-                    "packIdentifier UUID, " +
-                    "size INTEGER, " +
+                    "packIdentifier UUID NOT NULL, " +
                     "FOREIGN KEY (packIdentifier) REFERENCES packs(identifier)" +
                     ")";
 
