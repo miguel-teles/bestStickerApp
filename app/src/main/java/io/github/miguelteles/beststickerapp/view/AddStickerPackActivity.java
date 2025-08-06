@@ -46,7 +46,6 @@ public class AddStickerPackActivity extends AppCompatActivity {
         setContentView(R.layout.activity_sticker_create_pack);
 
         declaraCampos();
-        populateFieldsWithStickerPackBeingEdited();
         try {
             setaOnClickListeners();
             stickerPackService = StickerPackService.getInstance();
@@ -54,6 +53,7 @@ public class AddStickerPackActivity extends AppCompatActivity {
         } catch (StickerException ex) {
             StickerExceptionHandler.handleException(ex, this);
         }
+        populateFieldsWithStickerPackBeingEdited();
         if (getSupportActionBar() != null) {
             getSupportActionBar().hide();
         }
