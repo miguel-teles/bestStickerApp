@@ -24,8 +24,8 @@ import java.util.concurrent.Executor;
 import io.github.miguelteles.beststickerapp.domain.entity.Sticker;
 import io.github.miguelteles.beststickerapp.domain.entity.StickerPack;
 import io.github.miguelteles.beststickerapp.exception.StickerException;
+import io.github.miguelteles.beststickerapp.integration.stickerPack.StickerContentProviderTest;
 import io.github.miguelteles.beststickerapp.repository.StickerRepository;
-import io.github.miguelteles.beststickerapp.repository.contentProvider.StickerUriProvider;
 import io.github.miguelteles.beststickerapp.services.StickerImageConvertionService;
 import io.github.miguelteles.beststickerapp.services.StickerService;
 import io.github.miguelteles.beststickerapp.services.interfaces.OperationCallback;
@@ -37,7 +37,7 @@ public class StickerServiceTest {
 
     StickerRepository stickerRepository = mock(StickerRepository.class);
     ResourcesManagement stickerFilesManagementService = mock(ResourcesManagement.class);
-    StickerUriProvider stickerUriProvider = mock(StickerUriProvider.class);
+    StickerContentProviderTest.StickerUriProvider stickerUriProvider = mock(StickerContentProviderTest.StickerUriProvider.class);
     ContentResolver contentResolver = mock(ContentResolver.class);
     StickerPackValidator stickerPackValidator = mock(StickerPackValidator.class);
     StickerImageConvertionService stickerImageConvertionService = mock(StickerImageConvertionService.class);
@@ -65,15 +65,9 @@ public class StickerServiceTest {
             "app/src/main/assets/test_image.jpg",
             "app/src/main/assets/test_image.jpg",
             "teste",
-            "teste",
-            "teste",
-            "teste",
-            "teste",
             1,
             true,
-            false,
-            "androidAppDownloadLinkInQuery",
-            "iosAppDownloadLinkInQuery");
+            null);
 
     Sticker validSticker = new Sticker(UUID.randomUUID(), UUID.randomUUID(), "/home/miguel/StudioProjects/stickersProjeto/app/src/main/assets/test_image.jpg");
 
@@ -110,10 +104,10 @@ public class StickerServiceTest {
                         new byte[]{1,1,1,1,1,1,1,1});
             }
         });
-        when(contentResolver.insert(any(Uri.class), any(ContentValues.class))).then(new Answer<Object>() {
+        when(stickerFilesManagementService.getOrCreateFile(any(Uri.class), any(String.class))).then(new Answer<Uri>() {
             @Override
-            public Object answer(InvocationOnMock invocation) throws Throwable {
-                return null;
+            public Uri answer(InvocationOnMock invocation) throws Throwable {
+                return uri;
             }
         });
         Mockito.doNothing().when(stickerPackValidator).validateSticker(any(UUID.class), any(Sticker.class), any(Boolean.class));

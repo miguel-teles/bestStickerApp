@@ -4,7 +4,6 @@ import static org.junit.Assert.*;
 
 import static io.github.miguelteles.beststickerapp.repository.contentProvider.StickerContentProvider.ANDROID_APP_DOWNLOAD_LINK_IN_QUERY;
 import static io.github.miguelteles.beststickerapp.repository.contentProvider.StickerContentProvider.ANIMATED_STICKER_PACK;
-import static io.github.miguelteles.beststickerapp.repository.contentProvider.StickerContentProvider.AVOID_CACHE;
 import static io.github.miguelteles.beststickerapp.repository.contentProvider.StickerContentProvider.FOLDER;
 import static io.github.miguelteles.beststickerapp.repository.contentProvider.StickerContentProvider.IMAGE_DATA_VERSION;
 import static io.github.miguelteles.beststickerapp.repository.contentProvider.StickerContentProvider.IOS_APP_DOWNLOAD_LINK_IN_QUERY;
@@ -12,6 +11,7 @@ import static io.github.miguelteles.beststickerapp.repository.contentProvider.St
 import static io.github.miguelteles.beststickerapp.repository.contentProvider.StickerContentProvider.PRIVACY_POLICY_WEBSITE;
 import static io.github.miguelteles.beststickerapp.repository.contentProvider.StickerContentProvider.PUBLISHER_EMAIL;
 import static io.github.miguelteles.beststickerapp.repository.contentProvider.StickerContentProvider.PUBLISHER_WEBSITE;
+import static io.github.miguelteles.beststickerapp.repository.contentProvider.StickerContentProvider.STICKERS;
 import static io.github.miguelteles.beststickerapp.repository.contentProvider.StickerContentProvider.STICKER_FILE_ACCESSIBILITY_TEXT_IN_QUERY;
 import static io.github.miguelteles.beststickerapp.repository.contentProvider.StickerContentProvider.STICKER_FILE_EMOJI_IN_QUERY;
 import static io.github.miguelteles.beststickerapp.repository.contentProvider.StickerContentProvider.STICKER_FILE_NAME_IN_QUERY;
@@ -24,6 +24,7 @@ import static io.github.miguelteles.beststickerapp.repository.contentProvider.St
 import static io.github.miguelteles.beststickerapp.repository.contentProvider.StickerContentProvider.STICKER_PACK_PUBLISHER_IN_QUERY;
 
 import android.content.ContentProvider;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -48,6 +49,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 import io.github.miguelteles.beststickerapp.BuildConfig;
@@ -55,7 +57,6 @@ import io.github.miguelteles.beststickerapp.domain.entity.Sticker;
 import io.github.miguelteles.beststickerapp.domain.entity.StickerPack;
 import io.github.miguelteles.beststickerapp.exception.StickerException;
 import io.github.miguelteles.beststickerapp.repository.contentProvider.StickerContentProvider;
-import io.github.miguelteles.beststickerapp.repository.contentProvider.StickerUriProvider;
 import io.github.miguelteles.beststickerapp.services.FileResourceManagement;
 import io.github.miguelteles.beststickerapp.services.StickerImageConvertionService;
 import io.github.miguelteles.beststickerapp.services.StickerPackService;
@@ -74,8 +75,8 @@ public class StickerContentProviderTest {
     private StickerContentProviderReader stickerContentProviderReader;
     private StickerPackService stickerPackService;
     private Uri stickerPackImage = Uri.fromFile(new File("src/test/resources/io/github/miguelteles/beststickerapp/unit/service/test_image.jpg"));
-
     private StickerPack createdStickerPack;
+    private StickerUriProvider stickerUriProvider;
 
     @Before
     public void init() throws StickerException {
@@ -102,6 +103,8 @@ public class StickerContentProviderTest {
         stickerContentProviderReader = new StickerContentProviderReader(stickerPackService,
                 resourcesManagement,
                 ApplicationProvider.getApplicationContext());
+
+        stickerUriProvider = new StickerUriProvider();
     }
 
     @Test
@@ -136,24 +139,24 @@ public class StickerContentProviderTest {
             assertEquals(createdStickerPack, stickerPack);
             assertStickerPack(stickerPack);
 
-            Bitmap resizedTrayImageFile = stickerContentProviderReader.fetchAsset(StickerUriProvider.getStickerAsset(stickerPack.getIdentifier(), stickerPack.getResizedTrayImageFile()));
+            Bitmap resizedTrayImageFile = stickerContentProviderReader.fetchAsset(stickerUriProvider.getStickerAsset(stickerPack.getIdentifier(), stickerPack.getResizedTrayImageFile()));
             assertNotNull(resizedTrayImageFile);
 
-            String type = stickerContentProviderReader.getType(StickerUriProvider.getStickerAsset(stickerPack.getIdentifier(), stickerPack.getResizedTrayImageFile()));
+            String type = stickerContentProviderReader.getType(stickerUriProvider.getStickerAsset(stickerPack.getIdentifier(), stickerPack.getResizedTrayImageFile()));
             assertNotNull(type);
 
-            type = stickerContentProviderReader.getType(StickerUriProvider.getMetadataCode());
+            type = stickerContentProviderReader.getType(stickerUriProvider.getMetadataCode());
             assertNotNull(type);
 
-            type = stickerContentProviderReader.getType(StickerUriProvider.getStickerListFromPack(stickerPack.getIdentifier()));
+            type = stickerContentProviderReader.getType(stickerUriProvider.getStickerListFromPack(stickerPack.getIdentifier()));
             assertNotNull(type);
 
-            type = stickerContentProviderReader.getType(StickerUriProvider.getMetadataCodeFromPack(stickerPack.getIdentifier()));
+            type = stickerContentProviderReader.getType(stickerUriProvider.getMetadataCodeFromPack(stickerPack.getIdentifier()));
             assertNotNull(type);
 
             assertStickerPack(stickerContentProviderReader.fetchStickerPackByIdentifier(stickerPack.getIdentifier()));
 
-            Bitmap originalTrayImageFile = stickerContentProviderReader.fetchAsset(StickerUriProvider.getStickerOriginalAsset(stickerPack.getIdentifier(),  stickerPack.getOriginalTrayImageFile()));
+            Bitmap originalTrayImageFile = stickerContentProviderReader.fetchAsset(stickerUriProvider.getStickerOriginalAsset(stickerPack.getIdentifier(),  stickerPack.getOriginalTrayImageFile()));
             assertNotNull(originalTrayImageFile);
 
 
@@ -171,10 +174,10 @@ public class StickerContentProviderTest {
                     }
                 }
 
-                type = stickerContentProviderReader.getType(StickerUriProvider.getStickerAsset(stickerPack.getIdentifier(), stickerFromContentProvider.getStickerImageFile()));
+                type = stickerContentProviderReader.getType(stickerUriProvider.getStickerAsset(stickerPack.getIdentifier(), stickerFromContentProvider.getStickerImageFile()));
                 assertNotNull(type);
 
-                Bitmap imageStick = stickerContentProviderReader.fetchAsset(StickerUriProvider.getStickerAsset(stickerPack.getIdentifier(), stickerFromContentProvider.getStickerImageFile()));
+                Bitmap imageStick = stickerContentProviderReader.fetchAsset(stickerUriProvider.getStickerAsset(stickerPack.getIdentifier(), stickerFromContentProvider.getStickerImageFile()));
                 assertNotNull(imageStick);
             }
         }
@@ -187,13 +190,7 @@ public class StickerContentProviderTest {
         assertNotNull(stickerPack.getResizedTrayImageFile()); //STICKER_PACK_ICON_IN_QUERY
         assertNotNull(stickerPack.getOriginalTrayImageFile()); //STICKER_PACK_ICON_ORIGINAL_IMAGE_FILE
         assertNotNull(stickerPack.getFolderName()); //FOLDER
-        assertNotNull(stickerPack.getPublisherEmail()); //PUBLISHER_EMAIL
-        assertNotNull(stickerPack.getPublisherWebsite()); //PUBLISHER_WEBSITE
-        assertNotNull(stickerPack.getPrivacyPolicyWebsite()); //PRIVACY_POLICY_WEBSITE
-        assertNotNull(stickerPack.getLicenseAgreementWebsite()); //LICENSE_AGREEMENT_WEBSITE
         assertNotNull(stickerPack.getImageDataVersion()); //IMAGE_DATA_VERSION
-        assertNotNull(stickerPack.getAndroidPlayStoreLink()); //ANDROID_APP_DOWNLOAD_LINK_IN_QUERY
-        assertNotNull(stickerPack.getIosAppStoreLink()); //IOS_APP_DOWNLOAD_LINK_IN_QUERY
     }
 
     private Sticker createSticker(Uri stickerImage) {
@@ -213,7 +210,7 @@ public class StickerContentProviderTest {
         return sticker[0];
     }
 
-    public static class StickerContentProviderReader {
+    public class StickerContentProviderReader {
 
         private ContentProvider contentProvider;
 
@@ -248,7 +245,7 @@ public class StickerContentProviderTest {
         }
 
         public StickerPack fetchStickerPackByIdentifier(UUID identifier) {
-            final Cursor cursor = contentProvider.query(StickerUriProvider.getMetadataCodeFromPack(identifier), null, null, null, null);
+            final Cursor cursor = contentProvider.query(stickerUriProvider.getMetadataCodeFromPack(identifier), null, null, null, null);
             if (cursor == null) {
                 throw new IllegalStateException("could not fetch from content provider, " + BuildConfig.CONTENT_PROVIDER_AUTHORITY);
             }
@@ -295,10 +292,19 @@ public class StickerContentProviderTest {
                 final String publisherWebsite = cursor.getString(cursor.getColumnIndexOrThrow(PUBLISHER_WEBSITE)); //PUBLISHER_WEBSITE
                 final String privacyPolicyWebsite = cursor.getString(cursor.getColumnIndexOrThrow(PRIVACY_POLICY_WEBSITE)); //PRIVACY_POLICY_WEBSITE
                 final String licenseAgreementWebsite = cursor.getString(cursor.getColumnIndexOrThrow(LICENSE_AGREEMENT_WEBSITE)); //LICENSE_AGREEMENT_WEBSITE
+
+                Objects.requireNonNull(publisherEmail);
+                Objects.requireNonNull(publisherWebsite);
+                Objects.requireNonNull(privacyPolicyWebsite);
+                Objects.requireNonNull(licenseAgreementWebsite);
+
                 final Integer imageDataVersion = cursor.getInt(cursor.getColumnIndexOrThrow(IMAGE_DATA_VERSION)); //IMAGE_DATA_VERSION
-                final boolean avoidCache = cursor.getShort(cursor.getColumnIndexOrThrow(AVOID_CACHE)) > 0; //AVOID_CACHE
                 final String androidAppDownloadLinkInQuery = cursor.getString(cursor.getColumnIndexOrThrow(ANDROID_APP_DOWNLOAD_LINK_IN_QUERY));
                 final String iosAppDownloadLinkInQuery = cursor.getString(cursor.getColumnIndexOrThrow(IOS_APP_DOWNLOAD_LINK_IN_QUERY));
+
+                Objects.requireNonNull(androidAppDownloadLinkInQuery);
+                Objects.requireNonNull(iosAppDownloadLinkInQuery);
+
                 final boolean animatedStickerPack = cursor.getShort(cursor.getColumnIndexOrThrow(ANIMATED_STICKER_PACK)) > 0; //
                 final StickerPack stickerPack = new StickerPack(identifier,
                         name,
@@ -306,15 +312,9 @@ public class StickerContentProviderTest {
                         originalTrayImage,
                         resizedTrayImage,
                         folder,
-                        publisherEmail,
-                        publisherWebsite,
-                        privacyPolicyWebsite,
-                        licenseAgreementWebsite,
                         imageDataVersion,
-                        avoidCache,
                         animatedStickerPack,
-                        androidAppDownloadLinkInQuery,
-                        iosAppDownloadLinkInQuery);
+                        null);
                 stickerPackList.add(stickerPack);
                 cursor.moveToNext();
             }
@@ -324,7 +324,7 @@ public class StickerContentProviderTest {
 
         @NonNull
         private List<Sticker> fetchFromContentProviderForStickers(UUID stickerPackIdentifier) {
-            Uri uri = StickerUriProvider.getStickerListFromPack(stickerPackIdentifier);
+            Uri uri = stickerUriProvider.getStickerListFromPack(stickerPackIdentifier);
 
             final String[] projection = {STICKER_FILE_NAME_IN_QUERY,
                     STICKER_FILE_EMOJI_IN_QUERY,
@@ -356,7 +356,7 @@ public class StickerContentProviderTest {
         private byte[] fetchStickerAsset(@NonNull final UUID identifier,
                                          @NonNull final String stickerImageFileName) throws IOException {
             //o contentResolver.openInputStream vai pro método openAssetFile do contentProvider
-            try (final InputStream inputStream = new FileInputStream(contentProvider.openFile(StickerUriProvider.getStickerAsset(identifier, stickerImageFileName), "r").getFileDescriptor());
+            try (final InputStream inputStream = new FileInputStream(contentProvider.openFile(stickerUriProvider.getStickerAsset(identifier, stickerImageFileName), "r").getFileDescriptor());
                  final ByteArrayOutputStream buffer = new ByteArrayOutputStream()) {
                 if (inputStream == null) {
                     throw new IOException("cannot read sticker asset id: " + identifier + "; name: " + stickerImageFileName);
@@ -372,5 +372,29 @@ public class StickerContentProviderTest {
                 throw ex;
             }
         }
+    }
+
+    public class StickerUriProvider {
+
+        public Uri getStickerAsset(UUID identifier, String imageName) {
+            return new Uri.Builder().scheme(ContentResolver.SCHEME_CONTENT).authority(BuildConfig.CONTENT_PROVIDER_AUTHORITY).appendPath(StickerContentProvider.STICKERS_ASSET).appendPath(identifier.toString()).appendPath(imageName).build();
+        }
+
+        public Uri getStickerOriginalAsset(UUID identifier, String imageName) {
+            return new Uri.Builder().scheme(ContentResolver.SCHEME_CONTENT).authority(BuildConfig.CONTENT_PROVIDER_AUTHORITY).appendPath(StickerContentProvider.STICKERS_ASSET_ORIGINAL).appendPath(identifier.toString()).appendPath(imageName).build();
+        }
+
+        public Uri getMetadataCode() {
+            return new Uri.Builder().scheme(ContentResolver.SCHEME_CONTENT).authority(BuildConfig.CONTENT_PROVIDER_AUTHORITY).appendPath(StickerContentProvider.METADATA).build();
+        }
+
+        public Uri getMetadataCodeFromPack(UUID identifier) {
+            return new Uri.Builder().scheme(ContentResolver.SCHEME_CONTENT).authority(BuildConfig.CONTENT_PROVIDER_AUTHORITY).appendPath(StickerContentProvider.METADATA).appendPath(identifier.toString()).build();
+        }
+
+        public Uri getStickerListFromPack(UUID identifier) {
+            return new Uri.Builder().scheme(ContentResolver.SCHEME_CONTENT).authority(BuildConfig.CONTENT_PROVIDER_AUTHORITY).appendPath(STICKERS).appendPath(identifier.toString()).build();
+        }
+
     }
 }

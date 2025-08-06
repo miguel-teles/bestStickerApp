@@ -43,8 +43,6 @@ public class StickerPack implements Parcelable {
     private Integer imageDataVersion;
     private final String folderName;
     private final boolean animatedStickerPack;
-    private String iosAppStoreLink;
-    private String androidPlayStoreLink;
     private List<Sticker> stickers;
     private long totalSize;
     private boolean isWhitelisted;
@@ -118,10 +116,8 @@ public class StickerPack implements Parcelable {
         originalTrayImageFile = in.readString();
         resizedTrayImageFile = in.readString();
         folderName = in.readString();
-        iosAppStoreLink = in.readString();
         stickers = in.createTypedArrayList(Sticker.CREATOR);
         totalSize = in.readLong();
-        androidPlayStoreLink = in.readString();
         isWhitelisted = in.readByte() != 0;
         imageDataVersion = in.readInt();
         animatedStickerPack = in.readByte() != 0;
@@ -152,10 +148,8 @@ public class StickerPack implements Parcelable {
         dest.writeString(originalTrayImageFile);
         dest.writeString(resizedTrayImageFile);
         dest.writeString(folderName);
-        dest.writeString(iosAppStoreLink);
         dest.writeTypedList(stickers);
         dest.writeLong(totalSize);
-        dest.writeString(androidPlayStoreLink);
         dest.writeByte((byte) (isWhitelisted ? 1 : 0));
         dest.writeInt(imageDataVersion);
         dest.writeByte((byte) (animatedStickerPack ? 1 : 0));
@@ -202,14 +196,6 @@ public class StickerPack implements Parcelable {
 
     public boolean isAnimatedStickerPack() {
         return animatedStickerPack;
-    }
-
-    public String getIosAppStoreLink() {
-        return iosAppStoreLink;
-    }
-
-    public String getAndroidPlayStoreLink() {
-        return androidPlayStoreLink;
     }
 
     public String getFolderName() {
@@ -261,9 +247,7 @@ public class StickerPack implements Parcelable {
                 Objects.equals(originalTrayImageFile, that.originalTrayImageFile) &&
                 Objects.equals(resizedTrayImageFile, that.resizedTrayImageFile) &&
                 Objects.equals(imageDataVersion, that.imageDataVersion) &&
-                Objects.equals(folderName, that.folderName) &&
-                (Objects.equals(iosAppStoreLink, that.iosAppStoreLink) || (Utils.isNothing(iosAppStoreLink) && Utils.isNothing(that.iosAppStoreLink))) &&
-                (Objects.equals(androidPlayStoreLink, that.androidPlayStoreLink) || (Utils.isNothing(androidPlayStoreLink) && Utils.isNothing(that.androidPlayStoreLink)));
+                Objects.equals(folderName, that.folderName);
     }
 
 }

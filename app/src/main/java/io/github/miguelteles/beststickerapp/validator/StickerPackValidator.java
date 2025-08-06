@@ -132,18 +132,6 @@ public class StickerPackValidator {
         if (TextUtils.isEmpty(stickerPack.getOriginalTrayImageFile())) {
             throw new IllegalStateException("sticker pack tray id is empty, sticker pack identifier:" + stickerPack.getIdentifier());
         }
-        if (!TextUtils.isEmpty(stickerPack.getAndroidPlayStoreLink()) && !isValidWebsiteUrl(stickerPack.getAndroidPlayStoreLink())) {
-            throw new IllegalStateException("Make sure to include http or https in url links, android play store link is not a valid url: " + stickerPack.getAndroidPlayStoreLink());
-        }
-        if (!TextUtils.isEmpty(stickerPack.getAndroidPlayStoreLink()) && !isURLInCorrectDomain(stickerPack.getAndroidPlayStoreLink(), PLAY_STORE_DOMAIN)) {
-            throw new IllegalStateException("android play store link should use play store domain: " + PLAY_STORE_DOMAIN);
-        }
-        if (!TextUtils.isEmpty(stickerPack.getIosAppStoreLink()) && !isValidWebsiteUrl(stickerPack.getIosAppStoreLink())) {
-            throw new IllegalStateException("Make sure to include http or https in url links, ios app store link is not a valid url: " + stickerPack.getIosAppStoreLink());
-        }
-        if (!TextUtils.isEmpty(stickerPack.getIosAppStoreLink()) && !isURLInCorrectDomain(stickerPack.getIosAppStoreLink(), APPLE_STORE_DOMAIN)) {
-            throw new IllegalStateException("iOS app store link should use app store domain: " + APPLE_STORE_DOMAIN);
-        }
         if (stickerPack.getResizedTrayImageFileInBytes().length > TRAY_IMAGE_FILE_SIZE_MAX_KB * KB_IN_BYTES) {
             throw new IllegalStateException("tray image should be less than " + TRAY_IMAGE_FILE_SIZE_MAX_KB + " KB, tray image file: " + stickerPack.getOriginalTrayImageFile());
         }

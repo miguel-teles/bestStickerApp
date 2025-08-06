@@ -71,8 +71,8 @@ public class StickerContentProvider extends ContentProvider {
     public static final String METADATA = "metadata";
     public static final String FOLDER = "folder";
     public static final String STICKERS = "stickers";
-    static final String STICKERS_ASSET = "stickers_asset";
-    static final String STICKERS_ASSET_ORIGINAL = "stickers_asset_original";
+    public static final String STICKERS_ASSET = "stickers_asset";
+    public static final String STICKERS_ASSET_ORIGINAL = "stickers_asset_original";
     static final String PACK = "pack";
 
     public static final Uri AUTHORITY_URI = new Uri.Builder().scheme(ContentResolver.SCHEME_CONTENT).authority(BuildConfig.CONTENT_PROVIDER_AUTHORITY).appendPath(StickerContentProvider.METADATA).build();

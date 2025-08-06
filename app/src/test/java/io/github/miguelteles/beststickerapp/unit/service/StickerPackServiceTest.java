@@ -64,15 +64,9 @@ public class StickerPackServiceTest {
             "app/src/main/assets/test_image.jpg",
             "app/src/main/assets/test_image.jpg",
             "teste",
-            "teste",
-            "teste",
-            "teste",
-            "teste",
             1,
             true,
-            false,
-            "androidAppDownloadLinkInQuery",
-            "iosAppDownloadLinkInQuery");
+            null);
 
     @Before
     public void mockingDepedencies() throws StickerException {
