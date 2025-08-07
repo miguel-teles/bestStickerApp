@@ -1,11 +1,4 @@
-# Best Sticker App  ![Java](https://img.shields.io/badge/Java-17-blue) ![Android](https://img.shields.io/badge/Platform-Android-green)
-
-<style>
-* {
-    text-align: justify;
-}
-</style>
-
+# Best Sticker App ![icon](readme-images/icon.svg) ![Java](https://img.shields.io/badge/Java-17-blue) ![Android](https://img.shields.io/badge/Platform-Android-green)
 O Best Sticker App é um aplicativo que cria pacotes e figurinhas para serem utilizadas no WhatsApp.
 
 ## Como baixar e instalar
