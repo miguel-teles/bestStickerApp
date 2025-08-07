@@ -1,15 +1,23 @@
-# Best Sticker App ![Java](https://img.shields.io/badge/Java-17-blue) ![Android](https://img.shields.io/badge/Platform-Android-green)
+# Best Sticker App  ![Java](https://img.shields.io/badge/Java-17-blue) ![Android](https://img.shields.io/badge/Platform-Android-green)
+
+<style>
+* {
+    text-align: justify;
+}
+</style>
 
 O Best Sticker App é um aplicativo que cria pacotes e figurinhas para serem utilizadas no WhatsApp.
 
 ## Como baixar e instalar
 
+- Baixe o APK no link: [BestStickerApp](https://dseeev7jghcoi.cloudfront.net/)
+- Instale o APK: acesse os arquivos do dispositivo e aperte no APK baixado.
 
+## Overview
 
-## Overview 
 ### Motivação
 
-<div style="text-align: justify;">
+
 Eu adoro as figurinhas do WhatsApp, sempre que termino uma frase mando uma figurinha. Decidi fazer este aplicativo porque, mesmo que compreensível, os aplicativos que já vi contêm muitas propagandas. Muitas vezes só quero adicionar **uma** figurinha e eu preciso assistir uma propaganda de 30 segundos :/
 
 ### Base utilizada
@@ -23,7 +31,6 @@ importante e necessário para eu aprender Android e também entender os passos n
 pacotes de figurinhas e das figurinhas em si para o WhatsApp.
 
 **Observação**: vou alternar o nome WhatsApp com o nome "Whats".
-</div>
 
 ## Componentes do projeto
 
@@ -59,17 +66,17 @@ Todos eles são funções Lambda AWS que estão disponíveis no mesmo API Gatewa
 Presumivelmente, as únicas entidades que existem no projeto, por enquanto, são:
 
 - Sticker:
-  - identifier (UUID - PK);
-  - packIdentifier (UUID - FK)
-  - stickerImagefile (TEXT - Esta coluna apenas guarda o nome do arquivo e não a imagem de fato)
+    - identifier (UUID - PK);
+    - packIdentifier (UUID - FK)
+    - stickerImagefile (TEXT - Esta coluna apenas guarda o nome do arquivo e não a imagem de fato)
 - StickerPack:
-  - identifier (UUID - PK);
-  - publisher (TEXT - Nome do autor do pacote);
-  - originalTrayImageFile (TEXT - Nome do arquivo que contém uma cópia da imagem original que não teve seu tamanho alterado);
-  - resizedTrayImageFile (TEXT - Nome do arquivo que contém a imagem que será utilizada como ícone do pacote pelo WhatsApp);
-  - folder (TEXT - Nome da pasta que contém os arquivos do pacote de figurinhas);
-  - imageDataVersion (INTEGER - Número da versão do pacote. Este número aumenta toda vez que o pacote é alterado);
-  - animatedStickerPack (INTEGER - Define se o pacote contém figurinhas animadas ou estáticas, essa informação é necessária para o WhatsApp);
+    - identifier (UUID - PK);
+    - publisher (TEXT - Nome do autor do pacote);
+    - originalTrayImageFile (TEXT - Nome do arquivo que contém uma cópia da imagem original que não teve seu tamanho alterado);
+    - resizedTrayImageFile (TEXT - Nome do arquivo que contém a imagem que será utilizada como ícone do pacote pelo WhatsApp);
+    - folder (TEXT - Nome da pasta que contém os arquivos do pacote de figurinhas);
+    - imageDataVersion (INTEGER - Número da versão do pacote. Este número aumenta toda vez que o pacote é alterado);
+    - animatedStickerPack (INTEGER - Define se o pacote contém figurinhas animadas ou estáticas, essa informação é necessária para o WhatsApp);
 
 Observações:
 - Eu utilizo UUID porque o WhatsApp identifica se um pacote/sticker já foi adicionado utilizando este campo. Já que uma pacote e/ou figurinha podem ter *n* origens, optei o UUID para impedir (ou dificultar) a repetição de IDs
@@ -87,31 +94,31 @@ segue os seguintes passos:
 
 1. Cria a pasta que conterá as imagens do pacote e os stickers em: *internal_storage_directory*/**files**/**packs**/*nome_pacote_pasta*
 2. Copia as imagens:
-   1. Copia a imagem original selecionada à pasta criada no passo 1 e dá o nome de "packImage" + data atual (Esse passo acontece na criação do pacote para manter a imagem original sem ter seu tamanho alterado. Ela é utilizada para preencher o ImageView ao editar o pacote);
-      1. Rotaciona a imagem caso ela esteja rotacionada (celulares Samsung rotacionam as imagens tiradas pela câmera do celular);
-   3. Copia a image original selecionada à pasta criada no passo 1 e dá o nome de "packImageRzd" + data atual;
-      1. Modifica o tamanho da imagem para 96x96. O WhatsApp requer que a imagem do pacote tenha este tamanho.
-      2. Rotaciona a imagem caso ela esteja rotacionada (celulares Samsung rotacionam as imagens tiradas pela câmera do celular);
-      3. Envia a imagem para o serviço **StickerImageConverter** para converter a imagem ao formato WEBP.
+    1. Copia a imagem original selecionada à pasta criada no passo 1 e dá o nome de "packImage" + data atual (Esse passo acontece na criação do pacote para manter a imagem original sem ter seu tamanho alterado. Ela é utilizada para preencher o ImageView ao editar o pacote);
+        1. Rotaciona a imagem caso ela esteja rotacionada (celulares Samsung rotacionam as imagens tiradas pela câmera do celular);
+    3. Copia a image original selecionada à pasta criada no passo 1 e dá o nome de "packImageRzd" + data atual;
+        1. Modifica o tamanho da imagem para 96x96. O WhatsApp requer que a imagem do pacote tenha este tamanho.
+        2. Rotaciona a imagem caso ela esteja rotacionada (celulares Samsung rotacionam as imagens tiradas pela câmera do celular);
+        3. Envia a imagem para o serviço **StickerImageConverter** para converter a imagem ao formato WEBP.
 3. Verifica a integridade do pacote:
-   1. Verifica alguns campos do objeto instanciado *StickerPack*;
-   2. Verifica se a imagem passada é um arquivo válido de imagem;
-   3. Verifica altura e largura da imagem;
-4. Persiste no banco de dados; 
+    1. Verifica alguns campos do objeto instanciado *StickerPack*;
+    2. Verifica se a imagem passada é um arquivo válido de imagem;
+    3. Verifica altura e largura da imagem;
+4. Persiste no banco de dados;
 
 #### 2. Criando uma figurinha
 
 O fluxo começa na tela de detalhes do pacote. Ao clicar no botão " + " e selecionar a imagem da figurinha, o aplicativo seguee os seguintes passos:
 
 1. Copia a imagem:
-   1. Copia a image original selecionada à pasta do pacote de figurinhas e dá o nome de "sticker" + data atual:
-     1. Modifica o tamanho da imagem para 512x512. O WhatsApp requer que a imagem da figurinha tenha este tamanho.
-     2. Rotaciona a imagem caso ela esteja rotacionada (celulares Samsung rotacionam as imagens tiradas pela câmera do celular);
-     3. Envia a imagem para o serviço **StickerImageConverter** para converter a imagem ao formato WEBP.
+    1. Copia a image original selecionada à pasta do pacote de figurinhas e dá o nome de "sticker" + data atual:
+    1. Modifica o tamanho da imagem para 512x512. O WhatsApp requer que a imagem da figurinha tenha este tamanho.
+    2. Rotaciona a imagem caso ela esteja rotacionada (celulares Samsung rotacionam as imagens tiradas pela câmera do celular);
+    3. Envia a imagem para o serviço **StickerImageConverter** para converter a imagem ao formato WEBP.
 2. Verifica a integridade da figurinha:
-   1. Verifica alguns campos do objeto instanciado *Sticker*;
-   2. Verifica se a imagem passada é um arquivo válido de imagem;
-   3. Verifica altura e largura da imagem;
+    1. Verifica alguns campos do objeto instanciado *Sticker*;
+    2. Verifica se a imagem passada é um arquivo válido de imagem;
+    3. Verifica altura e largura da imagem;
 3. Persiste no banco de dados;
 
 #### 3. Tratamento de erro
@@ -127,9 +134,9 @@ todos para o Bucket S3
 
 1. Aplicativo abre, thread é criada;
 2. Itera por todos os arquivos da pasta de erros
-   1. Lê o arquivo;
-   2. Envia a RQ contendo o log;
-   3. Remove o arquivo da pasta de erros;
+    1. Lê o arquivo;
+    2. Envia a RQ contendo o log;
+    3. Remove o arquivo da pasta de erros;
 
 #### 4. Atualização do aplicativo
 
@@ -138,12 +145,12 @@ O aplicativo não é distribuído pela Play Store. Decidi não distribuir na Pla
 Como o aplicativo não é distribuído pela Play Store, o aplicativo gerencia totalmente suas atualizações. Os passos tomados por mim na atualização são:
 
 1. Buildar o aplicativo no Github Actions;
-   1. O build to script do Github Actions tem os seguintes passos principais:
-      1. Decodifica a keystore utilizada para assinar o aplicativo;
-      2. Gera uma key aleatória utilizada na autenticação dos serviços HTTP;
-      3. Dá upload da key aleatória gerada no passo anterior no Bucket que contém as keys válidas utilizadas na autenticação;
-      4. Builda o aplicativo e assina a APK com a chave decodificada no passo 1.
-      5. Dá upload do APK assinado num Bucket. O arquivo é salvo em uma pasta com o nome da versão construída.
+    1. O build to script do Github Actions tem os seguintes passos principais:
+        1. Decodifica a keystore utilizada para assinar o aplicativo;
+        2. Gera uma key aleatória utilizada na autenticação dos serviços HTTP;
+        3. Dá upload da key aleatória gerada no passo anterior no Bucket que contém as keys válidas utilizadas na autenticação;
+        4. Builda o aplicativo e assina a APK com a chave decodificada no passo 1.
+        5. Dá upload do APK assinado num Bucket. O arquivo é salvo em uma pasta com o nome da versão construída.
 2. Alterar a notificação que aparece no aplicativo sobre a atualização. As informações da atualização ficam em outro Bucket que guarda um json contendo as informações estruturadas da atualização;
 
 Os passos tomados pelo aplicativo são:
