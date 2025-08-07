@@ -4,7 +4,8 @@ O Best Sticker App é um aplicativo que cria pacotes e figurinhas para serem uti
 
 ## Como baixar e instalar
 
-
+- Baixe o APK no link: [BestStickerApp](https://dseeev7jghcoi.cloudfront.net/)
+- Instale o APK: acesse os arquivos do dispositivo e aperte no APK baixado.
 
 ## Overview 
 ### Motivação
