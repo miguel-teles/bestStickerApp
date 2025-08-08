@@ -10,7 +10,8 @@ public enum StickerExceptionEnum {
     ESP(R.string.EDIT_STICKER_PACK),
     FS(R.string.FETCH_STICKER),
     FSP(R.string.FETCH_STICKER_PACK),
-    ISP(R.string.INVALID_STICKER_PACK);
+    ISP(R.string.INVALID_STICKER_PACK),
+    GUL(R.string.GET_UPDATE_LINK);
 
 
     final int resourceId;

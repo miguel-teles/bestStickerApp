@@ -25,8 +25,8 @@ android {
         applicationId "com.best.stickerapp"
         minSdkVersion 30
         targetSdkVersion 33
-        versionCode 6
-        versionName "0.6"
+        versionCode 7
+        versionName "0.7"
 
         def contentProviderAuthority = applicationId + ".stickercontentprovider"
         // Creates a placeholder property to use in the manifest.
@@ -42,18 +42,6 @@ android {
 
         def apiProductionUrl = System.getenv(API_ENDPOINT_FIELDNAME) != null ? System.getenv(API_ENDPOINT_FIELDNAME) : "https://q7h1mc4qwh.execute-api.sa-east-1.amazonaws.com/prod/"
         buildConfigField "String", API_ENDPOINT_FIELDNAME, "\"${apiProductionUrl}\""
-
-        def awsAccessKey = System.getenv(AWS_ACCESS_KEY_FIELDNAME) != null ? System.getenv(AWS_ACCESS_KEY_FIELDNAME) : "AKIA2N47735ECE2EHJTD"
-        buildConfigField "String", AWS_ACCESS_KEY_FIELDNAME, "\"${awsAccessKey}\""
-
-        def awsSecretKey = System.getenv(AWS_SECRET_KEY_FIELDNAME) != null ? System.getenv(AWS_SECRET_KEY_FIELDNAME) : "CvvMcumussnDZKu9ssSb8i4puIjAX69cjDxz+TYv"
-        buildConfigField "String", AWS_SECRET_KEY_FIELDNAME, "\"${awsSecretKey}\""
-
-        def awsS3BucketNameUpdateApp = System.getenv(AWS_S3_BUCKET_NAME_UPDATE_APP_FIELDNAME) != null ? System.getProperty(AWS_S3_BUCKET_NAME_UPDATE_APP_FIELDNAME) : "beststickerapp-latestversion"
-        buildConfigField "String", AWS_S3_BUCKET_NAME_UPDATE_APP_FIELDNAME , "\"${awsS3BucketNameUpdateApp}\""
-
-        def awsS3BucketRegionUpdateApp = System.getenv(AWS_S3_BUCKET_REGION_UPDATE_APP_FIELDNAME) != null ? System.getProperty(AWS_S3_BUCKET_REGION_UPDATE_APP_FIELDNAME) : "sa-east-1"
-        buildConfigField "String", AWS_S3_BUCKET_REGION_UPDATE_APP_FIELDNAME , "\"${awsS3BucketRegionUpdateApp}\""
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 

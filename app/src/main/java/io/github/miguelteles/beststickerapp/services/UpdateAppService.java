@@ -16,14 +16,23 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
 import io.github.miguelteles.beststickerapp.BuildConfig;
+import io.github.miguelteles.beststickerapp.domain.pojo.ResponseAPIGetDownloadAppUrl;
 import io.github.miguelteles.beststickerapp.domain.pojo.Version;
+import io.github.miguelteles.beststickerapp.exception.StickerException;
+import io.github.miguelteles.beststickerapp.exception.StickerFatalErrorException;
 import io.github.miguelteles.beststickerapp.exception.StickerFolderException;
 import io.github.miguelteles.beststickerapp.exception.StickerWebCommunicationException;
+import io.github.miguelteles.beststickerapp.exception.enums.StickerExceptionEnum;
 import io.github.miguelteles.beststickerapp.exception.enums.StickerWebCommunicationExceptionEnum;
+import io.github.miguelteles.beststickerapp.services.client.GetDownloadAppUrlAPIImpl;
+import io.github.miguelteles.beststickerapp.services.client.interfaces.GetDownloadAppUrlAPI;
+import io.github.miguelteles.beststickerapp.services.client.interfaces.GetLatestAppVersionAPI;
 import io.github.miguelteles.beststickerapp.services.interfaces.DownloadCallback;
 import io.github.miguelteles.beststickerapp.services.interfaces.ResourcesManagement;
 import io.github.miguelteles.beststickerapp.utils.Utils;
@@ -35,46 +44,33 @@ public class UpdateAppService {
     private final Executor executor;
     private final UiThreadPoster threadResultPoster;
     private final Version version;
-    private final ResourcesManagement resourcesManagement;
+    private final GetDownloadAppUrlAPI getDownloadAppUrlAPI;
 
-    public UpdateAppService(Version version) {
+    public UpdateAppService(Version version) throws StickerFatalErrorException {
         this.executor = Executors.newSingleThreadExecutor(); //roda criando uma nova  thread
         this.threadResultPoster = new AndroidUiThreadPoster();
         this.version = version;
-        resourcesManagement = new FileResourceManagement(Utils.getApplicationContext(), Utils.getApplicationContext().getContentResolver());
+        this.getDownloadAppUrlAPI = new GetDownloadAppUrlAPIImpl(Utils.getApplicationContext());
     }
 
-    public File verifyDownloadedApkVersion() {
-        try {
-            Uri apkFile = resourcesManagement.getFile(Utils.getApplicationContext().getExternalFilesDir(null).getPath(), "update.apk");
-
-            PackageManager pm = Utils.getApplicationContext().getPackageManager();
-            PackageInfo info = pm.getPackageArchiveInfo(apkFile.getPath(), 0);
-
-            if (info != null) {
-                String versionName = info.versionName;
-                if (version.getVersion().equals(versionName)) {
-                    return new File(apkFile.getPath());
-                }
-            }
-            return null;
-        } catch (StickerFolderException e) {
-            return null;
-        }
-    }
-
-    public void downloadUpdate(String versionName, DownloadCallback downloadCallback) {
+    public void downloadUpdate(DownloadCallback downloadCallback) {
         executor.execute(() -> {
 
-            AWSCredentials credentials = new BasicAWSCredentials(BuildConfig.AWS_ACCESS_KEY, BuildConfig.AWS_SECRET_ACCESS_KEY);
-            AmazonS3Client amazonS3Client = new AmazonS3Client(credentials);
-            try (S3Object object = amazonS3Client.getObject(new GetObjectRequest(BuildConfig.AWS_S3_BUCKET_NAME_UPDATE_APP, versionName + "/app-release.apk"))) {
-                S3ObjectInputStream objectContent = object.getObjectContent();
 
-                long lenghtOfFile = object.getObjectMetadata().getContentLength();
+            try {
+                downloadCallback.onProgressUpdate(5);
+                ResponseAPIGetDownloadAppUrl downloadAppResponse = getDownloadAppUrlAPI.getDownloadAppUrl(version.getVersion());
+                if (downloadAppResponse.getPresignedUrl() == null) {
+                    throw new StickerException(null, StickerExceptionEnum.GUL, downloadAppResponse.getMessage());
+                }
+                downloadCallback.onProgressUpdate(10);
+
+                URL url = new URL(downloadAppResponse.getPresignedUrl());
+                URLConnection urlConnection = url.openConnection();
+                long lenghtOfFile = urlConnection.getContentLength();
 
                 File apkFile = new File(Utils.getApplicationContext().getExternalFilesDir(null) + "/update.apk");
-                try (InputStream input = new BufferedInputStream(objectContent, 64 * 1024); // download the file
+                try (InputStream input = new BufferedInputStream(url.openStream(), 64 * 1024); // download the file
                      OutputStream output = new FileOutputStream(apkFile)) {
 
                     byte[] data = new byte[12 * 1024];
@@ -82,7 +78,10 @@ public class UpdateAppService {
                     int byteCount;
                     while ((byteCount = input.read(data)) != -1) {
                         totalByteCount += byteCount;
-                        downloadCallback.onProgressUpdate((int) ((totalByteCount * 100) / lenghtOfFile));
+                        long progress = (totalByteCount * 100) / lenghtOfFile;
+                        if (progress > 10) {
+                            downloadCallback.onProgressUpdate((int) progress);
+                        }
                         output.write(data, 0, byteCount);
                     }
                     output.flush();

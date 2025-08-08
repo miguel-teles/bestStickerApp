@@ -21,6 +21,7 @@ import io.github.miguelteles.beststickerapp.domain.pojo.Version;
 import io.github.miguelteles.beststickerapp.exception.StickerException;
 import io.github.miguelteles.beststickerapp.exception.handler.StickerExceptionHandler;
 import io.github.miguelteles.beststickerapp.services.UpdateAppService;
+import io.github.miguelteles.beststickerapp.services.VersionValidatorService;
 import io.github.miguelteles.beststickerapp.services.interfaces.DownloadCallback;
 import io.github.miguelteles.beststickerapp.view.recyclerViewAdapters.updateChanges.UpdateChangesAdapter;
 
@@ -30,6 +31,7 @@ public class DownloadUpdateAppActivity extends AppCompatActivity {
     private TextView txtUpdateActivityMessage;
     private RecyclerView changesRecyclerView;
     private UpdateAppService updateAppService;
+    private VersionValidatorService versionValidatorService;
     private TextView btnDownloadUpdate;
     private ProgressBar pgbDownloadUpdate;
     private Version version;
@@ -42,7 +44,12 @@ public class DownloadUpdateAppActivity extends AppCompatActivity {
         loadContentFromIntent();
 
         declareComponents();
-        updateAppService = new UpdateAppService(version);
+        try {
+            updateAppService = new UpdateAppService(version);
+            versionValidatorService = VersionValidatorService.getInstance();
+        } catch (StickerException ex) {
+            StickerExceptionHandler.handleException(ex, this);
+        }
         loadVersionDescriptionTexts();
         loadUpdateChangesList();
         loadOnClickListeners();
@@ -62,7 +69,7 @@ public class DownloadUpdateAppActivity extends AppCompatActivity {
     private void loadOnClickListeners() {
         Context context = this;
 
-        File downloadedApk = updateAppService.verifyDownloadedApkVersion();
+        File downloadedApk = versionValidatorService.verifyDownloadedApkVersion(version);
         if (downloadedApk != null) {
             btnDownloadUpdateOnClickListenerSkip(downloadedApk, context);
         } else {
@@ -81,7 +88,7 @@ public class DownloadUpdateAppActivity extends AppCompatActivity {
     private void btnDownloadUpdateOnClickListenerDownload(Context context) {
         btnDownloadUpdate.setOnClickListener(v -> {
             changeBtnDownloadDesignOnClick();
-            updateAppService.downloadUpdate(version.getVersion(), createDownloadCallback(context));
+            updateAppService.downloadUpdate(createDownloadCallback(context));
         });
     }
 
