@@ -87,6 +87,7 @@ public class StickerPackDetailsActivity extends AddStickerPackToWhatsappActivity
         super.onResume();
         try {
             stickerPack = stickerPackService.fetchStickerPackAssets(stickerPack);
+            hidePreviousExpandedStickerPreview();
             loadStickersOnScreen();
             setBtnAddToWhatsappProperties();
         } catch (StickerException ex) {
@@ -97,7 +98,7 @@ public class StickerPackDetailsActivity extends AddStickerPackToWhatsappActivity
     private void setBtnAddToWhatsappProperties() {
         Context context = this;
         if (stickerPack.getStickers() != null && stickerPack.getStickers().size() < 3) {
-            btnAddToWhatsapp.setOnClickListener( v -> Toast.makeText(context, R.string.not_enough_stickers_to_add_to_whatsapp, Toast.LENGTH_LONG).show());
+            btnAddToWhatsapp.setOnClickListener(v -> Toast.makeText(context, R.string.not_enough_stickers_to_add_to_whatsapp, Toast.LENGTH_LONG).show());
             btnAddToWhatsapp.setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.shape_btn_default_disabled, null));
 
             txtNotEnoughStickers.setVisibility(View.VISIBLE);
@@ -154,6 +155,12 @@ public class StickerPackDetailsActivity extends AddStickerPackToWhatsappActivity
                 this,
                 this);
         recyclerView.setAdapter(stickerPreviewAdapter);
+    }
+
+    private void hidePreviousExpandedStickerPreview() {
+        if (stickerPreviewAdapter != null) {
+            stickerPreviewAdapter.hideExpandedStickerPreview();
+        }
     }
 
     private void declareGlobalComponents() {
