@@ -3,6 +3,7 @@ package io.github.miguelteles.beststickerapp.services.client;
 import android.content.Context;
 
 import java.io.IOException;
+import java.net.SocketTimeoutException;
 
 import io.github.miguelteles.beststickerapp.BuildConfig;
 import io.github.miguelteles.beststickerapp.domain.pojo.ResponseAPIAppLatestVersion;
@@ -27,7 +28,9 @@ public class GetDownloadAppUrlAPIImpl extends HttpClient implements GetDownloadA
         Call call = this.get("/download-link?versionName=" + versionName);
         try (Response response = call.execute()) {
             return Utils.getGson().fromJson(response.body().string(), ResponseAPIGetDownloadAppUrl.class);
-        } catch (IOException ex) {
+        } catch (SocketTimeoutException ex) {
+            throw new StickerWebCommunicationException(ex, StickerWebCommunicationExceptionEnum.TIMEOUT, "/download-link");
+        }  catch (IOException ex) {
             throw new StickerWebCommunicationException(ex, StickerWebCommunicationExceptionEnum.POST, "Erro ao buscar link de download da nova versão.");
         }
     }

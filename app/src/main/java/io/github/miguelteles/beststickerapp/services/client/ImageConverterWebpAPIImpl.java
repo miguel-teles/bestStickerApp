@@ -5,6 +5,7 @@ import android.content.Context;
 import com.google.gson.Gson;
 
 import java.io.IOException;
+import java.net.SocketTimeoutException;
 
 import io.github.miguelteles.beststickerapp.BuildConfig;
 import io.github.miguelteles.beststickerapp.domain.pojo.ConvertImageToWebpRQ;
@@ -30,7 +31,9 @@ public class ImageConverterWebpAPIImpl extends HttpClient implements ImageConver
         Call call = this.post("/converter", gson.toJson(new ConvertImageToWebpRQ(imageInBase64)));
         try (Response response = call.execute()) {
             return gson.fromJson(response.body().string(), ResponseAPIConvertedWebp.class);
-        } catch (IOException ex) {
+        } catch (SocketTimeoutException ex) {
+            throw new StickerWebCommunicationException(ex, StickerWebCommunicationExceptionEnum.TIMEOUT, "/converter");
+        }  catch (IOException ex) {
             handleIOException(ex);
             return null;
         }

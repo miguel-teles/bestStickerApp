@@ -3,6 +3,7 @@ package io.github.miguelteles.beststickerapp.services.client;
 import android.content.Context;
 
 import java.io.IOException;
+import java.net.SocketTimeoutException;
 
 import io.github.miguelteles.beststickerapp.BuildConfig;
 import io.github.miguelteles.beststickerapp.domain.pojo.ResponseAPIAppLatestVersion;
@@ -26,7 +27,9 @@ public class GetLatestAppVersionAPIImpl extends HttpClient implements GetLatestA
         Call call = this.get("/latest-version");
         try (Response response = call.execute()) {
             return Utils.getGson().fromJson(response.body().string(), ResponseAPIAppLatestVersion.class);
-        } catch (IOException ex) {
+        } catch (SocketTimeoutException ex) {
+            throw new StickerWebCommunicationException(ex, StickerWebCommunicationExceptionEnum.TIMEOUT, "/latest-version");
+        }  catch (IOException ex) {
             throw new StickerWebCommunicationException(ex, StickerWebCommunicationExceptionEnum.POST, "Erro ao checkar por uma nova versão do aplicativo.");
         }
     }

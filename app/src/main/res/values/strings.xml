@@ -76,4 +76,5 @@
     <string name="NO_INTERNET_ACCESS" translatable="false">É preciso estar conectado a internet para acessar essa funcionalidade</string>
     <string name="DOWNLOAD_UPDATE_EXCEPTION">Erro ao baixar a atualização do app</string>
     <string name="GET_UPDATE_LINK">Erro ao buscar link da atualização</string>
+    <string name="TIMEOUT">Timeout, que chato!</string>
 </resources>

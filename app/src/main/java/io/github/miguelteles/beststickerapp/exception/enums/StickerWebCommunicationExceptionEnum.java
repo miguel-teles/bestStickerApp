@@ -7,7 +7,8 @@ public enum StickerWebCommunicationExceptionEnum {
 
     POST(R.string.POST),
     NO_INTERNET_ACCESS(R.string.NO_INTERNET_ACCESS),
-    DOWNLOAD_UPDATE_EXCEPTION(R.string.DOWNLOAD_UPDATE_EXCEPTION);
+    DOWNLOAD_UPDATE_EXCEPTION(R.string.DOWNLOAD_UPDATE_EXCEPTION),
+    TIMEOUT(R.string.TIMEOUT);
 
     int mResourceId;
 
