@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
@@ -263,6 +264,12 @@ public class StickerPackService {
             pack.setStickers(stickerService.fetchAllStickerFromPackWithoutAssets(pack.getIdentifier()));
         }
         return packs;
+    }
+
+    public StickerPack fetchStickerPackWithoutAssets(UUID identifier) throws StickerException {
+        StickerPack pack = stickerPackRepository.findById(identifier);
+        pack.setStickers(stickerService.fetchAllStickerFromPackWithoutAssets(pack.getIdentifier()));
+        return pack;
     }
 
     public byte[] fetchStickerPackAsset(@NonNull String folderName, @NonNull String stickerPackImageFileName) throws StickerFolderException {

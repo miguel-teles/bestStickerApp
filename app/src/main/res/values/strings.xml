@@ -41,7 +41,7 @@
     <string name="allowed">Permitido :D</string>
     <string name="skip_already_downloaded">Já baixado, próxima etapa!</string>
     <string name="install_version">Instalar nova versão</string>
-
+    <string name="details_pack_already_added">Pack has been already added to WhatsApp, please close and open WhatsApp again to reflect the new stickers</string>
 
     <!-- Exception enums   -->
     <string name="MKDIR" translatable="false">Erro ao criar pasta</string>
@@ -74,7 +74,7 @@
     <string name="INVALID_STICKER_PACK" translatable="false">Invalid sticker pack</string>
     <string name="POST" translatable="false">Erro ao executar HTTP POST</string>
     <string name="NO_INTERNET_ACCESS" translatable="false">É preciso estar conectado a internet para acessar essa funcionalidade</string>
-    <string name="DOWNLOAD_UPDATE_EXCEPTION">Erro ao baixar a atualização do app</string>
-    <string name="GET_UPDATE_LINK">Erro ao buscar link da atualização</string>
-    <string name="TIMEOUT">Timeout, que chato!</string>
+    <string name="DOWNLOAD_UPDATE_EXCEPTION" translatable="false">Erro ao baixar a atualização do app</string>
+    <string name="GET_UPDATE_LINK" translatable="false">Erro ao buscar link da atualização</string>
+    <string name="TIMEOUT" translatable="false">Timeout, que chato!</string>
 </resources>

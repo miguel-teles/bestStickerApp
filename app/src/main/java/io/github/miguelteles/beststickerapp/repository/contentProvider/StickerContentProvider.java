@@ -43,6 +43,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 public class StickerContentProvider extends ContentProvider {
 
@@ -213,10 +214,7 @@ public class StickerContentProvider extends ContentProvider {
 
     private List<StickerPack> getStickerPackList() {
         try {
-            if (stickerPackList == null || isStickerPackListOutdated) {
-                stickerPackList = stickerPackService.fetchAllStickerPacksWithoutAssets();
-                isStickerPackListOutdated = false;
-            }
+            stickerPackList = stickerPackService.fetchAllStickerPacksWithoutAssets();
             return stickerPackList;
         } catch (StickerException ex) {
             StickerExceptionHandler.handleException(ex, this.context);
@@ -229,14 +227,18 @@ public class StickerContentProvider extends ContentProvider {
     }
 
     private Cursor getCursorForSingleStickerPack(@NonNull Uri uri) {
-        final String identifier = uri.getLastPathSegment();
-        for (StickerPack stickerPack : getStickerPackList()) {
+        try {
+            final String identifier = uri.getLastPathSegment();
+            StickerPack stickerPack = stickerPackService.fetchStickerPackWithoutAssets(UUID.fromString(identifier));
             if (identifier.equals(stickerPack.getIdentifier().toString())) {
                 return getStickerPackInfo(uri, Collections.singletonList(stickerPack));
             }
-        }
 
-        return getStickerPackInfo(uri, new ArrayList<>());
+            return getStickerPackInfo(uri, new ArrayList<>());
+        } catch (StickerException ex) {
+            StickerExceptionHandler.handleException(ex, this.context);
+            throw new RuntimeException(ex);
+        }
     }
 
     @NonNull

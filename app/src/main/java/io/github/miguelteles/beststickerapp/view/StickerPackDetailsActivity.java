@@ -12,6 +12,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.format.Formatter;
 import android.view.Menu;
@@ -27,6 +28,8 @@ import androidx.core.content.res.ResourcesCompat;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.lang.ref.WeakReference;
+
 import io.github.miguelteles.beststickerapp.R;
 import io.github.miguelteles.beststickerapp.domain.entity.Sticker;
 import io.github.miguelteles.beststickerapp.domain.entity.StickerPack;
@@ -36,6 +39,7 @@ import io.github.miguelteles.beststickerapp.services.FileResourceManagement;
 import io.github.miguelteles.beststickerapp.services.StickerPackService;
 import io.github.miguelteles.beststickerapp.services.interfaces.OperationCallback;
 import io.github.miguelteles.beststickerapp.services.interfaces.ResourcesManagement;
+import io.github.miguelteles.beststickerapp.validator.WhitelistCheck;
 import io.github.miguelteles.beststickerapp.view.recyclerViewAdapters.stickers.StickerPreviewAdapter;
 
 public class StickerPackDetailsActivity extends AddStickerPackToWhatsappActivity {
@@ -54,6 +58,7 @@ public class StickerPackDetailsActivity extends AddStickerPackToWhatsappActivity
     private StickerPackService stickerPackService;
     private ResourcesManagement resourcesManagement;
     private ProgressBar progressBar;
+    private TextView alreadyAddedText;
 
     private TextView txtNotEnoughStickers;
 
@@ -90,6 +95,8 @@ public class StickerPackDetailsActivity extends AddStickerPackToWhatsappActivity
             hidePreviousExpandedStickerPreview();
             loadStickersOnScreen();
             setBtnAddToWhatsappProperties();
+
+            new WhiteListCheckAsyncTask(this).execute(stickerPack);
         } catch (StickerException ex) {
             StickerExceptionHandler.handleException(ex, this);
         }
@@ -173,6 +180,7 @@ public class StickerPackDetailsActivity extends AddStickerPackToWhatsappActivity
         divider = findViewById(R.id.divider);
         progressBar = findViewById(R.id.pg_sticker_pack_edit);
         txtNotEnoughStickers = findViewById(R.id.txt_not_enough_stickers);
+        alreadyAddedText = findViewById(R.id.already_added_text);
     }
 
     private void setOnClickListeners() {
@@ -289,6 +297,45 @@ public class StickerPackDetailsActivity extends AddStickerPackToWhatsappActivity
             setBtnAddToWhatsappProperties();
         } catch (StickerException ex) {
             StickerExceptionHandler.handleException(ex, this);
+        }
+    }
+
+    private void updateAddUI(Boolean isWhitelisted) {
+        if (isWhitelisted) {
+            btnAddToWhatsapp.setVisibility(View.GONE);
+            alreadyAddedText.setVisibility(View.VISIBLE);
+            txtNotEnoughStickers.setVisibility(View.GONE);
+            findViewById(R.id.sticker_pack_details_tap_to_preview).setVisibility(View.GONE);
+        } else {
+            btnAddToWhatsapp.setVisibility(View.VISIBLE);
+            alreadyAddedText.setVisibility(View.GONE);
+            findViewById(R.id.sticker_pack_details_tap_to_preview).setVisibility(View.VISIBLE);
+        }
+    }
+
+    static class WhiteListCheckAsyncTask extends AsyncTask<StickerPack, Void, Boolean> {
+        private final WeakReference<StickerPackDetailsActivity> stickerPackDetailsActivityWeakReference;
+
+        WhiteListCheckAsyncTask(StickerPackDetailsActivity stickerPackListActivity) {
+            this.stickerPackDetailsActivityWeakReference = new WeakReference<>(stickerPackListActivity);
+        }
+
+        @Override
+        protected final Boolean doInBackground(StickerPack... stickerPacks) {
+            StickerPack stickerPack = stickerPacks[0];
+            final StickerPackDetailsActivity stickerPackDetailsActivity = stickerPackDetailsActivityWeakReference.get();
+            if (stickerPackDetailsActivity == null) {
+                return false;
+            }
+            return WhitelistCheck.isWhitelisted(stickerPackDetailsActivity, stickerPack.getIdentifier());
+        }
+
+        @Override
+        protected void onPostExecute(Boolean isWhitelisted) {
+            final StickerPackDetailsActivity stickerPackDetailsActivity = stickerPackDetailsActivityWeakReference.get();
+            if (stickerPackDetailsActivity != null) {
+                stickerPackDetailsActivity.updateAddUI(isWhitelisted);
+            }
         }
     }
 

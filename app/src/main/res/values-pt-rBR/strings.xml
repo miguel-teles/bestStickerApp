@@ -30,4 +30,6 @@
 	<string name="allowed">Permitido :D</string>
 	<string name="skip_already_downloaded">Já baixado, próxima etapa!</string>
 	<string name="install_version">Instalar nova versão</string>
+
+	<string name="details_pack_already_added">Pacote já foi adicionado! Para refletir alterações feitas, é necessário fechar e abrir o WhatsApp ou entrar e sair de uma conversa.</string>
 </resources>
