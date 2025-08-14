@@ -55,8 +55,6 @@ public class UpdateAppService {
 
     public void downloadUpdate(DownloadCallback downloadCallback) {
         executor.execute(() -> {
-
-
             try {
                 downloadCallback.onProgressUpdate(5);
                 ResponseAPIGetDownloadAppUrl downloadAppResponse = getDownloadAppUrlAPI.getDownloadAppUrl(version.getVersion());
