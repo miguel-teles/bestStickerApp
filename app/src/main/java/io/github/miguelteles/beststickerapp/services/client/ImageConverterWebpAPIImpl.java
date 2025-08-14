@@ -39,6 +39,20 @@ public class ImageConverterWebpAPIImpl extends HttpClient implements ImageConver
         }
     }
 
+    @Override
+    public void warm() throws StickerException {
+        Call call = this.post("/converter", "{\"warmup\": true}");
+        try (Response response = call.execute()) {
+            if (response.code() != 200) {
+                throw new StickerWebCommunicationException(null, StickerWebCommunicationExceptionEnum.POST, "warm up error");
+            }
+        } catch (SocketTimeoutException ex) {
+            throw new StickerWebCommunicationException(ex, StickerWebCommunicationExceptionEnum.TIMEOUT, "/converter");
+        }  catch (IOException ex) {
+            handleIOException(ex);
+        }
+    }
+
     private void handleIOException(IOException ex) throws StickerWebCommunicationException {
         if (this.isNetworkAvailable()) {
             throw new StickerWebCommunicationException(ex, StickerWebCommunicationExceptionEnum.POST, "Error converting image to webp via web service");

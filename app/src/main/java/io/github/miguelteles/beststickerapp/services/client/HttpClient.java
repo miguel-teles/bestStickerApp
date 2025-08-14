@@ -5,6 +5,8 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 
+import java.util.concurrent.TimeUnit;
+
 import io.github.miguelteles.beststickerapp.BuildConfig;
 import io.github.miguelteles.beststickerapp.exception.StickerException;
 import io.github.miguelteles.beststickerapp.exception.StickerFatalErrorException;
@@ -30,7 +32,9 @@ abstract class HttpClient {
         if (Utils.isNothing(secureToken)) {
             throw new StickerFatalErrorException(null, StickerFatalExceptionEnum.NO_SECURE_TOKEN_FOUND, "Ops! Há algo de muito errado com esta versão do aplicativo.");
         }
-        okHttpClient = new OkHttpClient();
+        okHttpClient = new OkHttpClient.Builder()
+                .connectTimeout(15, TimeUnit.SECONDS)
+                .build();
     }
 
     protected Call post(String endpoint, String bodyContent) throws StickerException {

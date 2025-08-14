@@ -6,4 +6,6 @@ import io.github.miguelteles.beststickerapp.exception.StickerException;
 public interface ImageConverterWebpAPI {
 
     ResponseAPIConvertedWebp convertImageToWebp(String imageInBase64) throws StickerException;
+
+    void warm() throws StickerException;
 }
