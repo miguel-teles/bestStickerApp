@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
+import io.github.miguelteles.beststickerapp.domain.pojo.VisualMediaType;
 import io.github.miguelteles.beststickerapp.exception.StickerFolderException;
 import io.github.miguelteles.beststickerapp.exception.enums.StickerFolderExceptionEnum;
 
@@ -53,7 +54,8 @@ public interface ResourcesManagement {
         }
     }
 
-    record Image(Uri originalImageFile, Uri resizedImageFile, byte[] residezImageFileInBytes) {
+    VisualMediaType getTypeOfVisualMedia(Uri uri) throws StickerFolderException;
 
+    record Image(Uri originalImageFile, Uri resizedImageFile, byte[] residezImageFileInBytes) {
     }
 }

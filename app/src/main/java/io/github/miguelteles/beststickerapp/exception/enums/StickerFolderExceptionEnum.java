@@ -18,6 +18,7 @@ public enum StickerFolderExceptionEnum {
     GET_PATH(R.string.GET_PATH),
     GET_FOLDER(R.string.GET_FOLDER),
     GET_FILE(R.string.GET_FILE),
+    GET_FILE_TYPE(R.string.GET_FILE_TYPE),
     CREATE_FOLDER_PACOTE(R.string.CREATE_FOLDER_PACOTE),
 
     COPY(R.string.COPY),

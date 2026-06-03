@@ -53,6 +53,7 @@
     <string name="GET_PATH" translatable="false">Erro ao encontrar local do arquivo</string>
     <string name="GET_FOLDER" translatable="false">Erro ao acessar pasta</string>
     <string name="GET_FILE" translatable="false">Erro ao abrir arquivo</string>
+    <string name="GET_FILE_TYPE" translatable="false">Erro ao definir o tipo do arquivo</string>
     <string name="CREATE_FOLDER_PACOTE" translatable="false">Erro ao criar pasta do pacote de figurinhas</string>
     <string name="COPY" translatable="false">Erro ao copiar arquivo ao destino novo</string>
     <string name="RESIZE" translatable="false">Erro ao mudar tamanho da imagem</string>

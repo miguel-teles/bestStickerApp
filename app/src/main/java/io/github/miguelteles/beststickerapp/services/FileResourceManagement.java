@@ -6,6 +6,8 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.provider.OpenableColumns;
 
+import com.google.common.net.MediaType;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -15,6 +17,7 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.github.miguelteles.beststickerapp.domain.pojo.VisualMediaType;
 import io.github.miguelteles.beststickerapp.exception.StickerFolderException;
 import io.github.miguelteles.beststickerapp.exception.enums.StickerFolderExceptionEnum;
 import io.github.miguelteles.beststickerapp.services.interfaces.ResourcesManagement;
@@ -256,6 +259,20 @@ public class FileResourceManagement implements ResourcesManagement {
         } catch (IOException e) {
             throw new StickerFolderException(e, StickerFolderExceptionEnum.CONVERT_FILE, "Erro ao converter imagem para .webp");
         }
+    }
+
+    @Override
+    public VisualMediaType getTypeOfVisualMedia(Uri uri) throws StickerFolderException {
+        String mimeType = contentResolver.getType(uri);
+
+        if (mimeType != null) {
+            if (mimeType.contains(MediaType.ANY_IMAGE_TYPE.type())) {
+                return VisualMediaType.IMAGE;
+            } else if (mimeType.contains(MediaType.ANY_VIDEO_TYPE.type())) {
+                return VisualMediaType.VIDEO;
+            }
+        }
+        throw new StickerFolderException(null, StickerFolderExceptionEnum.GET_FILE_TYPE, "Erro ao ler arquivo da uri");
     }
 
     public abstract static class DirectoryNames {
