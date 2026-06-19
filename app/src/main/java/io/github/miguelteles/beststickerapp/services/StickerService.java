@@ -8,6 +8,7 @@ import androidx.annotation.NonNull;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -20,10 +21,11 @@ import io.github.miguelteles.beststickerapp.exception.enums.StickerExceptionEnum
 import io.github.miguelteles.beststickerapp.exception.enums.StickerFolderExceptionEnum;
 import io.github.miguelteles.beststickerapp.repository.MyDatabase;
 import io.github.miguelteles.beststickerapp.repository.StickerRepository;
-import io.github.miguelteles.beststickerapp.services.interfaces.OperationCallback;
+import io.github.miguelteles.beststickerapp.services.interfaces.operationcallback.OnProgressUpdate;
 import io.github.miguelteles.beststickerapp.services.interfaces.ResourcesManagement;
+import io.github.miguelteles.beststickerapp.services.mediaconvertion.StickerImageConvertionService;
+import io.github.miguelteles.beststickerapp.services.mediaconvertion.StickerVideoConvertionService;
 import io.github.miguelteles.beststickerapp.utils.Utils;
-import io.github.miguelteles.beststickerapp.validator.MethodInputValidator;
 import io.github.miguelteles.beststickerapp.validator.StickerPackValidator;
 
 public class StickerService {
@@ -31,6 +33,7 @@ public class StickerService {
     private static StickerService instance;
     private final ResourcesManagement resourcesManagement;
     private final StickerImageConvertionService stickerImageConvertionService;
+    private final StickerVideoConvertionService stickerVideoConvertionService;
     private final StickerRepository stickerRepository;
     private final ContentResolver contentResolver;
     private final StickerPackValidator stickerPackValidator;
@@ -41,18 +44,21 @@ public class StickerService {
         resourcesManagement = FileResourceManagement.getInstance();
         contentResolver = context.getContentResolver();
         this.stickerImageConvertionService = StickerImageConvertionService.getInstance();
+        this.stickerVideoConvertionService = StickerVideoConvertionService.getInstance();
     }
 
     public StickerService(StickerRepository stickerRepository,
                           ResourcesManagement resourcesManagement,
                           ContentResolver contentResolver,
                           StickerPackValidator stickerPackValidator,
-                          StickerImageConvertionService stickerImageConvertionService) {
+                          StickerImageConvertionService stickerImageConvertionService,
+                          StickerVideoConvertionService stickerVideoConvertionService) {
         this.stickerRepository = stickerRepository;
         this.resourcesManagement = resourcesManagement;
         this.contentResolver = contentResolver;
         this.stickerPackValidator = stickerPackValidator;
         this.stickerImageConvertionService = stickerImageConvertionService;
+        this.stickerVideoConvertionService = stickerVideoConvertionService;
     }
 
     public static StickerService getInstance() throws StickerException {
@@ -64,20 +70,16 @@ public class StickerService {
 
     public Sticker createSticker(StickerPack stickerPack,
                                  Uri selectedStickerImage,
-                                 OperationCallback<Sticker> callbackClass) throws StickerException {
-        validateParametersCreateSticker(stickerPack, selectedStickerImage, callbackClass);
-        ResourcesManagement.Image copiedImages = null;
+                                 OnProgressUpdate callbackClass) throws StickerException {
+        SavedMedia savedMedia = null;
         try {
             callbackClass.onProgressUpdate(30);
             Uri stickerPackFolder = resourcesManagement.getOrCreateStickerPackDirectory(stickerPack.getFolderName());
-            copiedImages = stickerImageConvertionService.generateStickerImages(stickerPackFolder,
-                    selectedStickerImage,
-                    generateStickerImageName(),
-                    Sticker.STICKER_IMAGE_SIZE,
-                    false);
+            String stickerImageFile = generateStickerImageName();
+            savedMedia = convertAndSaveMedia(stickerPack, selectedStickerImage, stickerPackFolder, stickerImageFile);
 
             callbackClass.onProgressUpdate(50);
-            Sticker sticker = new Sticker(copiedImages.resizedImageFile().getLastPathSegment(), stickerPack.getIdentifier(), copiedImages.residezImageFileInBytes());
+            Sticker sticker = buildSticker(stickerPack, savedMedia);
             stickerPackValidator.validateSticker(stickerPack.getIdentifier(), sticker, stickerPack.isAnimatedStickerPack());
             stickerRepository.save(sticker);
 
@@ -86,26 +88,83 @@ public class StickerService {
         } catch (StickerException ex) {
             throw ex;
         } catch (Exception ex) {
-            deleteStickerImages(copiedImages);
+            deleteStickerImages(savedMedia);
             throw new StickerException(ex, StickerExceptionEnum.CSP, null);
         }
-
     }
 
-    private void deleteStickerImages(ResourcesManagement.Image copiedImages) {
+    @NonNull
+    private static Sticker buildSticker(StickerPack stickerPack, SavedMedia savedMedia) {
+        return new Sticker(savedMedia.savedImage().getLastPathSegment(), stickerPack.getIdentifier(), savedMedia.stickerImageInBytes());
+    }
+
+    @NonNull
+    private SavedMedia convertAndSaveMedia(StickerPack stickerPack, Uri selectedStickerImage, Uri stickerPackFolder, String stickerImageFile) throws StickerException {
+        if (stickerPack.isStandardStickerPack()) {
+            return convertToStaticWebpAndSave(selectedStickerImage, stickerPackFolder, stickerImageFile);
+        } else {
+            return convertToAnimatedWebpAndSave(selectedStickerImage, stickerPackFolder, stickerImageFile);
+        }
+    }
+
+    @NonNull
+    private SavedMedia convertToAnimatedWebpAndSave(Uri selectedStickerImage, Uri stickerPackFolder, String stickerImageFile) throws StickerException {
+        ResourcesManagement.Media copiedImages = stickerVideoConvertionService.generateConvertedMedia(stickerPackFolder,
+                selectedStickerImage,
+                stickerImageFile);
+        Uri savedImage = saveConvertedVideoToDevice(stickerImageFile,
+                stickerPackFolder,
+                copiedImages.getLinkToDownloadMedia());
+        return new SavedMedia(resourcesManagement.getContentAsBytes(savedImage),
+                savedImage);
+    }
+
+    @NonNull
+    private SavedMedia convertToStaticWebpAndSave(Uri selectedStickerImage, Uri stickerPackFolder, String stickerImageFile) throws StickerException {
+        ResourcesManagement.Media copiedImages = stickerImageConvertionService.generateConvertedMedia(stickerPackFolder,
+                selectedStickerImage,
+                stickerImageFile,
+                Sticker.STICKER_IMAGE_SIZE,
+                false);
+        return new SavedMedia(copiedImages.getConvertedMedia(),
+                saveConvertedImageToDevice(stickerPackFolder, copiedImages.getConvertedMedia()));
+    }
+
+    private record SavedMedia(byte[] stickerImageInBytes, Uri savedImage) {
+    }
+
+    private Uri saveConvertedVideoToDevice(String stickerImageFile,
+                                           Uri stickerPackFile,
+                                           URL linkToDownloadMedia) throws StickerFolderException {
+        Uri stickerUri = resourcesManagement.getOrCreateFile(stickerPackFile, stickerImageFile);
+
+        this.resourcesManagement.downloadFile(
+                linkToDownloadMedia,
+                resourcesManagement.getFileFromURI(stickerUri));
+        return stickerUri;
+    }
+
+    private Uri saveConvertedImageToDevice(@NonNull Uri stickerPackFolder,
+                                           byte[] convertImageToWebp) throws StickerFolderException {
+        return this.resourcesManagement.saveFileToDevice(
+                stickerPackFolder,
+                createNameConvertedImageFile(stickerPackFolder),
+                convertImageToWebp
+        );
+    }
+
+    private String createNameConvertedImageFile(@NonNull Uri stickerPackFolder) {
+        return stickerPackFolder.getLastPathSegment().replace(this.resourcesManagement.getFileExtension(stickerPackFolder, true), ".webp");
+    }
+
+    private void deleteStickerImages(SavedMedia savedMedia) {
         try {
-            resourcesManagement.deleteFile(copiedImages.resizedImageFile());
+            if (savedMedia != null) {
+                resourcesManagement.deleteFile(savedMedia.savedImage());
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
-
-    private void validateParametersCreateSticker(StickerPack stickerPack, Uri selectedStickerImage, OperationCallback<Sticker> callbackClass) {
-        MethodInputValidator.requireNotNull(stickerPack, "StickerPack");
-        MethodInputValidator.requireNotNull(stickerPack.getIdentifier(), "StickerPack identifier");
-        MethodInputValidator.requireNotEmpty(stickerPack.getFolderName(), "StickerPack folder");
-        MethodInputValidator.requireNotNull(selectedStickerImage, "SelectedStickerImage");
-        MethodInputValidator.requireNotNull(callbackClass, "CallbackClass");
     }
 
     public void deleteSticker(Sticker sticker,

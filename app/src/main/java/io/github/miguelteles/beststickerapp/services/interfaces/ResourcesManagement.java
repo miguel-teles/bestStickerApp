@@ -2,9 +2,13 @@ package io.github.miguelteles.beststickerapp.services.interfaces;
 
 import android.net.Uri;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.util.List;
 
 import io.github.miguelteles.beststickerapp.domain.pojo.VisualMediaType;
@@ -16,7 +20,8 @@ public interface ResourcesManagement {
     Uri getBaseFolder();
     Uri getCacheFolder();
     Uri getCertificateFolder();
-    Uri getOrCreateFile(Uri folder, String fileName) throws StickerFolderException;
+    Uri getOrCreateFile(@NotNull Uri folder, @NotNull String fileName) throws StickerFolderException;
+    File getFileFromURI(@NotNull Uri file) throws StickerFolderException;
     Uri getOrCreateStickerPackDirectory(String folderName);
     Uri getOrCreateLogsDirectory();
     Uri getOrCreateLogErrorsDirectory();
@@ -37,6 +42,12 @@ public interface ResourcesManagement {
 
     void writeToFile(Uri destinationFile, InputStream inputStream) throws StickerFolderException;
 
+    Uri saveFileToDevice(Uri stickerPackFolder, String filename, byte[] file) throws StickerFolderException;
+
+    File downloadFile(URL url, File destinationFile) throws StickerFolderException;
+
+    VisualMediaType getTypeOfVisualMedia(Uri uri) throws StickerFolderException;
+
     default byte[] readBytesFromInputStream(InputStream inputStream) throws StickerFolderException {
         try (final ByteArrayOutputStream buffer = new ByteArrayOutputStream()) {
             if (inputStream == null) {
@@ -54,8 +65,57 @@ public interface ResourcesManagement {
         }
     }
 
-    VisualMediaType getTypeOfVisualMedia(Uri uri) throws StickerFolderException;
+    class Media {
+        private final Uri originalImageFile;
+        private final byte[] convertedMedia;
+        private final URL linkToDownloadMedia;
 
-    record Image(Uri originalImageFile, Uri resizedImageFile, byte[] residezImageFileInBytes) {
+        private Media(Builder builder) {
+            this.originalImageFile = builder.originalImageFile;
+            this.convertedMedia = builder.convertedMedia;
+            this.linkToDownloadMedia = builder.linkToDownloadMedia;
+        }
+
+        public static Builder builder() {
+            return new Builder();
+        }
+
+        public Uri getOriginalImageFile() {
+            return originalImageFile;
+        }
+
+        public byte[] getConvertedMedia() {
+            return convertedMedia;
+        }
+
+        public URL getLinkToDownloadMedia() {
+            return linkToDownloadMedia;
+        }
+
+        public static class Builder {
+
+            private Uri originalImageFile;
+            private byte[] convertedMedia;
+            private URL linkToDownloadMedia;
+
+            public Builder originalImageFile(Uri originalImageFile) {
+                this.originalImageFile = originalImageFile;
+                return this;
+            }
+
+            public Builder convertedMedia(byte[] convertedMedia) {
+                this.convertedMedia = convertedMedia;
+                return this;
+            }
+
+            public Builder linkToDownloadMedia(URL linkToDownloadMedia) {
+                this.linkToDownloadMedia = linkToDownloadMedia;
+                return this;
+            }
+
+            public Media build() {
+                return new Media(this);
+            }
+        }
     }
 }

@@ -10,7 +10,6 @@ package io.github.miguelteles.beststickerapp.view;
 
 import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -36,11 +35,12 @@ import io.github.miguelteles.beststickerapp.domain.entity.StickerPack;
 import io.github.miguelteles.beststickerapp.exception.StickerException;
 import io.github.miguelteles.beststickerapp.exception.handler.StickerExceptionHandler;
 import io.github.miguelteles.beststickerapp.services.FileResourceManagement;
-import io.github.miguelteles.beststickerapp.services.StickerPackService;
-import io.github.miguelteles.beststickerapp.services.interfaces.OperationCallback;
 import io.github.miguelteles.beststickerapp.services.interfaces.ResourcesManagement;
+import io.github.miguelteles.beststickerapp.services.interfaces.operationcallback.OperationCallback;
 import io.github.miguelteles.beststickerapp.validator.WhitelistCheck;
 import io.github.miguelteles.beststickerapp.view.recyclerViewAdapters.stickers.StickerPreviewAdapter;
+import io.github.miguelteles.beststickerapp.viewmodel.StickerPackViewModel;
+import io.github.miguelteles.beststickerapp.viewmodel.StickerViewModel;
 
 public class StickerPackDetailsActivity extends AddStickerPackToWhatsappActivity {
 
@@ -55,7 +55,8 @@ public class StickerPackDetailsActivity extends AddStickerPackToWhatsappActivity
     private ImageView btnEditStickerPack;
     private ImageView btnDeleteStickerPack;
     private ImageView btnGoBack;
-    private StickerPackService stickerPackService;
+    private StickerPackViewModel stickerPackViewModel;
+    private StickerViewModel stickerViewModel;
     private ResourcesManagement resourcesManagement;
     private ProgressBar progressBar;
     private TextView alreadyAddedText;
@@ -70,7 +71,8 @@ public class StickerPackDetailsActivity extends AddStickerPackToWhatsappActivity
 
         declareGlobalComponents();
         try {
-            stickerPackService = StickerPackService.getInstance();
+            stickerViewModel = StickerViewModel.getInstance();
+            stickerPackViewModel = StickerPackViewModel.getInstance();
             resourcesManagement = FileResourceManagement.getInstance();
         } catch (StickerException ex) {
             StickerExceptionHandler.handleException(ex, this);
@@ -91,7 +93,7 @@ public class StickerPackDetailsActivity extends AddStickerPackToWhatsappActivity
     protected void onResume() {
         super.onResume();
         try {
-            stickerPack = stickerPackService.fetchStickerPackAssets(stickerPack);
+            stickerPack = stickerPackViewModel.fetchStickerPackAssets(stickerPack);
             hidePreviousExpandedStickerPreview();
             loadStickersOnScreen();
             setBtnAddToWhatsappProperties();
@@ -208,20 +210,14 @@ public class StickerPackDetailsActivity extends AddStickerPackToWhatsappActivity
         Context context = this;
         AlertDialog.Builder alertBuilder = new AlertDialog.Builder(this, R.style.alertDialogStyle);
         alertBuilder.setMessage(R.string.SURE_DELETE_STICKER_PACK)
-                .setPositiveButton(R.string.YES_SIR, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        progressBar.setVisibility(View.VISIBLE);
-                        stickerPackService.deleteStickerPack(stickerPack, createStickerPackDeletionCallback(context));
-                        Intent intent = new Intent(context, StickerPackListActivity.class);
-                        startActivity(intent);
-                    }
-                })
-                .setNegativeButton(R.string.NOT_TODAY, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                    }
-                }).create().show();
+                .setPositiveButton(R.string.YES_SIR,
+                        (dialog, which) -> {
+                            progressBar.setVisibility(View.VISIBLE);
+                            stickerPackViewModel.deleteStickerPack(stickerPack, createStickerPackDeletionCallback(context));
+                            Intent intent = new Intent(context, StickerPackListActivity.class);
+                            startActivity(intent);
+                        })
+                .setNegativeButton(R.string.NOT_TODAY, (dialog, which) -> {}).create().show();
     }
 
     private OperationCallback<StickerPack> createStickerPackDeletionCallback(Context context) {
@@ -291,7 +287,7 @@ public class StickerPackDetailsActivity extends AddStickerPackToWhatsappActivity
 
     public void deleteSticker(Sticker sticker, StickerPack stickerPack) {
         try {
-            this.stickerPackService.deleteSticker(sticker, stickerPack);
+            this.stickerViewModel.deleteSticker(sticker, stickerPack);
             stickerPack.getStickers().remove(sticker);
             loadStickersOnScreen();
             setBtnAddToWhatsappProperties();

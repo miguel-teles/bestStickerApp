@@ -29,11 +29,12 @@ import io.github.miguelteles.beststickerapp.domain.pojo.Version;
 import io.github.miguelteles.beststickerapp.exception.StickerException;
 import io.github.miguelteles.beststickerapp.exception.handler.StickerExceptionHandler;
 import io.github.miguelteles.beststickerapp.services.VersionValidatorService;
-import io.github.miguelteles.beststickerapp.services.StickerPackService;
+
 import io.github.miguelteles.beststickerapp.validator.WhitelistCheck;
 import io.github.miguelteles.beststickerapp.view.dialogs.UpdateDialogFragment;
 import io.github.miguelteles.beststickerapp.view.recyclerViewAdapters.stickerpacks.StickerPackListAdapter;
 import io.github.miguelteles.beststickerapp.view.recyclerViewAdapters.stickerpacks.StickerPackListItemViewHolder;
+import io.github.miguelteles.beststickerapp.viewmodel.StickerPackViewModel;
 
 
 public class StickerPackListActivity extends AddStickerPackToWhatsappActivity {
@@ -45,7 +46,7 @@ public class StickerPackListActivity extends AddStickerPackToWhatsappActivity {
     private WhiteListCheckAsyncTask whiteListCheckAsyncTask;
     private ArrayList<StickerPack> stickerPackList;
     private TextView btnCreateNewStickerPack;
-    private StickerPackService stickerPackService;
+    private StickerPackViewModel stickerPackViewModel;
     private VersionValidatorService versionValidatorService;
 
 
@@ -67,18 +68,13 @@ public class StickerPackListActivity extends AddStickerPackToWhatsappActivity {
     }
 
     private VersionValidatorService.CheckLatestVersionCallback createNewVersionAvailableCallback() {
-        return new VersionValidatorService.CheckLatestVersionCallback() {
-            @Override
-            public void onUpdateAvailable(Version version) {
-                new UpdateDialogFragment(version).show(getSupportFragmentManager(), "updateDialog");
-            }
-        };
+        return version -> new UpdateDialogFragment(version).show(getSupportFragmentManager(), "updateDialog");
     }
 
     private void initializeServices() {
         try {
-            stickerPackService = StickerPackService.getInstance();
-            stickerPackList = new ArrayList<>(stickerPackService.fetchAllStickerPacksWithAssets());
+            stickerPackViewModel = StickerPackViewModel.getInstance();
+            stickerPackList = new ArrayList<>(stickerPackViewModel.fetchAllStickerPacksWithAssets());
             versionValidatorService = VersionValidatorService.getInstance();
         } catch (StickerException ex) {
             StickerExceptionHandler.handleException(ex, this);
@@ -89,7 +85,7 @@ public class StickerPackListActivity extends AddStickerPackToWhatsappActivity {
     protected void onResume() {
         super.onResume();
         try {
-            stickerPackList = new ArrayList<>(stickerPackService.fetchAllStickerPacksWithAssets());
+            stickerPackList = new ArrayList<>(stickerPackViewModel.fetchAllStickerPacksWithAssets());
             whiteListCheckAsyncTask = new WhiteListCheckAsyncTask(this);
             whiteListCheckAsyncTask.execute(stickerPackList.toArray(new StickerPack[0]));
         } catch (StickerException ex) {

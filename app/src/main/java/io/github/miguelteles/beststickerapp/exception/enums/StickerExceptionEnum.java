@@ -11,7 +11,10 @@ public enum StickerExceptionEnum {
     FS(R.string.FETCH_STICKER),
     FSP(R.string.FETCH_STICKER_PACK),
     ISP(R.string.INVALID_STICKER_PACK),
-    GUL(R.string.GET_UPDATE_LINK);
+    GUL(R.string.GET_UPDATE_LINK),
+    END(R.string.NOT_DEFINED_EXCEPTION),
+    WTSP(R.string.WRONG_TYPE_STICKER_PACK),
+    IDL(R.string.INVALID_DOWNLOAD_LINK);
 
 
     final int resourceId;

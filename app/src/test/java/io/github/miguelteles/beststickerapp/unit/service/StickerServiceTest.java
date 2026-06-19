@@ -5,7 +5,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 import android.content.ContentResolver;
-import android.content.ContentValues;
 import android.net.Uri;
 
 import org.junit.Before;
@@ -26,9 +25,9 @@ import io.github.miguelteles.beststickerapp.domain.entity.StickerPack;
 import io.github.miguelteles.beststickerapp.exception.StickerException;
 import io.github.miguelteles.beststickerapp.integration.stickerPack.StickerContentProviderTest;
 import io.github.miguelteles.beststickerapp.repository.StickerRepository;
-import io.github.miguelteles.beststickerapp.services.StickerImageConvertionService;
+import io.github.miguelteles.beststickerapp.services.mediaconvertion.StickerImageConvertionService;
 import io.github.miguelteles.beststickerapp.services.StickerService;
-import io.github.miguelteles.beststickerapp.services.interfaces.OperationCallback;
+import io.github.miguelteles.beststickerapp.services.interfaces.operationcallback.OperationCallback;
 import io.github.miguelteles.beststickerapp.services.interfaces.ResourcesManagement;
 import io.github.miguelteles.beststickerapp.utils.Utils;
 import io.github.miguelteles.beststickerapp.validator.StickerPackValidator;
@@ -96,10 +95,10 @@ public class StickerServiceTest {
                 return "falagalera.jpg";
             }
         });
-        when(stickerImageConvertionService.generateStickerImages(any(Uri.class), any(Uri.class), any(String.class), any(Integer.class), any(Boolean.class))).then(new Answer<ResourcesManagement.Image>() {
+        when(stickerImageConvertionService.generateConvertedMedia(any(Uri.class), any(Uri.class), any(String.class), any(Integer.class), any(Boolean.class))).then(new Answer<ResourcesManagement.Media>() {
             @Override
-            public ResourcesManagement.Image answer(InvocationOnMock invocation) throws Throwable {
-                return new ResourcesManagement.Image(uri,
+            public ResourcesManagement.Media answer(InvocationOnMock invocation) throws Throwable {
+                return new ResourcesManagement.Media(uri,
                         uri,
                         new byte[]{1,1,1,1,1,1,1,1});
             }

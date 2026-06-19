@@ -27,11 +27,11 @@ import io.github.miguelteles.beststickerapp.domain.entity.StickerPack;
 import io.github.miguelteles.beststickerapp.exception.StickerException;
 import io.github.miguelteles.beststickerapp.exception.StickerFolderException;
 import io.github.miguelteles.beststickerapp.services.FileResourceManagement;
-import io.github.miguelteles.beststickerapp.services.StickerImageConvertionService;
+import io.github.miguelteles.beststickerapp.services.mediaconvertion.StickerImageConvertionService;
 import io.github.miguelteles.beststickerapp.services.StickerPackService;
 import io.github.miguelteles.beststickerapp.services.StickerService;
 import io.github.miguelteles.beststickerapp.services.client.ImageConverterWebpAPIImpl;
-import io.github.miguelteles.beststickerapp.services.interfaces.OperationCallback;
+import io.github.miguelteles.beststickerapp.services.interfaces.operationcallback.OperationCallback;
 import io.github.miguelteles.beststickerapp.services.interfaces.ResourcesManagement;
 import io.github.miguelteles.beststickerapp.validator.StickerPackValidator;
 

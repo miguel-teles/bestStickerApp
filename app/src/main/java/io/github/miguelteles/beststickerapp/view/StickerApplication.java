@@ -20,7 +20,7 @@ import com.facebook.drawee.backends.pipeline.Fresco;
 import java.util.HashSet;
 import java.util.Set;
 
-import io.github.miguelteles.beststickerapp.services.StickerImageConvertionWarmer;
+import io.github.miguelteles.beststickerapp.services.mediaconvertion.StickerImageConvertionWarmer;
 
 public class StickerApplication extends Application {
 

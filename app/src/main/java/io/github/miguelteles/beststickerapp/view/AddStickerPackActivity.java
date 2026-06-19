@@ -1,12 +1,16 @@
 package io.github.miguelteles.beststickerapp.view;
 
+import static android.view.View.INVISIBLE;
+
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
+import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -15,18 +19,18 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.res.ResourcesCompat;
 
-import io.github.miguelteles.beststickerapp.R;
-import io.github.miguelteles.beststickerapp.exception.StickerException;
-import io.github.miguelteles.beststickerapp.exception.handler.StickerExceptionHandler;
-import io.github.miguelteles.beststickerapp.exception.enums.StickerExceptionEnum;
-import io.github.miguelteles.beststickerapp.domain.entity.StickerPack;
-import io.github.miguelteles.beststickerapp.services.FileResourceManagement;
-import io.github.miguelteles.beststickerapp.services.StickerPackService;
-import io.github.miguelteles.beststickerapp.services.interfaces.OperationCallback;
-import io.github.miguelteles.beststickerapp.services.interfaces.ResourcesManagement;
-import io.github.miguelteles.beststickerapp.utils.Utils;
-
 import com.google.android.material.textfield.TextInputEditText;
+
+import io.github.miguelteles.beststickerapp.R;
+import io.github.miguelteles.beststickerapp.domain.entity.StickerPack;
+import io.github.miguelteles.beststickerapp.exception.StickerException;
+import io.github.miguelteles.beststickerapp.exception.enums.StickerExceptionEnum;
+import io.github.miguelteles.beststickerapp.exception.handler.StickerExceptionHandler;
+import io.github.miguelteles.beststickerapp.services.FileResourceManagement;
+import io.github.miguelteles.beststickerapp.services.interfaces.ResourcesManagement;
+import io.github.miguelteles.beststickerapp.services.interfaces.operationcallback.OperationCallback;
+import io.github.miguelteles.beststickerapp.utils.Utils;
+import io.github.miguelteles.beststickerapp.viewmodel.StickerPackViewModel;
 
 
 public class AddStickerPackActivity extends AppCompatActivity {
@@ -34,11 +38,14 @@ public class AddStickerPackActivity extends AppCompatActivity {
     private StickerPack stickerPackBeingEdited;
     private TextView btnAddStickerPack;
     private TextInputEditText txtNomePacote, txtAutor;
+    private CheckBox chkBoxIsAnimatedStickerPack;
     private ImageView stickerPackImageView;
     private Uri uriImagemStickerPack;
-    private StickerPackService stickerPackService;
+    private StickerPackViewModel stickerPackViewModel;
     private ResourcesManagement resourcesManagement;
     private ProgressBar creationProgressBar;
+    private Resources resources;
+    private boolean isEdition;
 
     @Override
     protected void onCreate(Bundle bundle) {
@@ -48,7 +55,7 @@ public class AddStickerPackActivity extends AppCompatActivity {
         declaraCampos();
         try {
             setaOnClickListeners();
-            stickerPackService = StickerPackService.getInstance();
+            stickerPackViewModel = StickerPackViewModel.getInstance();
             resourcesManagement = FileResourceManagement.getInstance();
         } catch (StickerException ex) {
             StickerExceptionHandler.handleException(ex, this);
@@ -69,6 +76,8 @@ public class AddStickerPackActivity extends AppCompatActivity {
         Intent intent = getIntent();
         this.btnAddStickerPack.setText(R.string.ADD_PACK);
         if (isStickerPackEdit(intent)) {
+            this.isEdition = true;
+            chkBoxIsAnimatedStickerPack.setVisibility(INVISIBLE);
             this.stickerPackBeingEdited = (StickerPack) intent.getExtras().get(Extras.STICKER_PACK);
             txtNomePacote.setText(stickerPackBeingEdited.getName());
             txtAutor.setText(stickerPackBeingEdited.getPublisher());
@@ -96,6 +105,8 @@ public class AddStickerPackActivity extends AppCompatActivity {
         txtAutor = findViewById(R.id.txt_input_edit_autor);
         stickerPackImageView = findViewById(R.id.pacote_imageview);
         creationProgressBar = findViewById(R.id.pg_sticker_pack_creation);
+        this.resources = Utils.getApplicationContext().getResources();
+        chkBoxIsAnimatedStickerPack = findViewById(R.id.chk_box_is_animated_sticker_pack);
     }
 
     private void setaOnClickListeners() throws StickerException {
@@ -178,17 +189,18 @@ public class AddStickerPackActivity extends AppCompatActivity {
         try {
             return v -> {
                 disableBtnAddStickerPack();
-                String nmAutorInput = txtAutor.getText().toString();
+                String nmAutorInput = determineAuthorName(txtAutor.getText().toString());
                 String nomePacoteInput = txtNomePacote.getText().toString();
 
                 creationProgressBar.setVisibility(View.VISIBLE);
                 if (stickerPackBeingEdited == null) {
-                    stickerPackService.createStickerPack(nmAutorInput,
+                    stickerPackViewModel.createStickerPack(nmAutorInput,
                             nomePacoteInput,
                             uriImagemStickerPack,
+                            chkBoxIsAnimatedStickerPack.isChecked(),
                             createStickerPackCreationCallback());
                 } else {
-                    stickerPackService.updateStickerPack(stickerPackBeingEdited,
+                    stickerPackViewModel.updateStickerPack(stickerPackBeingEdited,
                             nmAutorInput,
                             nomePacoteInput,
                             createStickerPackCreationCallback());
@@ -197,6 +209,14 @@ public class AddStickerPackActivity extends AppCompatActivity {
         } catch (Exception ex) {
             throw new StickerException(ex, StickerExceptionEnum.CSP, null);
         }
+    }
+
+    @NonNull
+    private String determineAuthorName(@NonNull String authorNameInput) {
+        if (Utils.isNothing(authorNameInput)) {
+            authorNameInput = resources.getString(R.string.defaultPublisher);
+        }
+        return authorNameInput;
     }
 
     private OperationCallback<StickerPack> createStickerPackCreationCallback() {

@@ -9,6 +9,7 @@
 package io.github.miguelteles.beststickerapp.domain.entity;
 
 import android.content.ContentValues;
+import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -196,6 +197,10 @@ public class StickerPack implements Parcelable {
 
     public boolean isAnimatedStickerPack() {
         return animatedStickerPack;
+    }
+
+    public boolean isStandardStickerPack() {
+        return !animatedStickerPack;
     }
 
     public String getFolderName() {

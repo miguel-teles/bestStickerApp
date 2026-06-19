@@ -6,20 +6,27 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.provider.OpenableColumns;
 
+import androidx.annotation.NonNull;
+
 import com.google.common.net.MediaType;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
 import io.github.miguelteles.beststickerapp.domain.pojo.VisualMediaType;
 import io.github.miguelteles.beststickerapp.exception.StickerFolderException;
+import io.github.miguelteles.beststickerapp.exception.StickerWebCommunicationException;
 import io.github.miguelteles.beststickerapp.exception.enums.StickerFolderExceptionEnum;
+import io.github.miguelteles.beststickerapp.exception.enums.StickerWebCommunicationExceptionEnum;
 import io.github.miguelteles.beststickerapp.services.interfaces.ResourcesManagement;
 import io.github.miguelteles.beststickerapp.utils.Utils;
 import io.github.miguelteles.beststickerapp.validator.MethodInputValidator;
@@ -60,7 +67,7 @@ public class FileResourceManagement implements ResourcesManagement {
     }
 
     @Override
-    public Uri getOrCreateFile(Uri folder, String fileName) throws StickerFolderException {
+    public Uri getOrCreateFile(@NonNull Uri folder, @NonNull String fileName) throws StickerFolderException {
         MethodInputValidator.requireNotNull(folder, "Folder");
         MethodInputValidator.requireNotEmpty(fileName, "FileName");
 
@@ -71,6 +78,17 @@ public class FileResourceManagement implements ResourcesManagement {
             throw new StickerFolderException(ex, StickerFolderExceptionEnum.MKFILE, null);
         }
         return Uri.fromFile(file);
+    }
+
+    @Override
+    public File getFileFromURI(@NonNull Uri fileUri) throws StickerFolderException {
+        MethodInputValidator.requireNotNull(fileUri, "File");
+
+        File file = new File(fileUri.getPath());
+        if (!file.exists()) {
+            throw new StickerFolderException(null, StickerFolderExceptionEnum.GET_FILE, "Arquivo não existe");
+        }
+        return file;
     }
 
     @Override
@@ -259,6 +277,32 @@ public class FileResourceManagement implements ResourcesManagement {
         } catch (IOException e) {
             throw new StickerFolderException(e, StickerFolderExceptionEnum.CONVERT_FILE, "Erro ao converter imagem para .webp");
         }
+    }
+
+    public File downloadFile(URL url, File destinationFile) throws StickerFolderException{
+        try (BufferedInputStream in = new BufferedInputStream(url.openStream());
+             FileOutputStream fileOutputStream = new FileOutputStream(destinationFile)) {
+            byte[] dataBuffer = new byte[1024];
+            int bytesRead;
+            while ((bytesRead = in.read(dataBuffer, 0, 1024)) != -1) {
+                fileOutputStream.write(dataBuffer, 0, bytesRead);
+            }
+            return destinationFile;
+        } catch (IOException ex) {
+            throw new StickerFolderException(ex,
+                    StickerFolderExceptionEnum.DOWNLOAD,
+                    "Arquivo " + destinationFile);
+        }
+    }
+
+    @Override
+    public Uri saveFileToDevice(Uri stickerPackFolder, String filename, byte[] file) throws StickerFolderException {
+        Uri webpImage = getOrCreateFile(
+                stickerPackFolder,
+                filename
+        );
+        writeToFile(webpImage, new ByteArrayInputStream(file));
+        return webpImage;
     }
 
     @Override

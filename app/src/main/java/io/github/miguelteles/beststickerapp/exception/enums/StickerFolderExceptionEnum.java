@@ -25,7 +25,8 @@ public enum StickerFolderExceptionEnum {
     RESIZE(R.string.RESIZE),
     DELETE_FOLDER(R.string.DELETE_FOLDER),
 
-    CONVERT_FILE(R.string.CONVERT_FILE);
+    CONVERT_FILE(R.string.CONVERT_FILE),
+    DOWNLOAD(R.string.DOWNLOAD);
 
     int mResourceId;
 

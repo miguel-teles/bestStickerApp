@@ -9,7 +9,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.media.MediaMetadataRetriever;
-import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
@@ -39,26 +38,27 @@ import io.github.miguelteles.beststickerapp.domain.pojo.VisualMediaType;
 import io.github.miguelteles.beststickerapp.exception.StickerException;
 import io.github.miguelteles.beststickerapp.exception.handler.StickerExceptionHandler;
 import io.github.miguelteles.beststickerapp.services.FileResourceManagement;
-import io.github.miguelteles.beststickerapp.services.StickerPackService;
-import io.github.miguelteles.beststickerapp.services.interfaces.OperationCallback;
+import io.github.miguelteles.beststickerapp.services.interfaces.operationcallback.OperationCallback;
+import io.github.miguelteles.beststickerapp.viewmodel.StickerViewModel;
 
 public class AddStickerActivity extends AppCompatActivity {
     private static final String TAG_MODIFIED = "modified";
     private static final String TAG_UNMODIFIED = "";
 
-    private ImageView btnPickImageOrVideo = null;
-    private ImageView stickerImageView = null;
-    private PlayerView stickerPlayerView = null;
-    private ImageView stickerVideoThumbnailImageView = null;
-    private Uri uriStickerMedia = null;
-    private TextView btnAdicionarSticker = null;
+    private VisualMediaType typeSelectedMedia;
+    private ImageView btnPickImageOrVideo;
+    private ImageView stickerImageView;
+    private PlayerView stickerPlayerView;
+    private ImageView stickerVideoThumbnailImageView;
+    private Uri uriStickerMedia;
+    private TextView btnAdicionarSticker;
     private StickerPack stickerPack;
     private ProgressBar creationProgressBar;
     private ActivityResultLauncher<PickVisualMediaRequest> pickMedia;
+    private TextView txtWarnInvalidStickerType;
     private ExoPlayer exoPlayer;
 
-    //services
-    private StickerPackService stickerPackService;
+    private StickerViewModel stickerViewModel;
     private FileResourceManagement fileResourceManagement;
 
     @Override
@@ -68,7 +68,7 @@ public class AddStickerActivity extends AppCompatActivity {
         declaraCampos();
 
         try {
-            stickerPackService = StickerPackService.getInstance();
+            stickerViewModel = StickerViewModel.getInstance();
             fileResourceManagement = FileResourceManagement.getInstance();
         } catch (StickerException ex) {
             StickerExceptionHandler.handleException(ex, this);
@@ -106,19 +106,18 @@ public class AddStickerActivity extends AppCompatActivity {
                     if (uri != null) {
                         try {
                             uriStickerMedia = uri;
-                            VisualMediaType typeOfVisualMedia = fileResourceManagement.getTypeOfVisualMedia(uri);
-                            if (typeOfVisualMedia.isImage()) {
+                            this.typeSelectedMedia = fileResourceManagement.getTypeOfVisualMedia(uri);
+                            if (typeSelectedMedia.isImage()) {
                                 addContentToImageView(uri);
                             } else {
                                 addContentToVideoView(uri);
                             }
 
+                            verificaCamposObrigatoriosEIntegridade();
                         } catch (StickerException ex) {
                             StickerExceptionHandler.handleException(ex, this);
                         }
-
                     }
-                    verificaCamposObrigatorios();
                 });
         this.stickerPlayerView.setResizeMode(AspectRatioFrameLayout.RESIZE_MODE_FILL);
         this.stickerPlayerView.setUseController(false);
@@ -127,16 +126,14 @@ public class AddStickerActivity extends AppCompatActivity {
         this.exoPlayer = new ExoPlayer.Builder(getApplicationContext()).build();
         this.stickerPlayerView.setPlayer(exoPlayer);
         this.exoPlayer.addListener(new Player.Listener() {
-
             @Override
             public void onIsPlayingChanged(boolean isPlaying) {
                 if (isPlaying) {
                     stickerVideoThumbnailImageView.setVisibility(INVISIBLE);
                 }
             }
-
-
         });
+        this.txtWarnInvalidStickerType = findViewById(R.id.txt_warning_invalid_sticker_type);
     }
 
     @OptIn(markerClass = UnstableApi.class)
@@ -151,6 +148,7 @@ public class AddStickerActivity extends AppCompatActivity {
         exoPlayer.play();
         stickerPlayerView.setTag(TAG_MODIFIED);
         stickerImageView.setTag(TAG_UNMODIFIED);
+        typeSelectedMedia = VisualMediaType.VIDEO;
     }
 
     private void addContentToImageView(Uri uri) {
@@ -160,6 +158,7 @@ public class AddStickerActivity extends AppCompatActivity {
         stickerImageView.setTag(TAG_MODIFIED);
         stickerPlayerView.setTag(TAG_UNMODIFIED);
         exoPlayer.stop();
+        typeSelectedMedia = VisualMediaType.IMAGE;
     }
 
     private View.OnClickListener adicionarSticker() {
@@ -167,7 +166,7 @@ public class AddStickerActivity extends AppCompatActivity {
         return v -> {
             disableBtnAddSticker();
             creationProgressBar.setVisibility(VISIBLE);
-            stickerPackService.createSticker(stickerPack,
+            stickerViewModel.createSticker(stickerPack,
                     uriStickerMedia,
                     createStickerCreationCallback(context));
         };
@@ -205,12 +204,23 @@ public class AddStickerActivity extends AppCompatActivity {
         };
     }
 
-    private void verificaCamposObrigatorios() {
-        if (TAG_MODIFIED.equals(stickerImageView.getTag()) || TAG_MODIFIED.equals(stickerPlayerView.getTag())) {
-            enableBtnAddSticker();
-        } else {
+    private void verificaCamposObrigatoriosEIntegridade() throws StickerException {
+        if (TAG_UNMODIFIED.equals(stickerImageView.getTag()) && TAG_UNMODIFIED.equals(stickerPlayerView.getTag())) {
             disableBtnAddSticker();
+            txtWarnInvalidStickerType.setVisibility(INVISIBLE);
+            return;
+        } else if (typeSelectedMedia.isImage() && stickerPack.isAnimatedStickerPack()) {
+            txtWarnInvalidStickerType.setVisibility(VISIBLE);
+            disableBtnAddSticker();
+            return;
+        } else if (typeSelectedMedia.isVideo() && stickerPack.isStandardStickerPack()) {
+            txtWarnInvalidStickerType.setVisibility(VISIBLE);
+            disableBtnAddSticker();
+            return;
         }
+        txtWarnInvalidStickerType.setVisibility(INVISIBLE);
+        enableBtnAddSticker();
+
     }
 
     private void disableBtnAddSticker() {

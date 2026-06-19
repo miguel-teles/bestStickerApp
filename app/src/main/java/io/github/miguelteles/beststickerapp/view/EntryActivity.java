@@ -28,14 +28,14 @@ import io.github.miguelteles.beststickerapp.domain.entity.StickerPack;
 import io.github.miguelteles.beststickerapp.exception.StickerException;
 import io.github.miguelteles.beststickerapp.exception.handler.StickerExceptionHandler;
 import io.github.miguelteles.beststickerapp.repository.MyDatabase;
-import io.github.miguelteles.beststickerapp.services.StickerPackService;
 import io.github.miguelteles.beststickerapp.utils.Utils;
 import io.github.miguelteles.beststickerapp.validator.StickerPackValidator;
+import io.github.miguelteles.beststickerapp.viewmodel.StickerPackViewModel;
 
 public class EntryActivity extends BaseActivity {
     private View progressBar;
     private LoadListAsyncTask loadListAsyncTask;
-    private static StickerPackService stickerPackService;
+    private static StickerPackViewModel stickerPackViewModel;
     private static StickerPackValidator stickerPackValidator;
     public static final boolean SAFE_MODE = true;
 
@@ -71,7 +71,7 @@ public class EntryActivity extends BaseActivity {
         try {
             stickerPackValidator = StickerPackValidator.getInstance();
             MyDatabase.getInstance();
-            stickerPackService = StickerPackService.getInstance();
+            stickerPackViewModel = StickerPackViewModel.getInstance();
         } catch (StickerException ex) {
             StickerExceptionHandler.handleException(ex, this);
         }
@@ -133,7 +133,7 @@ public class EntryActivity extends BaseActivity {
                 System.out.println("doInBackground");
                 final Context context = contextWeakReference.get();
                 if (context != null) {
-                    stickerPackList = new ArrayList<>(stickerPackService.fetchAllStickerPacksWithAssets());
+                    stickerPackList = new ArrayList<>(stickerPackViewModel.fetchAllStickerPacksWithAssets());
                     for (StickerPack stickerPack : stickerPackList) {
                         stickerPackValidator.verifyStickerPackValidity(stickerPack);
                     }

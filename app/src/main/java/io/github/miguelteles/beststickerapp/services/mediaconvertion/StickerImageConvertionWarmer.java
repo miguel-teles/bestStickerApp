@@ -1,4 +1,4 @@
-package io.github.miguelteles.beststickerapp.services;
+package io.github.miguelteles.beststickerapp.services.mediaconvertion;
 
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;

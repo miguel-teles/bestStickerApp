@@ -8,13 +8,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import android.content.ContentResolver;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
-
-import androidx.test.core.app.ApplicationProvider;
-
-import com.google.common.io.Files;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -25,24 +19,18 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.robolectric.RobolectricTestRunner;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FilterInputStream;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 
 import io.github.miguelteles.beststickerapp.domain.pojo.ResponseAPIConvertedWebp;
 import io.github.miguelteles.beststickerapp.exception.StickerException;
-import io.github.miguelteles.beststickerapp.exception.StickerFolderException;
-import io.github.miguelteles.beststickerapp.services.StickerImageConvertionService;
+import io.github.miguelteles.beststickerapp.services.mediaconvertion.StickerImageConvertionService;
 import io.github.miguelteles.beststickerapp.services.client.interfaces.ImageConverterWebpAPI;
 import io.github.miguelteles.beststickerapp.services.interfaces.ResourcesManagement;
 
 @RunWith(RobolectricTestRunner.class)
-public class StickerImageConvertionServiceTest {
+public class StickerMediaConvertionServiceTest {
 
     @Mock
     ResourcesManagement resourcesManagement;
@@ -106,55 +94,55 @@ public class StickerImageConvertionServiceTest {
     }
 
     @Test
-    public void testGenerateStickerImages() throws StickerException {
-        ResourcesManagement.Image generatedStickerImage = stickerImageConvertionService.generateStickerImages(resultFolder,
+    public void testGenerateStickerMedias() throws StickerException {
+        ResourcesManagement.Media generatedStickerMedia = stickerImageConvertionService.generateConvertedMedia(resultFolder,
                 stickerImage,
                 "generatedStickerImage",
                 96,
                 true);
 
-        assertTrue(generatedStickerImage.originalImageFile() != null);
-        assertTrue(generatedStickerImage.resizedImageFile() != null);
-        assertTrue(generatedStickerImage.residezImageFileInBytes() != null);
+        assertTrue(generatedStickerMedia.originalImageFile() != null);
+        assertTrue(generatedStickerMedia.resizedImageFile() != null);
+        assertTrue(generatedStickerMedia.convertedMedia() != null);
 
 
-        generatedStickerImage = stickerImageConvertionService.generateStickerImages(resultFolder,
+        generatedStickerMedia = stickerImageConvertionService.generateConvertedMedia(resultFolder,
                 stickerImage,
                 "generatedStickerImage",
                 96,
                 false);
 
-        assertFalse(generatedStickerImage.originalImageFile() != null);
-        assertTrue(generatedStickerImage.resizedImageFile() != null);
-        assertTrue(generatedStickerImage.residezImageFileInBytes() != null);
+        assertFalse(generatedStickerMedia.originalImageFile() != null);
+        assertTrue(generatedStickerMedia.resizedImageFile() != null);
+        assertTrue(generatedStickerMedia.convertedMedia() != null);
     }
 
     @Test
-    public void testGenerateStickerImagesInvalidInput() throws StickerException {
-        assertThrows(IllegalArgumentException.class, () -> stickerImageConvertionService.generateStickerImages(null,
+    public void testGenerateStickerMediasInvalidInput() throws StickerException {
+        assertThrows(IllegalArgumentException.class, () -> stickerImageConvertionService.generateConvertedMedia(null,
                 stickerImage,
                 "generatedStickerImage",
                 96,
                 true));
 
-        assertThrows(IllegalArgumentException.class, () -> stickerImageConvertionService.generateStickerImages(resultFolder,
+        assertThrows(IllegalArgumentException.class, () -> stickerImageConvertionService.generateConvertedMedia(resultFolder,
                 null,
                 "generatedStickerImage",
                 96,
                 true));
 
-        assertThrows(IllegalArgumentException.class, () -> stickerImageConvertionService.generateStickerImages(resultFolder,
+        assertThrows(IllegalArgumentException.class, () -> stickerImageConvertionService.generateConvertedMedia(resultFolder,
                 stickerImage,
                 null,
                 96,
                 true));
 
-        assertThrows(IllegalArgumentException.class, () -> stickerImageConvertionService.generateStickerImages(resultFolder,
+        assertThrows(IllegalArgumentException.class, () -> stickerImageConvertionService.generateConvertedMedia(resultFolder,
                 stickerImage,
                 "generatedStickerImage",
                 0,
                 true));
-        assertThrows(IllegalArgumentException.class, () -> stickerImageConvertionService.generateStickerImages(resultFolder,
+        assertThrows(IllegalArgumentException.class, () -> stickerImageConvertionService.generateConvertedMedia(resultFolder,
                 stickerImage,
                 "generatedStickerImage",
                 null,

@@ -1,4 +1,4 @@
-package io.github.miguelteles.beststickerapp.services;
+package io.github.miguelteles.beststickerapp.services.mediaconvertion;
 
 import android.content.ContentResolver;
 import android.graphics.Bitmap;
@@ -20,48 +20,37 @@ import java.util.Base64;
 
 import io.github.miguelteles.beststickerapp.domain.pojo.ResponseAPIConvertedWebp;
 import io.github.miguelteles.beststickerapp.exception.StickerException;
-import io.github.miguelteles.beststickerapp.exception.StickerFatalErrorException;
 import io.github.miguelteles.beststickerapp.exception.StickerFolderException;
 import io.github.miguelteles.beststickerapp.exception.enums.StickerFolderExceptionEnum;
+import io.github.miguelteles.beststickerapp.services.FileResourceManagement;
 import io.github.miguelteles.beststickerapp.services.client.ImageConverterWebpAPIImpl;
 import io.github.miguelteles.beststickerapp.services.client.interfaces.ImageConverterWebpAPI;
 import io.github.miguelteles.beststickerapp.services.interfaces.ResourcesManagement;
 import io.github.miguelteles.beststickerapp.utils.Utils;
 import io.github.miguelteles.beststickerapp.validator.MethodInputValidator;
 
-public class StickerImageConvertionService {
+public class StickerImageConvertionService extends StickerMediaConvertionService {
 
     private static StickerImageConvertionService instance;
-    private final ResourcesManagement resourcesManagement;
     private final ImageConverterWebpAPI imageConverterWebpAPI;
-    private final ContentResolver contentResolver;
 
     private StickerImageConvertionService() throws StickerException {
-        resourcesManagement = FileResourceManagement.getInstance();
+        super(FileResourceManagement.getInstance(), Utils.getApplicationContext().getContentResolver());
         imageConverterWebpAPI = new ImageConverterWebpAPIImpl(Utils.getApplicationContext());
-        contentResolver = Utils.getApplicationContext().getContentResolver();
     }
 
     public StickerImageConvertionService(ResourcesManagement resourcesManagement,
                                          ImageConverterWebpAPI imageConverterWebpAPI,
                                          ContentResolver contentResolver) {
-        this.resourcesManagement = resourcesManagement;
+        super(resourcesManagement, contentResolver);
         this.imageConverterWebpAPI = imageConverterWebpAPI;
-        this.contentResolver = contentResolver;
     }
 
-    public static StickerImageConvertionService getInstance() throws StickerException {
-        if (instance == null) {
-            instance = new StickerImageConvertionService();
-        }
-        return instance;
-    }
-
-    public ResourcesManagement.Image generateStickerImages(@NotNull Uri stickerPackFolder,
-                                                           @NotNull Uri sourceImage,
-                                                           @NotNull String destinationImageFileName,
-                                                           @NotNull Integer imageWidthAndHeight,
-                                                           boolean keepOriginalCopy) throws StickerException {
+    public ResourcesManagement.Media generateConvertedMedia(@NotNull Uri stickerPackFolder,
+                                                            @NotNull Uri sourceImage,
+                                                            @NotNull String destinationImageFileName,
+                                                            @NotNull Integer imageWidthAndHeight,
+                                                            boolean keepOriginalCopy) throws StickerException {
         MethodInputValidator.requireNotNull(stickerPackFolder, "stickerPackFolder");
         MethodInputValidator.requireNotNull(sourceImage, "sourceImage");
         MethodInputValidator.requireNotEmpty(destinationImageFileName, "destinationImageFileName");
@@ -73,16 +62,19 @@ public class StickerImageConvertionService {
             int rotation = getImageOrientation(sourceImage);
 
             if (keepOriginalCopy) {
-                originalImageCopy = generateImageCopy(sourceImage, stickerPackFolder, buildImageFileName(sourceImage, destinationImageFileName));
+                originalImageCopy = generateMediaCopy(sourceImage, stickerPackFolder, buildImageFileName(sourceImage, destinationImageFileName));
                 rotateImage(originalImageCopy, rotation);
             }
-            resizedImageOriginalFormat = generateImageCopy(sourceImage, resourcesManagement.getCacheFolder(), buildResizedImageFileName(sourceImage, destinationImageFileName));
+            //coloca no cache a imagem reduzida pra não deixar ela carregada na memória enquanto tá sendo convertida
+            resizedImageOriginalFormat = generateMediaCopy(sourceImage, resourcesManagement.getCacheFolder(), buildResizedImageFileName(sourceImage, destinationImageFileName));
             resizeImage(resizedImageOriginalFormat, imageWidthAndHeight);
             rotateImage(resizedImageOriginalFormat, rotation);
 
-            Uri resizedImageWebp = convertImageToWebp(resizedImageOriginalFormat, stickerPackFolder);
-            byte[] bytes = readBytesFromGeneratedImageWebp(resizedImageWebp);
-            return new ResourcesManagement.Image(originalImageCopy, resizedImageWebp, bytes);
+            byte[] convertImageToWebp = convertImageToWebp(resizedImageOriginalFormat);
+            return ResourcesManagement.Media.builder()
+                    .originalImageFile(originalImageCopy)
+                    .convertedMedia(convertImageToWebp)
+                    .build();
         } catch (StickerException ste) {
             throw ste;
         } catch (Exception ex) {
@@ -92,32 +84,6 @@ public class StickerImageConvertionService {
                 resourcesManagement.deleteFile(resizedImageOriginalFormat);
             }
         }
-    }
-
-    @NonNull
-    private String buildResizedImageFileName(@NonNull Uri sourceImage, @NonNull String destinationImageFileName) {
-        return destinationImageFileName + "Rzd" + this.resourcesManagement.getFileExtension(sourceImage, true);
-    }
-
-    @NonNull
-    private String buildImageFileName(@NonNull Uri sourceImage, @NonNull String destinationImageFileName) {
-        return destinationImageFileName + this.resourcesManagement.getFileExtension(sourceImage, true);
-    }
-
-    private byte[] readBytesFromGeneratedImageWebp(Uri resizedImageWebp) throws IOException, StickerFolderException {
-        byte[] bytes = null;
-        try (InputStream inputStream = contentResolver.openInputStream(resizedImageWebp)) {
-            bytes = resourcesManagement.readBytesFromInputStream(inputStream);
-        }
-        return bytes;
-    }
-
-    private Uri generateImageCopy(Uri sourceImage,
-                                  Uri copyDestinationFolder,
-                                  String copyDestinationFileName) throws Exception {
-        Uri resizedImageOriginalFormat = resourcesManagement.getOrCreateFile(copyDestinationFolder, copyDestinationFileName);
-        resourcesManagement.writeToFile(resizedImageOriginalFormat, contentResolver.openInputStream(sourceImage));
-        return resizedImageOriginalFormat;
     }
 
     private Bitmap applyRotationToBitmap(Bitmap bitmap, int rotate) {
@@ -178,17 +144,14 @@ public class StickerImageConvertionService {
         }
     }
 
-    private Uri convertImageToWebp(Uri file, Uri destinationFolder) throws StickerException {
+    private byte[] convertImageToWebp(Uri file) throws StickerException {
         String originalFormatImageBase64 = convertFileIntoBase64(file);
         ResponseAPIConvertedWebp responseAPIConvertedWebp = this.imageConverterWebpAPI.convertImageToWebp(originalFormatImageBase64);
         if (responseAPIConvertedWebp.getMessage() != null || responseAPIConvertedWebp.getWebpImageBase64() == null) {
             throw new StickerFolderException(null, StickerFolderExceptionEnum.CONVERT_FILE, responseAPIConvertedWebp.getMessage());
         }
 
-        byte[] webpImageInByteArray = Base64.getDecoder().decode(responseAPIConvertedWebp.getWebpImageBase64());
-        Uri webpImage = this.resourcesManagement.getOrCreateFile(destinationFolder, file.getLastPathSegment().replace(this.resourcesManagement.getFileExtension(file, true), ".webp"));
-        this.resourcesManagement.writeToFile(webpImage, new ByteArrayInputStream(webpImageInByteArray));
-        return webpImage;
+        return Base64.getDecoder().decode(responseAPIConvertedWebp.getWebpImageBase64());
     }
 
     private String convertFileIntoBase64(Uri uri) throws StickerFolderException {
@@ -202,4 +165,10 @@ public class StickerImageConvertionService {
         return originalFormatImageBase64;
     }
 
+    public static StickerImageConvertionService getInstance() throws StickerException {
+        if (instance == null) {
+            instance = new StickerImageConvertionService();
+        }
+        return instance;
+    }
 }

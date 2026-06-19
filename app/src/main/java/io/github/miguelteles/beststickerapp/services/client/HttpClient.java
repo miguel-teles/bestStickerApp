@@ -37,17 +37,24 @@ abstract class HttpClient {
                 .build();
     }
 
-    protected Call post(String endpoint, String bodyContent) throws StickerException {
+    protected Call post(String endpoint, String bodyContent) {
         RequestBody requestBody = RequestBody.create(bodyContent, JSON);
         return okHttpClient.newCall(getRequestBuilderWithCommonAttributes(endpoint).post(requestBody).build());
     }
 
-    protected Call get(String endpoint) throws StickerException {
+    protected Call get(String endpoint) {
         return okHttpClient.newCall(getRequestBuilderWithCommonAttributes(endpoint).get().build());
     }
 
+    protected Call put(String endpoint, byte[] file) {
+        RequestBody requestBody = RequestBody.create(file);
+        return okHttpClient.newCall(
+                new Request.Builder().url(endpoint).post(requestBody).build()
+        );
+    }
+
     private Request.Builder getRequestBuilderWithCommonAttributes(String endpoint) {
-        return new Request.Builder()
+         return new Request.Builder()
                 .url(baseUrl + endpoint)
                 .addHeader("x-api-key", secureToken);
     }
