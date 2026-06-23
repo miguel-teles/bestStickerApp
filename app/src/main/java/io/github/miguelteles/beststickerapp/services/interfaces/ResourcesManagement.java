@@ -48,6 +48,8 @@ public interface ResourcesManagement {
 
     VisualMediaType getTypeOfVisualMedia(Uri uri) throws StickerFolderException;
 
+    long getFileSize(Uri uri) throws StickerFolderException;
+
     default byte[] readBytesFromInputStream(InputStream inputStream) throws StickerFolderException {
         try (final ByteArrayOutputStream buffer = new ByteArrayOutputStream()) {
             if (inputStream == null) {

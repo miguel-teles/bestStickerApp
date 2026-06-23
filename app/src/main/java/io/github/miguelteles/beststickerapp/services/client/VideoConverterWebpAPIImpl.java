@@ -27,7 +27,6 @@ public class VideoConverterWebpAPIImpl extends HttpClient implements VideoConver
 
     private final Gson gson;
     private final String PRESIGNED_GENERATION_URL_UPLOAD_FILE = "/video-converter-url";
-    private final String PRESIGNED_GENERATION_URL_DOWNLOAD_FILE = "/video-converter-url";
 
     public VideoConverterWebpAPIImpl(Context context) throws StickerFatalErrorException {
         super(BuildConfig.API_ENDPOINT, context);
@@ -61,7 +60,7 @@ public class VideoConverterWebpAPIImpl extends HttpClient implements VideoConver
     }
 
     @Override
-    public Object uploadVideo(String presignedUrl, byte[] video) throws StickerException {
+    public Object uploadVideo(String presignedUrl, File video) throws StickerException {
         Call call = this.put(presignedUrl, video);
         try (Response response = call.execute()) {
             return response.body().string();

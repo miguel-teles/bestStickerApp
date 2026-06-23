@@ -81,7 +81,8 @@ public class StickerPackService {
                     imageUri,
                     packImageFilename,
                     StickerPack.TRAY_IMAGE_SIZE,
-                    true);
+                    true,
+                    OnProgressUpdate.EMPTY);
             callbackClass.onProgressUpdate(50);
             Uri savedFile = saveConvertedImageToDevice(stickerPackFolder, packImageFilename, copiedImages.getConvertedMedia());
 

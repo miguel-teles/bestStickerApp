@@ -11,7 +11,7 @@ public interface VideoConverterWebpAPI {
     ResponseAPIUploadDestinationVideoConverter createUploadDestination(String filename) throws StickerException;
     ResponseAPIDownloadSourceVideoConverter createDownloadSource(String filename) throws StickerException;
 
-    Object uploadVideo(String presignedUrl, byte[] video) throws StickerException;
+    Object uploadVideo(String presignedUrl, File video) throws StickerException;
 
     void warm() throws StickerException;
 

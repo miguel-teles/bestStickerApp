@@ -68,13 +68,13 @@
     <string name="NOT_TODAY" translatable="false">Hoje não...</string>
     <string name="SELECT_A_PICTURE_FOR_PACK" translatable="false">Imagem do pacote (se vazio, será um macaco)</string>
     <string name="SELECT_A_PICTURE_FOR_STICKER" translatable="false">Selecione uma imagem</string>
-    <string name="WARN_WRONG_TYPE_STICKER_PACK" translatable="false">Este pacote não aceita este tipo de figurinha. Pacotes aceitam somente figurinhas animadas ou figurinhas padrões (com imagens estáticas).</string>
+    <string name="WARN_WRONG_TYPE_STICKER_PACK" translatable="false">Este pacote não aceita este tipo de figurinha. Todas as figurinhas do pacote precisam ser do mesmo tipo: animada ou padrão (estática).</string>
     <string name="ADD_STICKER" translatable="false">ADICIONAR FIGURINHAS</string>
     <string name="ADD_PACK" translatable="false">CRIAR PACOTE</string>
     <string name="SAVE_PACK" translatable="false">SALVAR PACOTE</string>
     <string name="FETCH_STICKER" translatable="false">Erro ao buscar figurinhas</string>
     <string name="FETCH_STICKER_PACK" translatable="false">Erro ao buscar pacote de figurinhas</string>
-    <string name="INVALID_STICKER_PACK" translatable="false">Invalid sticker pack</string>
+    <string name="INVALID_STICKER_PACK" translatable="false">Pacote de figurinhas inválido</string>
     <string name="POST" translatable="false">Erro ao executar HTTP POST</string>
     <string name="NO_INTERNET_ACCESS" translatable="false">É preciso estar conectado a internet para acessar essa funcionalidade</string>
     <string name="DOWNLOAD_UPDATE_EXCEPTION" translatable="false">Erro ao baixar a atualização do app</string>
@@ -84,4 +84,8 @@
     <string name="INVALID_DOWNLOAD_LINK" translatable="false">Link de download é inválido</string>
     <string name="TIMEOUT" translatable="false">Timeout, que chato!</string>
     <string name="IS_STICKER_PACK_ANIMATED" translatable="false">É para figurinhas animadas?</string>
+    <string name="FILE_NOT_FOUND" translatable="false">Arquivo não encontrado</string>
+    <string name="CONVERTION_TIME_OUT" translatable="false">Figurinha não foi convertida a tempo para baixá-la. Tente novamente.</string>
+    <string name="WARN_FILE_BIGGER_THAN_ALLOWED" translatable="false">Wow! Arquivo grande demais para transformar em figurinha.</string>
+    <string name="WARN_DURATION_OF_VIDEO" translatable="false">O vídeo pode ser cortado, pois a duração máxima de uma figurinha animada é de 10 segundos.</string>
 </resources>

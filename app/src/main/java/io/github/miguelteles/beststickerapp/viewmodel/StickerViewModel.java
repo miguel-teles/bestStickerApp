@@ -7,9 +7,9 @@ import androidx.annotation.NonNull;
 import io.github.miguelteles.beststickerapp.domain.entity.Sticker;
 import io.github.miguelteles.beststickerapp.domain.entity.StickerPack;
 import io.github.miguelteles.beststickerapp.exception.StickerException;
-import io.github.miguelteles.beststickerapp.services.StickerPackService;
 import io.github.miguelteles.beststickerapp.services.StickerService;
 import io.github.miguelteles.beststickerapp.services.interfaces.operationcallback.OperationCallback;
+import io.github.miguelteles.beststickerapp.services.mediaconvertion.StickerVideoConvertionService;
 
 public class StickerViewModel {
 
@@ -36,6 +36,10 @@ public class StickerViewModel {
     public void deleteSticker(Sticker sticker,
                               StickerPack stickerPack) throws StickerException {
         stickerService.deleteSticker(sticker, stickerPack);
+    }
+
+    public long getMaxFileSizeAllowed() {
+        return StickerVideoConvertionService.MAX_FILE_SIZE_ALLOWED_IN_BYTES;
     }
 
     public static StickerViewModel getInstance() throws StickerException {

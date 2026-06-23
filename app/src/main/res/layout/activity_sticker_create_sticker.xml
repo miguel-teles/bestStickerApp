@@ -42,6 +42,12 @@
             android:layout_height="match_parent"
             android:visibility="gone" />
 
+        <pl.droidsonroids.gif.GifImageView
+            android:id="@+id/sticker_gifimageview"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone" />
+
         <ImageView
             android:id="@+id/sticker_imageview"
             android:layout_width="match_parent"
@@ -58,7 +64,7 @@
     </FrameLayout>
 
     <TextView
-        android:id="@+id/txt_warning_invalid_sticker_type"
+        android:id="@+id/txt_warning_add_sticker"
         android:layout_width="350dp"
         android:layout_height="wrap_content"
         android:text="@string/WARN_WRONG_TYPE_STICKER_PACK"
@@ -67,6 +73,7 @@
         app:layout_constraintBottom_toTopOf="@+id/pg_sticker_creation"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
+        android:textAlignment="center"
         android:visibility="invisible"/>
 
     <ProgressBar

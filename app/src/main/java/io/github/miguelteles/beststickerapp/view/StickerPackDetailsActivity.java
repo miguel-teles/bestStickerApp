@@ -238,6 +238,15 @@ public class StickerPackDetailsActivity extends AddStickerPackToWhatsappActivity
             public void onProgressUpdate(int process) {
                 progressBar.setProgress(process, true);
             }
+
+            @Override
+            public void onProgressUpdate() {
+                progressBar.setProgress(
+                        this.calculateProgress(
+                                progressBar.getProgress()
+                        )
+                );
+            }
         };
     }
 

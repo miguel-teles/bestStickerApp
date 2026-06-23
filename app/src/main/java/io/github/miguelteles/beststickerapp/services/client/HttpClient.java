@@ -5,6 +5,7 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 
+import java.io.File;
 import java.util.concurrent.TimeUnit;
 
 import io.github.miguelteles.beststickerapp.BuildConfig;
@@ -46,10 +47,10 @@ abstract class HttpClient {
         return okHttpClient.newCall(getRequestBuilderWithCommonAttributes(endpoint).get().build());
     }
 
-    protected Call put(String endpoint, byte[] file) {
-        RequestBody requestBody = RequestBody.create(file);
+    protected Call put(String endpoint, File file) {
+        RequestBody requestBody = RequestBody.create(file, null);
         return okHttpClient.newCall(
-                new Request.Builder().url(endpoint).post(requestBody).build()
+                new Request.Builder().url(endpoint).put(requestBody).build()
         );
     }
 

@@ -6,7 +6,7 @@ import java.util.concurrent.Executors;
 import io.github.miguelteles.beststickerapp.exception.StickerException;
 import io.github.miguelteles.beststickerapp.services.interfaces.operationcallback.OperationCallback;
 import io.github.miguelteles.beststickerapp.utils.thread.StickerExceptionSupplier;
-import io.github.miguelteles.beststickerapp.utils.thread.StickerPackRunnable;
+import io.github.miguelteles.beststickerapp.utils.thread.StickerExceptionRunnable;
 import io.github.miguelteles.beststickerapp.view.interfaces.UiThreadPoster;
 import io.github.miguelteles.beststickerapp.view.threadHandlers.AndroidUiThreadPoster;
 
@@ -48,7 +48,7 @@ class ExecutorWithThreadResultPoster<T> {
         });
     }
 
-    public void execute(StickerPackRunnable runnable,
+    public void execute(StickerExceptionRunnable runnable,
                         OperationCallback<T> stickerCreationCallback) {
         executor.execute(() -> {
             StickerException exception = null;

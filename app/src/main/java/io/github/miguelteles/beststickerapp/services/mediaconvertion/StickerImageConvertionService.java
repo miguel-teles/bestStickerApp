@@ -26,8 +26,10 @@ import io.github.miguelteles.beststickerapp.services.FileResourceManagement;
 import io.github.miguelteles.beststickerapp.services.client.ImageConverterWebpAPIImpl;
 import io.github.miguelteles.beststickerapp.services.client.interfaces.ImageConverterWebpAPI;
 import io.github.miguelteles.beststickerapp.services.interfaces.ResourcesManagement;
+import io.github.miguelteles.beststickerapp.services.interfaces.operationcallback.OnProgressUpdate;
 import io.github.miguelteles.beststickerapp.utils.Utils;
 import io.github.miguelteles.beststickerapp.validator.MethodInputValidator;
+import kotlin.NotImplementedError;
 
 public class StickerImageConvertionService extends StickerMediaConvertionService {
 
@@ -50,7 +52,8 @@ public class StickerImageConvertionService extends StickerMediaConvertionService
                                                             @NotNull Uri sourceImage,
                                                             @NotNull String destinationImageFileName,
                                                             @NotNull Integer imageWidthAndHeight,
-                                                            boolean keepOriginalCopy) throws StickerException {
+                                                            boolean keepOriginalCopy,
+                                                            OnProgressUpdate onProgressUpdate) throws StickerException {
         MethodInputValidator.requireNotNull(stickerPackFolder, "stickerPackFolder");
         MethodInputValidator.requireNotNull(sourceImage, "sourceImage");
         MethodInputValidator.requireNotEmpty(destinationImageFileName, "destinationImageFileName");
@@ -70,7 +73,8 @@ public class StickerImageConvertionService extends StickerMediaConvertionService
             resizeImage(resizedImageOriginalFormat, imageWidthAndHeight);
             rotateImage(resizedImageOriginalFormat, rotation);
 
-            byte[] convertImageToWebp = convertImageToWebp(resizedImageOriginalFormat);
+            onProgressUpdate.onProgressUpdate();
+            byte[] convertImageToWebp = convertImageToWebp(resizedImageOriginalFormat, onProgressUpdate);
             return ResourcesManagement.Media.builder()
                     .originalImageFile(originalImageCopy)
                     .convertedMedia(convertImageToWebp)
@@ -144,9 +148,10 @@ public class StickerImageConvertionService extends StickerMediaConvertionService
         }
     }
 
-    private byte[] convertImageToWebp(Uri file) throws StickerException {
+    private byte[] convertImageToWebp(Uri file, OnProgressUpdate onProgressUpdate) throws StickerException {
         String originalFormatImageBase64 = convertFileIntoBase64(file);
         ResponseAPIConvertedWebp responseAPIConvertedWebp = this.imageConverterWebpAPI.convertImageToWebp(originalFormatImageBase64);
+        onProgressUpdate.onProgressUpdate();
         if (responseAPIConvertedWebp.getMessage() != null || responseAPIConvertedWebp.getWebpImageBase64() == null) {
             throw new StickerFolderException(null, StickerFolderExceptionEnum.CONVERT_FILE, responseAPIConvertedWebp.getMessage());
         }

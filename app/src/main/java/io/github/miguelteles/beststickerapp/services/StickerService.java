@@ -1,5 +1,7 @@
 package io.github.miguelteles.beststickerapp.services;
 
+import static io.github.miguelteles.beststickerapp.exception.enums.StickerFolderExceptionEnum.FILE_NOT_FOUND;
+
 import android.content.ContentResolver;
 import android.content.Context;
 import android.net.Uri;
@@ -76,14 +78,14 @@ public class StickerService {
             callbackClass.onProgressUpdate(30);
             Uri stickerPackFolder = resourcesManagement.getOrCreateStickerPackDirectory(stickerPack.getFolderName());
             String stickerImageFile = generateStickerImageName();
-            savedMedia = convertAndSaveMedia(stickerPack, selectedStickerImage, stickerPackFolder, stickerImageFile);
+            savedMedia = convertAndSaveMedia(stickerPack, selectedStickerImage, stickerPackFolder, stickerImageFile, callbackClass);
 
-            callbackClass.onProgressUpdate(50);
+            callbackClass.onProgressUpdate();
             Sticker sticker = buildSticker(stickerPack, savedMedia);
             stickerPackValidator.validateSticker(stickerPack.getIdentifier(), sticker, stickerPack.isAnimatedStickerPack());
             stickerRepository.save(sticker);
 
-            callbackClass.onProgressUpdate(70);
+            callbackClass.onProgressUpdate();
             return sticker;
         } catch (StickerException ex) {
             throw ex;
@@ -99,35 +101,53 @@ public class StickerService {
     }
 
     @NonNull
-    private SavedMedia convertAndSaveMedia(StickerPack stickerPack, Uri selectedStickerImage, Uri stickerPackFolder, String stickerImageFile) throws StickerException {
+    private SavedMedia convertAndSaveMedia(StickerPack stickerPack,
+                                           Uri selectedStickerImage,
+                                           Uri stickerPackFolder,
+                                           String stickerImageFile,
+                                           OnProgressUpdate callbackClass) throws StickerException {
         if (stickerPack.isStandardStickerPack()) {
-            return convertToStaticWebpAndSave(selectedStickerImage, stickerPackFolder, stickerImageFile);
+            return convertToStaticWebpAndSave(selectedStickerImage, stickerPackFolder, stickerImageFile, callbackClass);
         } else {
-            return convertToAnimatedWebpAndSave(selectedStickerImage, stickerPackFolder, stickerImageFile);
+            return convertToAnimatedWebpAndSave(selectedStickerImage, stickerPackFolder, stickerImageFile, callbackClass);
         }
     }
 
     @NonNull
-    private SavedMedia convertToAnimatedWebpAndSave(Uri selectedStickerImage, Uri stickerPackFolder, String stickerImageFile) throws StickerException {
+    private SavedMedia convertToAnimatedWebpAndSave(Uri selectedStickerImage,
+                                                    Uri stickerPackFolder,
+                                                    String stickerImageFile,
+                                                    OnProgressUpdate callbackClass) throws StickerException {
         ResourcesManagement.Media copiedImages = stickerVideoConvertionService.generateConvertedMedia(stickerPackFolder,
                 selectedStickerImage,
-                stickerImageFile);
+                stickerImageFile,
+                callbackClass);
+        callbackClass.onProgressUpdate();
         Uri savedImage = saveConvertedVideoToDevice(stickerImageFile,
                 stickerPackFolder,
-                copiedImages.getLinkToDownloadMedia());
+                copiedImages.getLinkToDownloadMedia(),
+                callbackClass);
+        callbackClass.onProgressUpdate();
         return new SavedMedia(resourcesManagement.getContentAsBytes(savedImage),
                 savedImage);
     }
 
     @NonNull
-    private SavedMedia convertToStaticWebpAndSave(Uri selectedStickerImage, Uri stickerPackFolder, String stickerImageFile) throws StickerException {
+    private SavedMedia convertToStaticWebpAndSave(Uri selectedStickerImage,
+                                                  Uri stickerPackFolder,
+                                                  String stickerImageFile,
+                                                  OnProgressUpdate callbackClass) throws StickerException {
         ResourcesManagement.Media copiedImages = stickerImageConvertionService.generateConvertedMedia(stickerPackFolder,
                 selectedStickerImage,
                 stickerImageFile,
                 Sticker.STICKER_IMAGE_SIZE,
-                false);
+                false,
+                callbackClass);
+        callbackClass.onProgressUpdate();
+        Uri savedImage = saveConvertedImageToDevice(stickerPackFolder, copiedImages.getConvertedMedia());
+        callbackClass.onProgressUpdate();
         return new SavedMedia(copiedImages.getConvertedMedia(),
-                saveConvertedImageToDevice(stickerPackFolder, copiedImages.getConvertedMedia()));
+                savedImage);
     }
 
     private record SavedMedia(byte[] stickerImageInBytes, Uri savedImage) {
@@ -135,13 +155,42 @@ public class StickerService {
 
     private Uri saveConvertedVideoToDevice(String stickerImageFile,
                                            Uri stickerPackFile,
-                                           URL linkToDownloadMedia) throws StickerFolderException {
+                                           URL linkToDownloadMedia,
+                                           OnProgressUpdate onProgressUpdate) throws StickerException {
         Uri stickerUri = resourcesManagement.getOrCreateFile(stickerPackFile, stickerImageFile);
 
-        this.resourcesManagement.downloadFile(
-                linkToDownloadMedia,
-                resourcesManagement.getFileFromURI(stickerUri));
+        downloadVideoWithRetries(linkToDownloadMedia, stickerUri, onProgressUpdate);
+
         return stickerUri;
+    }
+
+    private void downloadVideoWithRetries(URL linkToDownloadMedia, Uri stickerUri, OnProgressUpdate onProgressUpdate) throws StickerException {
+        int maxRetries = 10;
+        for (int i = 1; i <= maxRetries; i++) {
+            try {
+                this.resourcesManagement.downloadFile(
+                        linkToDownloadMedia,
+                        resourcesManagement.getFileFromURI(stickerUri));
+                break;
+            } catch (StickerFolderException ex) {
+                if (!FILE_NOT_FOUND.toString().equals(ex.getStickerExceptionEnumMessage())) {
+                    throw ex;
+                }
+                if (FILE_NOT_FOUND.toString().equals(ex.getStickerExceptionEnumMessage()) && i == maxRetries) {
+                    throw new StickerException(null, StickerExceptionEnum.CTO, null);
+                }
+                aguardaConversao();
+            }
+            onProgressUpdate.onProgressUpdate(1);
+        };
+    }
+
+    private static void aguardaConversao() {
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException ex) {
+            Thread.currentThread().interrupt();
+        }
     }
 
     private Uri saveConvertedImageToDevice(@NonNull Uri stickerPackFolder,

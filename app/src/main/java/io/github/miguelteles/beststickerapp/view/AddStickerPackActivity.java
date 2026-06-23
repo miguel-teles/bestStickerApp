@@ -45,7 +45,6 @@ public class AddStickerPackActivity extends AppCompatActivity {
     private ResourcesManagement resourcesManagement;
     private ProgressBar creationProgressBar;
     private Resources resources;
-    private boolean isEdition;
 
     @Override
     protected void onCreate(Bundle bundle) {
@@ -76,7 +75,6 @@ public class AddStickerPackActivity extends AppCompatActivity {
         Intent intent = getIntent();
         this.btnAddStickerPack.setText(R.string.ADD_PACK);
         if (isStickerPackEdit(intent)) {
-            this.isEdition = true;
             chkBoxIsAnimatedStickerPack.setVisibility(INVISIBLE);
             this.stickerPackBeingEdited = (StickerPack) intent.getExtras().get(Extras.STICKER_PACK);
             txtNomePacote.setText(stickerPackBeingEdited.getName());
@@ -168,6 +166,8 @@ public class AddStickerPackActivity extends AppCompatActivity {
         return v -> {
             Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
             intent.setType("image/*");
+            intent.putExtra(Intent.EXTRA_MIME_TYPES,
+                    new String[]{"image/jpeg", "image/png", "image/webp"});
             startActivityForResult(intent, Utils.PICK_IMAGE_REQUEST_CODE);
         };
     }
@@ -239,6 +239,11 @@ public class AddStickerPackActivity extends AppCompatActivity {
             @Override
             public void onProgressUpdate(int process) {
                 creationProgressBar.setProgress(process, true);
+            }
+
+            @Override
+            public void onProgressUpdate() {
+                creationProgressBar.setProgress(this.calculateProgress(creationProgressBar.getProgress()));
             }
         };
     }

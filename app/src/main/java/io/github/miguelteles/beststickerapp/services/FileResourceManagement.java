@@ -2,18 +2,18 @@ package io.github.miguelteles.beststickerapp.services;
 
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.res.AssetFileDescriptor;
 import android.database.Cursor;
 import android.net.Uri;
 import android.provider.OpenableColumns;
 
 import androidx.annotation.NonNull;
 
-import com.google.common.net.MediaType;
-
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -22,6 +22,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.github.miguelteles.beststickerapp.domain.pojo.MediaType;
 import io.github.miguelteles.beststickerapp.domain.pojo.VisualMediaType;
 import io.github.miguelteles.beststickerapp.exception.StickerFolderException;
 import io.github.miguelteles.beststickerapp.exception.StickerWebCommunicationException;
@@ -288,6 +289,10 @@ public class FileResourceManagement implements ResourcesManagement {
                 fileOutputStream.write(dataBuffer, 0, bytesRead);
             }
             return destinationFile;
+        } catch (FileNotFoundException ex) {
+            throw new StickerFolderException(ex,
+                    StickerFolderExceptionEnum.FILE_NOT_FOUND,
+                    null);
         } catch (IOException ex) {
             throw new StickerFolderException(ex,
                     StickerFolderExceptionEnum.DOWNLOAD,
@@ -310,13 +315,27 @@ public class FileResourceManagement implements ResourcesManagement {
         String mimeType = contentResolver.getType(uri);
 
         if (mimeType != null) {
-            if (mimeType.contains(MediaType.ANY_IMAGE_TYPE.type())) {
+            if (mimeType.equals(MediaType.GIF)) {
+                return VisualMediaType.GIF;
+            } else if (mimeType.contains(MediaType.ANY_IMAGE_TYPE)) {
                 return VisualMediaType.IMAGE;
-            } else if (mimeType.contains(MediaType.ANY_VIDEO_TYPE.type())) {
+            } else if (mimeType.contains(MediaType.ANY_VIDEO_TYPE)) {
                 return VisualMediaType.VIDEO;
             }
         }
         throw new StickerFolderException(null, StickerFolderExceptionEnum.GET_FILE_TYPE, "Erro ao ler arquivo da uri");
+    }
+
+    @Override
+    public long getFileSize(Uri uri) throws StickerFolderException {
+        try (AssetFileDescriptor fileDescriptor = contentResolver.openAssetFileDescriptor(uri, "r")){
+            if (fileDescriptor==null) {
+                throw new StickerFolderException(null, StickerFolderExceptionEnum.FILE_NOT_FOUND, "Arquivo não encontrado ao tentar determinar seu tamanho");
+            }
+            return fileDescriptor.getLength();
+        } catch (IOException e) {
+            throw new StickerFolderException(e, StickerFolderExceptionEnum.GET_FILE, "Erro ao determinar tamanho do arquivo");
+        }
     }
 
     public abstract static class DirectoryNames {

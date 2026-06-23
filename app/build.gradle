@@ -36,7 +36,8 @@ android {
         def secureToken = System.getenv(SECURE_TOKEN_FIELDNAME) != null ? System.getenv(SECURE_TOKEN_FIELDNAME) : "f0a9c3bdeaf2ef5df1be92c6a47ff8eac8470a05d183fb68c4eec0b5c112cd0a"
         buildConfigField "String", SECURE_TOKEN_FIELDNAME, "\"${secureToken}\""
 
-        def apiProductionUrl = System.getenv(API_ENDPOINT_FIELDNAME) != null ? System.getenv(API_ENDPOINT_FIELDNAME) : "https://q7h1mc4qwh.execute-api.sa-east-1.amazonaws.com/prod/"
+//        def apiProductionUrl = System.getenv(API_ENDPOINT_FIELDNAME) != null ? System.getenv(API_ENDPOINT_FIELDNAME) : "https://q7h1mc4qwh.execute-api.sa-east-1.amazonaws.com/prod/"
+        def apiProductionUrl = System.getenv(API_ENDPOINT_FIELDNAME) != null ? System.getenv(API_ENDPOINT_FIELDNAME) : "https://915ibg6co8.execute-api.sa-east-1.amazonaws.com/dev/"
         buildConfigField "String", API_ENDPOINT_FIELDNAME, "\"${apiProductionUrl}\""
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -131,6 +132,8 @@ dependencies {
 
     implementation(platform("com.google.firebase:firebase-bom:34.0.0"))
     implementation("com.google.firebase:firebase-analytics")
+
+    implementation 'pl.droidsonroids.gif:android-gif-drawable:1.2.17'
 
 
     testImplementation 'junit:junit:4.13.2'

@@ -26,7 +26,8 @@ public enum StickerFolderExceptionEnum {
     DELETE_FOLDER(R.string.DELETE_FOLDER),
 
     CONVERT_FILE(R.string.CONVERT_FILE),
-    DOWNLOAD(R.string.DOWNLOAD);
+    DOWNLOAD(R.string.DOWNLOAD),
+    FILE_NOT_FOUND(R.string.FILE_NOT_FOUND);
 
     int mResourceId;
 

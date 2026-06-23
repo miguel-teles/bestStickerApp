@@ -7,7 +7,6 @@ import androidx.annotation.NonNull;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 
@@ -22,9 +21,13 @@ import io.github.miguelteles.beststickerapp.services.FileResourceManagement;
 import io.github.miguelteles.beststickerapp.services.client.VideoConverterWebpAPIImpl;
 import io.github.miguelteles.beststickerapp.services.client.interfaces.VideoConverterWebpAPI;
 import io.github.miguelteles.beststickerapp.services.interfaces.ResourcesManagement;
+import io.github.miguelteles.beststickerapp.services.interfaces.operationcallback.OnProgressUpdate;
 import io.github.miguelteles.beststickerapp.utils.Utils;
 
 public class StickerVideoConvertionService extends StickerMediaConvertionService {
+
+    public static final long MAX_FILE_SIZE_ALLOWED_IN_BYTES = 50 * 1000 * 1000;
+    public static final int MAX_ANIMATION_DURATION_SECONDS = 10;
 
     private static StickerVideoConvertionService instance;
     private final VideoConverterWebpAPI videoConverterWebpAPI;
@@ -43,24 +46,27 @@ public class StickerVideoConvertionService extends StickerMediaConvertionService
 
     public ResourcesManagement.Media generateConvertedMedia(@NotNull Uri stickerPackFolder,
                                                             @NotNull Uri sourceImage,
-                                                            @NotNull String destinationImageFileName) throws StickerException {
+                                                            @NotNull String destinationImageFileName,
+                                                            OnProgressUpdate onProgressUpdate) throws StickerException {
         return this.generateConvertedMedia(stickerPackFolder,
                 sourceImage,
                 destinationImageFileName,
                 Sticker.STICKER_IMAGE_SIZE,
-                false);
+                false,
+                onProgressUpdate);
     }
 
     public ResourcesManagement.Media generateConvertedMedia(@NotNull Uri stickerPackFolder,
                                                             @NotNull Uri sourceImage,
                                                             @NotNull String destinationImageFileName,
                                                             @NotNull Integer imageWidthAndHeight,
-                                                            boolean keepOriginalCopy) throws StickerException {
+                                                            boolean keepOriginalCopy,
+                                                            OnProgressUpdate onProgressUpdate) throws StickerException {
         Uri copiedVideo = null;
         try {
             copiedVideo = generateMediaCopy(sourceImage, resourcesManagement.getCacheFolder(), buildResizedImageFileName(sourceImage, destinationImageFileName));
 
-            URL convertedVideoToWebp = convertVideoToWebp(copiedVideo);
+            URL convertedVideoToWebp = convertVideoToWebp(copiedVideo, onProgressUpdate);
             return ResourcesManagement.Media.builder()
                     .linkToDownloadMedia(convertedVideoToWebp)
                     .build();
@@ -75,18 +81,21 @@ public class StickerVideoConvertionService extends StickerMediaConvertionService
         }
     }
 
-    private URL convertVideoToWebp(Uri copiedVideo) throws StickerException {
+    private URL convertVideoToWebp(Uri copiedVideo,
+                                   OnProgressUpdate onProgressUpdate) throws StickerException {
         String filename = this.resourcesManagement.getFileFromURI(copiedVideo).getName();
 
         ResponseAPIUploadDestinationVideoConverter uploadDestination = this.videoConverterWebpAPI.createUploadDestination(filename);
-        if (uploadDestination.getSignedUrl() == null) {
+        onProgressUpdate.onProgressUpdate();
+        if (uploadDestination.getSignedUrl() == null || uploadDestination.getConvertedFileName() == null) {
             throw new StickerFolderException(null, StickerFolderExceptionEnum.CONVERT_FILE, uploadDestination.getMessage());
         }
 
-        byte[] contentAsBytes = this.resourcesManagement.getContentAsBytes(copiedVideo);
-        this.videoConverterWebpAPI.uploadVideo(uploadDestination.getSignedUrl(), contentAsBytes);
+        this.videoConverterWebpAPI.uploadVideo(uploadDestination.getSignedUrl(), this.resourcesManagement.getFileFromURI(copiedVideo));
+        onProgressUpdate.onProgressUpdate();
 
         ResponseAPIDownloadSourceVideoConverter downloadSource = this.videoConverterWebpAPI.createDownloadSource(uploadDestination.getConvertedFileName());
+        onProgressUpdate.onProgressUpdate();
 
         return createURL(downloadSource);
     }

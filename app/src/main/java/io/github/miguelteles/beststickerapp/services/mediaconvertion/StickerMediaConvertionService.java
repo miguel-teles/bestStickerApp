@@ -7,12 +7,9 @@ import androidx.annotation.NonNull;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.io.IOException;
-import java.io.InputStream;
-
 import io.github.miguelteles.beststickerapp.exception.StickerException;
-import io.github.miguelteles.beststickerapp.exception.StickerFolderException;
 import io.github.miguelteles.beststickerapp.services.interfaces.ResourcesManagement;
+import io.github.miguelteles.beststickerapp.services.interfaces.operationcallback.OnProgressUpdate;
 
 public abstract class StickerMediaConvertionService {
 
@@ -29,7 +26,8 @@ public abstract class StickerMediaConvertionService {
                                                                      @NotNull Uri sourceImage,
                                                                      @NotNull String destinationImageFileName,
                                                                      @NotNull Integer imageWidthAndHeight,
-                                                                     boolean keepOriginalCopy) throws StickerException;
+                                                                     boolean keepOriginalCopy,
+                                                                     OnProgressUpdate onProgressUpdate) throws StickerException;
 
     protected final Uri generateMediaCopy(Uri sourceImage,
                                           Uri copyDestinationFolder,

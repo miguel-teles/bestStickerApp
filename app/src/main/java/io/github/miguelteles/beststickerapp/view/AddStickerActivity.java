@@ -28,6 +28,9 @@ import androidx.media3.common.MediaItem;
 import androidx.media3.common.Player;
 import androidx.media3.common.util.UnstableApi;
 import androidx.media3.exoplayer.ExoPlayer;
+import androidx.media3.exoplayer.source.ClippingMediaSource;
+import androidx.media3.exoplayer.source.DefaultMediaSourceFactory;
+import androidx.media3.exoplayer.source.MediaSource;
 import androidx.media3.ui.AspectRatioFrameLayout;
 import androidx.media3.ui.PlayerView;
 
@@ -39,7 +42,9 @@ import io.github.miguelteles.beststickerapp.exception.StickerException;
 import io.github.miguelteles.beststickerapp.exception.handler.StickerExceptionHandler;
 import io.github.miguelteles.beststickerapp.services.FileResourceManagement;
 import io.github.miguelteles.beststickerapp.services.interfaces.operationcallback.OperationCallback;
+import io.github.miguelteles.beststickerapp.services.mediaconvertion.StickerVideoConvertionService;
 import io.github.miguelteles.beststickerapp.viewmodel.StickerViewModel;
+import pl.droidsonroids.gif.GifImageView;
 
 public class AddStickerActivity extends AppCompatActivity {
     private static final String TAG_MODIFIED = "modified";
@@ -55,11 +60,17 @@ public class AddStickerActivity extends AppCompatActivity {
     private StickerPack stickerPack;
     private ProgressBar creationProgressBar;
     private ActivityResultLauncher<PickVisualMediaRequest> pickMedia;
-    private TextView txtWarnInvalidStickerType;
+    private TextView txtWarnAddSticker;
     private ExoPlayer exoPlayer;
+
+    private GifImageView stickerGifImageView;
 
     private StickerViewModel stickerViewModel;
     private FileResourceManagement fileResourceManagement;
+
+    private static MediaItem.ClippingConfiguration clippingConfiguration;
+
+    private long selectedMediaSize = 0;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -90,12 +101,14 @@ public class AddStickerActivity extends AppCompatActivity {
 
     private void setOnClickListeners() {
         btnPickImageOrVideo.setOnClickListener(selecionaImagem());
-        btnAdicionarSticker.setOnClickListener(adicionarSticker());
+        btnAdicionarSticker.setOnClickListener(addStickerOnClickListener());
     }
 
     @SuppressLint("UnsafeOptInUsageError")
     private void declaraCampos() {
         this.stickerImageView = findViewById(R.id.sticker_imageview);
+        this.stickerGifImageView = findViewById(R.id.sticker_gifimageview);
+        this.stickerGifImageView.setScaleType(ImageView.ScaleType.FIT_XY);
         this.stickerVideoThumbnailImageView = findViewById(R.id.sticker_playerview_thumbnail);
         this.stickerPlayerView = findViewById(R.id.sticker_playerview);
         this.btnAdicionarSticker = findViewById(R.id.btn_adicionar_sticker);
@@ -107,6 +120,7 @@ public class AddStickerActivity extends AppCompatActivity {
                         try {
                             uriStickerMedia = uri;
                             this.typeSelectedMedia = fileResourceManagement.getTypeOfVisualMedia(uri);
+                            this.selectedMediaSize = fileResourceManagement.getFileSize(uri);
                             if (typeSelectedMedia.isImage()) {
                                 addContentToImageView(uri);
                             } else {
@@ -124,8 +138,22 @@ public class AddStickerActivity extends AppCompatActivity {
         this.stickerImageView.setScaleType(ImageView.ScaleType.FIT_XY);
         this.stickerVideoThumbnailImageView.setScaleType(ImageView.ScaleType.FIT_XY);
         this.exoPlayer = new ExoPlayer.Builder(getApplicationContext()).build();
+        this.exoPlayer.setVolume(0);
         this.stickerPlayerView.setPlayer(exoPlayer);
+        final Context context = this;
         this.exoPlayer.addListener(new Player.Listener() {
+
+            @Override
+            public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
+                if (playbackState == ExoPlayer.STATE_READY) {
+                    try {
+                        verificaCamposObrigatoriosEIntegridade();
+                    } catch (StickerException ex) {
+                        StickerExceptionHandler.handleException(ex, context);
+                    }
+                }
+            }
+
             @Override
             public void onIsPlayingChanged(boolean isPlaying) {
                 if (isPlaying) {
@@ -133,22 +161,55 @@ public class AddStickerActivity extends AppCompatActivity {
                 }
             }
         });
-        this.txtWarnInvalidStickerType = findViewById(R.id.txt_warning_invalid_sticker_type);
+        this.txtWarnAddSticker = findViewById(R.id.txt_warning_add_sticker);
     }
 
     @OptIn(markerClass = UnstableApi.class)
     private void addContentToVideoView(Uri uri) {
+        stickerImageView.setTag(TAG_UNMODIFIED);
+        stickerImageView.setVisibility(INVISIBLE);
+        stickerVideoThumbnailImageView.setVisibility(INVISIBLE);
+        stickerPlayerView.setVisibility(INVISIBLE);
+        stickerGifImageView.setVisibility(INVISIBLE);
+        if (this.typeSelectedMedia.isGif()) {
+            addContentToGifImageView(uri);
+        } else {
+            addContentToPlayerView(uri);
+        }
+    }
+
+    @OptIn(markerClass = UnstableApi.class)
+    private void addContentToPlayerView(Uri uri) {
         stickerVideoThumbnailImageView.setVisibility(VISIBLE);
         stickerVideoThumbnailImageView.setImageBitmap(getVideoThumbnail(this, uri));
         stickerPlayerView.setVisibility(VISIBLE);
-        stickerImageView.setVisibility(INVISIBLE);
+
+        exoPlayer.setMediaItem(
+                new MediaItem.Builder()
+                        .setUri(uri)
+                        .setClippingConfiguration(getClippingConfiguration())
+                        .build()
+        );
         exoPlayer.prepare();
-        exoPlayer.setMediaItem(MediaItem.fromUri(uri));
         exoPlayer.setRepeatMode(Player.REPEAT_MODE_ALL);
         exoPlayer.play();
+
         stickerPlayerView.setTag(TAG_MODIFIED);
-        stickerImageView.setTag(TAG_UNMODIFIED);
-        typeSelectedMedia = VisualMediaType.VIDEO;
+    }
+
+    private static MediaItem.ClippingConfiguration getClippingConfiguration() {
+        if (clippingConfiguration == null) {
+            clippingConfiguration = new MediaItem.ClippingConfiguration.Builder()
+                    .setEndPositionMs(StickerVideoConvertionService.MAX_ANIMATION_DURATION_SECONDS * 1000)
+                    .build();
+        }
+        return clippingConfiguration;
+    }
+
+    private void addContentToGifImageView(Uri uri) {
+        stickerGifImageView.setImageURI(uri);
+        stickerGifImageView.setVisibility(VISIBLE);
+        stickerGifImageView.setTag(TAG_MODIFIED);
     }
 
     private void addContentToImageView(Uri uri) {
@@ -157,11 +218,11 @@ public class AddStickerActivity extends AppCompatActivity {
         stickerVideoThumbnailImageView.setVisibility(INVISIBLE);
         stickerImageView.setTag(TAG_MODIFIED);
         stickerPlayerView.setTag(TAG_UNMODIFIED);
+        exoPlayer.clearMediaItems();
         exoPlayer.stop();
-        typeSelectedMedia = VisualMediaType.IMAGE;
     }
 
-    private View.OnClickListener adicionarSticker() {
+    private View.OnClickListener addStickerOnClickListener() {
         Context context = this;
         return v -> {
             disableBtnAddSticker();
@@ -191,7 +252,17 @@ public class AddStickerActivity extends AppCompatActivity {
 
             @Override
             public void onProgressUpdate(int process) {
-                creationProgressBar.setProgress(process, true);
+                int current = creationProgressBar.getProgress();
+                creationProgressBar.setProgress(current + process, true);
+            }
+
+            @Override
+            public void onProgressUpdate() {
+                creationProgressBar.setProgress(
+                        this.calculateProgress(
+                                creationProgressBar.getProgress()
+                        )
+                );
             }
         };
     }
@@ -205,22 +276,58 @@ public class AddStickerActivity extends AppCompatActivity {
     }
 
     private void verificaCamposObrigatoriosEIntegridade() throws StickerException {
-        if (TAG_UNMODIFIED.equals(stickerImageView.getTag()) && TAG_UNMODIFIED.equals(stickerPlayerView.getTag())) {
+        if (isEverythingUnmodifed()) {
             disableBtnAddSticker();
-            txtWarnInvalidStickerType.setVisibility(INVISIBLE);
+            txtWarnAddSticker.setVisibility(INVISIBLE);
             return;
-        } else if (typeSelectedMedia.isImage() && stickerPack.isAnimatedStickerPack()) {
-            txtWarnInvalidStickerType.setVisibility(VISIBLE);
+        } else if (isStickerStandardButPackIsAnimated()) {
+            txtWarnAddSticker.setVisibility(VISIBLE);
+            txtWarnAddSticker.setText(R.string.WARN_WRONG_TYPE_STICKER_PACK);
             disableBtnAddSticker();
             return;
-        } else if (typeSelectedMedia.isVideo() && stickerPack.isStandardStickerPack()) {
-            txtWarnInvalidStickerType.setVisibility(VISIBLE);
+        } else if (isStickerAnimatedButPackIsStandard()) {
+            txtWarnAddSticker.setVisibility(VISIBLE);
+            txtWarnAddSticker.setText(R.string.WARN_WRONG_TYPE_STICKER_PACK);
             disableBtnAddSticker();
+            return;
+        } else if (isVideoSelected() && isVideoFileSizeTooBig()) {
+            txtWarnAddSticker.setVisibility(VISIBLE);
+            txtWarnAddSticker.setText(R.string.WARN_FILE_BIGGER_THAN_ALLOWED);
+            disableBtnAddSticker();
+            return;
+        } else if (isVideoSelected() && !exoPlayer.isPlaying()) {
+            disableBtnAddSticker();
+            return;
+        } else if (isVideoSelected() && exoPlayer.isPlaying()) {
+            txtWarnAddSticker.setVisibility(VISIBLE);
+            txtWarnAddSticker.setText(R.string.WARN_DURATION_OF_VIDEO);
+            enableBtnAddSticker();
             return;
         }
-        txtWarnInvalidStickerType.setVisibility(INVISIBLE);
+        txtWarnAddSticker.setVisibility(INVISIBLE);
         enableBtnAddSticker();
+    }
 
+    private boolean isVideoFileSizeTooBig() {
+        return this.selectedMediaSize >= this.stickerViewModel.getMaxFileSizeAllowed();
+    }
+
+    private boolean isEverythingUnmodifed() {
+        return TAG_UNMODIFIED.equals(stickerImageView.getTag()) &&
+                TAG_UNMODIFIED.equals(stickerPlayerView.getTag()) &&
+                TAG_UNMODIFIED.equals(stickerGifImageView.getTag());
+    }
+
+    private boolean isStickerStandardButPackIsAnimated() {
+        return typeSelectedMedia.isImage() && stickerPack.isAnimatedStickerPack();
+    }
+
+    private boolean isStickerAnimatedButPackIsStandard() {
+        return typeSelectedMedia.isAnimated() && stickerPack.isStandardStickerPack();
+    }
+
+    private boolean isVideoSelected() {
+        return TAG_MODIFIED.equals(stickerPlayerView.getTag());
     }
 
     private void disableBtnAddSticker() {
