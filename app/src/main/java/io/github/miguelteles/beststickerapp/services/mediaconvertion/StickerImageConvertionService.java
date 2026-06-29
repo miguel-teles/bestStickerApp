@@ -38,7 +38,7 @@ public class StickerImageConvertionService extends StickerMediaConvertionService
 
     private StickerImageConvertionService() throws StickerException {
         super(FileResourceManagement.getInstance(), Utils.getApplicationContext().getContentResolver());
-        imageConverterWebpAPI = new ImageConverterWebpAPIImpl(Utils.getApplicationContext());
+        imageConverterWebpAPI = ImageConverterWebpAPIImpl.getInstance();
     }
 
     public StickerImageConvertionService(ResourcesManagement resourcesManagement,

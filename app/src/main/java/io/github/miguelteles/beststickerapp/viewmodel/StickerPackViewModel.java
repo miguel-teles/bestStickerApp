@@ -22,6 +22,12 @@ public class StickerPackViewModel {
         this.stickerPackService = StickerPackService.getInstance();
     }
 
+    public StickerPackViewModel(ExecutorWithThreadResultPoster<StickerPack> executorWithThreadResultPoster,
+                                StickerPackService stickerPackService) {
+        this.executorWithThreadResultPoster = executorWithThreadResultPoster;
+        this.stickerPackService = stickerPackService;
+    }
+
     public void createStickerPack(@NonNull String authorName,
                                   @NonNull String packName,
                                   @NonNull Uri imageUri,

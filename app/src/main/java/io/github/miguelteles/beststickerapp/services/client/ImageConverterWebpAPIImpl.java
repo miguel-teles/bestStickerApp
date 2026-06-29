@@ -15,16 +15,25 @@ import io.github.miguelteles.beststickerapp.exception.StickerFatalErrorException
 import io.github.miguelteles.beststickerapp.exception.StickerWebCommunicationException;
 import io.github.miguelteles.beststickerapp.exception.enums.StickerWebCommunicationExceptionEnum;
 import io.github.miguelteles.beststickerapp.services.client.interfaces.ImageConverterWebpAPI;
+import io.github.miguelteles.beststickerapp.utils.Utils;
 import okhttp3.Call;
 import okhttp3.Response;
 
 public class ImageConverterWebpAPIImpl extends HttpClient implements ImageConverterWebpAPI {
 
+    private static ImageConverterWebpAPI instance;
     private final Gson gson;
 
-    public ImageConverterWebpAPIImpl(Context context) throws StickerFatalErrorException {
+    private ImageConverterWebpAPIImpl(Context context) throws StickerFatalErrorException {
         super(BuildConfig.API_ENDPOINT, context);
         gson = new Gson();
+    }
+
+    public static ImageConverterWebpAPI getInstance() throws StickerFatalErrorException {
+        if (instance == null) {
+            instance = new ImageConverterWebpAPIImpl(Utils.getApplicationContext());
+        }
+        return instance;
     }
 
     public ResponseAPIConvertedWebp convertImageToWebp(String imageInBase64) throws StickerException {
@@ -33,7 +42,7 @@ public class ImageConverterWebpAPIImpl extends HttpClient implements ImageConver
             return gson.fromJson(response.body().string(), ResponseAPIConvertedWebp.class);
         } catch (SocketTimeoutException ex) {
             throw new StickerWebCommunicationException(ex, StickerWebCommunicationExceptionEnum.TIMEOUT, "/converter");
-        }  catch (IOException ex) {
+        } catch (IOException ex) {
             handleIOException(ex);
             return null;
         }
@@ -48,7 +57,7 @@ public class ImageConverterWebpAPIImpl extends HttpClient implements ImageConver
             }
         } catch (SocketTimeoutException ex) {
             throw new StickerWebCommunicationException(ex, StickerWebCommunicationExceptionEnum.TIMEOUT, "/converter");
-        }  catch (IOException ex) {
+        } catch (IOException ex) {
             handleIOException(ex);
         }
     }

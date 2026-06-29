@@ -5,196 +5,259 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 import android.content.ContentResolver;
+import android.content.Context;
 import android.net.Uri;
 
+import androidx.annotation.NonNull;
+
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.Mockito;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
+import org.mockito.MockitoAnnotations;
+import org.robolectric.RobolectricTestRunner;
 
-import java.io.ByteArrayInputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
-import java.util.List;
+import java.net.URL;
 import java.util.UUID;
-import java.util.concurrent.Executor;
 
 import io.github.miguelteles.beststickerapp.domain.entity.Sticker;
 import io.github.miguelteles.beststickerapp.domain.entity.StickerPack;
+import io.github.miguelteles.beststickerapp.domain.pojo.VisualMediaType;
 import io.github.miguelteles.beststickerapp.exception.StickerException;
-import io.github.miguelteles.beststickerapp.integration.stickerPack.StickerContentProviderTest;
+import io.github.miguelteles.beststickerapp.exception.StickerFolderException;
+import io.github.miguelteles.beststickerapp.repository.MyDatabase;
 import io.github.miguelteles.beststickerapp.repository.StickerRepository;
+import io.github.miguelteles.beststickerapp.services.client.ImageConverterWebpAPIImpl;
+import io.github.miguelteles.beststickerapp.services.client.VideoConverterWebpAPIImpl;
+import io.github.miguelteles.beststickerapp.services.interfaces.operationcallback.OnProgressUpdate;
 import io.github.miguelteles.beststickerapp.services.mediaconvertion.StickerImageConvertionService;
 import io.github.miguelteles.beststickerapp.services.StickerService;
-import io.github.miguelteles.beststickerapp.services.interfaces.operationcallback.OperationCallback;
 import io.github.miguelteles.beststickerapp.services.interfaces.ResourcesManagement;
+import io.github.miguelteles.beststickerapp.services.mediaconvertion.StickerVideoConvertionService;
 import io.github.miguelteles.beststickerapp.utils.Utils;
+import io.github.miguelteles.beststickerapp.utils.thread.StickerExceptionRunnable;
 import io.github.miguelteles.beststickerapp.validator.StickerPackValidator;
 
+/**
+ * Métodos públicos:
+ * - getInstance
+ * - createSticker
+ * - deleteSticker
+ * - fetchAllStickerFromPackWithAssets
+ * - fetchAllStickerFromPackWithoutAssets
+ * - fetchStickerAsset
+ */
+@RunWith(RobolectricTestRunner.class)
 public class StickerServiceTest {
 
-    StickerRepository stickerRepository = mock(StickerRepository.class);
-    ResourcesManagement stickerFilesManagementService = mock(ResourcesManagement.class);
-    StickerContentProviderTest.StickerUriProvider stickerUriProvider = mock(StickerContentProviderTest.StickerUriProvider.class);
-    ContentResolver contentResolver = mock(ContentResolver.class);
-    StickerPackValidator stickerPackValidator = mock(StickerPackValidator.class);
-    StickerImageConvertionService stickerImageConvertionService = mock(StickerImageConvertionService.class);
-    StickerService stickerService = mock(StickerService.class);
-    Uri uri = mock(Uri.class);
-    Executor testExecutor = Runnable::run;
+    @Mock
+    private StickerRepository stickerRepository;
 
-    OperationCallback<Sticker> callback = new OperationCallback<Sticker>() {
-        @Override
-        public void onCreationFinish(Sticker createdEntity, StickerException stickerException) {
-            generatedSticker = createdEntity;
-        }
+    @Mock
+    private ResourcesManagement resourcesManagement;
 
-        @Override
-        public void onProgressUpdate(int process) {
+    @Mock
+    private ContentResolver contentResolver;
 
-        }
-    };
+    @Mock
+    private StickerPackValidator stickerPackValidator;
 
-    Sticker generatedSticker = null;
+    @Mock
+    private StickerImageConvertionService imageConvertionService;
 
-    StickerPack validStickerPack = new StickerPack(UUID.randomUUID(),
-            "teste",
-            "teste",
-            "app/src/main/assets/test_image.jpg",
-            "app/src/main/assets/test_image.jpg",
-            "teste",
-            1,
-            true,
-            null);
+    @Mock
+    private StickerVideoConvertionService videoConvertionService;
 
-    Sticker validSticker = new Sticker(UUID.randomUUID(), UUID.randomUUID(), "/home/miguel/StudioProjects/stickersProjeto/app/src/main/assets/test_image.jpg");
+    @Mock
+    private OnProgressUpdate progressUpdate;
+    @Mock
+    private Context context;
 
+    private StickerService stickerService;
 
+    private AutoCloseable closeable;
 
     @Before
-    public void mockingDepedencies() throws StickerException {
-        when(stickerRepository.save(any(Sticker.class))).then(new Answer<Sticker>() {
-            @Override
-            public Sticker answer(InvocationOnMock invocation) {
-                Sticker sticker = invocation.getArgument(0);
-                sticker.setIdentifier(UUID.randomUUID());
-                sticker.setPackIdentifier(UUID.randomUUID());
-                return sticker;
-            }
-        });
-        when(stickerFilesManagementService.getOrCreateStickerPackDirectory(any(String.class))).then(new Answer<Uri>() {
-            @Override
-            public Uri answer(InvocationOnMock invocation) throws Throwable {
-                return uri;
-            }
-        });
-        when(uri.getLastPathSegment()).then(new Answer<String>() {
-            @Override
-            public String answer(InvocationOnMock invocation) throws Throwable {
-                return "falagalera.jpg";
-            }
-        });
-        when(stickerImageConvertionService.generateConvertedMedia(any(Uri.class), any(Uri.class), any(String.class), any(Integer.class), any(Boolean.class))).then(new Answer<ResourcesManagement.Media>() {
-            @Override
-            public ResourcesManagement.Media answer(InvocationOnMock invocation) throws Throwable {
-                return new ResourcesManagement.Media(uri,
-                        uri,
-                        new byte[]{1,1,1,1,1,1,1,1});
-            }
-        });
-        when(stickerFilesManagementService.getOrCreateFile(any(Uri.class), any(String.class))).then(new Answer<Uri>() {
-            @Override
-            public Uri answer(InvocationOnMock invocation) throws Throwable {
-                return uri;
-            }
-        });
-        Mockito.doNothing().when(stickerPackValidator).validateSticker(any(UUID.class), any(Sticker.class), any(Boolean.class));
-        
-        when(stickerRepository.findByPackIdentifier(any(UUID.class))).then(new Answer<List<Sticker>>() {
-            @Override
-            public List<Sticker> answer(InvocationOnMock invocation) throws Throwable {
-                return List.of(validSticker.clone(), validSticker.clone(), validSticker.clone(), validSticker.clone());
-            }
-        });
-        try {
-            when(contentResolver.openInputStream(any(Uri.class))).then(new Answer<InputStream>() {
-                @Override
-                public InputStream answer(InvocationOnMock invocation) throws Throwable {
-                    return new ByteArrayInputStream(new byte[]{1,1,1,2,2,2,1,1,});
-                }
-            });
-        } catch (FileNotFoundException ex) {
-            throw new RuntimeException(ex);
-        }
-        when(stickerUriProvider.getStickerAsset(any(UUID.class), any(String.class))).then(new Answer<Uri>() {
-            @Override
-            public Uri answer(InvocationOnMock invocation) throws Throwable {
-                return uri;
-            }
-        });
-        when(stickerFilesManagementService.readBytesFromInputStream(any(InputStream.class))).then(new Answer<byte[]>() {
+    public void setUp() {
+        closeable = MockitoAnnotations.openMocks(this);
 
-            @Override
-            public byte[] answer(InvocationOnMock invocation) throws Throwable {
-                return new byte[]{1,11,11,1,1,1,11,1,1};
-            }
-        });
-
-        stickerService = new StickerService(stickerRepository, stickerFilesManagementService, contentResolver, stickerPackValidator, stickerImageConvertionService);
+        stickerService = new StickerService(
+                stickerRepository,
+                resourcesManagement,
+                contentResolver,
+                stickerPackValidator,
+                imageConvertionService,
+                videoConvertionService
+        );
     }
 
     @Test
-    public void testCreateSticker() throws StickerException {
-        Sticker sticker = stickerService.createSticker(validStickerPack, uri, callback);
+    public void shouldGetInstance() throws StickerException {
+        runWithMockedStatic(()-> {
+            StickerService instance = StickerService.getInstance();
 
-        assertFalse("StickerImageFile is not null", Utils.isNothing(sticker.getStickerImageFile()));
-        assertNotNull("Sticker has identifier", sticker.getPackIdentifier());
-        assertTrue("Sticker size is greater then 0",sticker.getSize()>0);
+            assertNotNull(instance);
+        });
     }
 
     @Test
-    public void testCreateStickerInputInput() {
-        assertThrows("IllegalArgumentException thrown when stickerPack is null", IllegalArgumentException.class, () -> stickerService.createSticker(null, uri, callback));
-        assertThrows("IllegalArgumentException thrown when selectedUriImage is null", IllegalArgumentException.class, () -> stickerService.createSticker(validStickerPack, null, callback));
-        assertThrows("IllegalArgumentException thrown when callbackClass is null", IllegalArgumentException.class, () -> stickerService.createSticker(validStickerPack, uri, null));
+    public void shouldBeSameInstance() throws StickerException {
+        runWithMockedStatic(()-> {
+            doReturn(contentResolver).when(context).getContentResolver();
+
+
+            StickerService instance1 = StickerService.getInstance();
+            StickerService instance2 = StickerService.getInstance();
+
+            assertEquals(instance1, instance2);
+        });
     }
 
-    @Test
-    public void testDeleteSticker() throws StickerException {
-        stickerService.deleteSticker(validSticker, validStickerPack);
-    }
+    public void runWithMockedStatic(StickerExceptionRunnable runnable) throws StickerException {
+        try (MockedStatic<Utils> utils = Mockito.mockStatic(Utils.class);
+             MockedStatic<MyDatabase> mockMyDatabase = Mockito.mockStatic(MyDatabase.class);
+             MockedStatic<ImageConverterWebpAPIImpl> mockImageConverterWebpAPIImpl = Mockito.mockStatic(ImageConverterWebpAPIImpl.class);
+             MockedStatic<VideoConverterWebpAPIImpl> mockVideoConverterWebpAPIImpl = Mockito.mockStatic(VideoConverterWebpAPIImpl.class)
+        ) {
+            utils.when(() -> Utils.getApplicationContext()).thenReturn(context);
+            mockMyDatabase.when(() -> MyDatabase.getInstance()).thenReturn(mock(MyDatabase.class));
+            mockImageConverterWebpAPIImpl.when(() -> ImageConverterWebpAPIImpl.getInstance()).thenReturn(mock(ImageConverterWebpAPIImpl.class));
+            mockVideoConverterWebpAPIImpl.when(() -> VideoConverterWebpAPIImpl.getInstance()).thenReturn(mock(VideoConverterWebpAPIImpl.class));
 
-    @Test
-    public void testDeleteStickerInputInvalido() {
-        assertThrows("IllegalArgumentException thrown when sticker is null", IllegalArgumentException.class, () -> stickerService.deleteSticker(null, validStickerPack));
-        assertThrows("IllegalArgumentException thrown when stickerPack is null", IllegalArgumentException.class, () -> stickerService.deleteSticker(validSticker, null));
-    }
-
-    @Test
-    public void testFetchAllStickerFromPackWithAssets() throws StickerException {
-        List<Sticker> stickers = stickerService.fetchAllStickerFromPackWithAssets(validStickerPack.getIdentifier(), validStickerPack.getFolderName());
-        assertNotNull("Sticker list cannot be null, even thought the sticker pack is empty", stickers);
-        for(Sticker sticker : stickers) {
-            assertNotNull(sticker.getIdentifier());
-            assertNotNull(sticker.getStickerImageFile());
-            assertTrue(sticker.getSize()!=0);
-            assertNotNull(sticker.getPackIdentifier());
-            assertNotNull(sticker.getStickerImageFileInBytes());
+            runnable.run();
         }
     }
 
     @Test
-    public void testFetchAllStickerFromPackWithoutAssets() throws StickerException {
-        List<Sticker> stickers = stickerService.fetchAllStickerFromPackWithoutAssets(validStickerPack.getIdentifier());
-        assertNotNull("Sticker list cannot be null, even thought the sticker pack is empty", stickers);
-        for (Sticker sticker : stickers) {
-            assertNotNull(sticker.getIdentifier());
-            assertNotNull(sticker.getStickerImageFile());
-            assertTrue(sticker.getSize() == 0);
-            assertNotNull(sticker.getPackIdentifier());
-            assertNull(sticker.getStickerImageFileInBytes());
-        }
+    public void shouldCreateStaticSticker() throws Exception {
+        StickerPack stickerPack = createMockedStickerPack(false);
+
+        Uri selectedImage = Uri.parse("file:///input.png");
+        Uri stickerFolder = Uri.parse("file:///stickers");
+        Uri savedImage = Uri.parse("file:///stickers/sticker.webp");
+
+        ResourcesManagement.Media media = buildStaticMedia();
+
+        mockGetOrCreateStickerPackDirectory(stickerPack.getFolderName(), stickerFolder);
+        mockGenerateConvertedStaticMedia(media);
+        mockSaveFileToDevice(media, savedImage);
+        when(resourcesManagement.getTypeOfVisualMedia(any())).thenReturn(VisualMediaType.IMAGE);
+
+        Sticker result = stickerService.createSticker(
+                stickerPack,
+                selectedImage,
+                progressUpdate);
+
+        assertNotNull(result);
+
+        verify(stickerRepository).save(any(Sticker.class));
+        verify(stickerPackValidator).validateSticker(eq(stickerPack.getIdentifier()), any(Sticker.class), anyBoolean());
     }
 
+    @Test
+    public void shouldCreateAnimatedSticker() throws Exception {
+        StickerPack stickerPack = createMockedStickerPack(true);
+
+        Uri selectedImage = Uri.parse("file:///input.png");
+        Uri stickerFolder = Uri.parse("file:///stickers");
+        Uri savedImage = Uri.parse("file:///stickers/sticker.webp");
+
+        ResourcesManagement.Media media = buildAnimatedMedia();
+
+        mockGetOrCreateStickerPackDirectory("mypack", stickerFolder);
+        mockGenerateConvertedAnimatedMedia(media);
+        mockSaveFileToDevice(media, savedImage);
+        mockGetOrCreateFile(stickerFolder, savedImage);
+        byte[] stickerInBytes = {1, 2, 3, 5};
+        mockContentAsBytes(stickerInBytes);
+        when(resourcesManagement.getTypeOfVisualMedia(any())).thenReturn(VisualMediaType.GIF);
+
+        Sticker result = stickerService.createSticker(
+                stickerPack,
+                selectedImage,
+                progressUpdate);
+
+        assertNotNull(result);
+        assertEquals(result.getPackIdentifier(), stickerPack.getIdentifier());
+        assertEquals(result.getStickerImageFileInBytes(), stickerInBytes);
+
+        verify(stickerRepository).save(any(Sticker.class));
+        verify(stickerPackValidator)
+                .validateSticker(eq(stickerPack.getIdentifier()), any(Sticker.class), anyBoolean());
+    }
+
+    private void mockContentAsBytes(byte[] stickerInBytes) throws StickerFolderException {
+        doReturn(stickerInBytes).when(resourcesManagement).getContentAsBytes(any());
+    }
+
+    private void mockGetOrCreateFile(Uri stickerFolder, Uri savedImage) throws StickerFolderException {
+        doReturn(savedImage).when(resourcesManagement).getOrCreateFile(eq(stickerFolder), anyString());
+    }
+
+    private void mockGenerateConvertedStaticMedia(ResourcesManagement.Media media) throws StickerException {
+        when(imageConvertionService.generateConvertedMedia(
+                any(),
+                any(),
+                anyString(),
+                eq(Sticker.STICKER_IMAGE_SIZE),
+                eq(false),
+                any()))
+                .thenReturn(media);
+    }
+
+    private void mockGenerateConvertedAnimatedMedia(ResourcesManagement.Media media) throws StickerException {
+        when(videoConvertionService.generateConvertedMedia(
+                any(),
+                any(),
+                anyString(),
+                any()))
+                .thenReturn(media);
+    }
+
+    private static ResourcesManagement.Media buildStaticMedia() {
+        return ResourcesManagement.Media
+                .builder()
+                .convertedMedia(new byte[]{1, 2, 3})
+                .build();
+    }
+
+    private static ResourcesManagement.Media buildAnimatedMedia() throws Exception {
+        return ResourcesManagement.Media
+                .builder()
+                .linkToDownloadMedia(new URL("http://google.com"))
+                .build();
+    }
+
+    private void mockSaveFileToDevice(ResourcesManagement.Media media, Uri savedImage) throws StickerFolderException {
+        when(resourcesManagement.saveFileToDevice(
+                any(),
+                anyString(),
+                eq(media.getConvertedMedia())))
+                .thenReturn(savedImage);
+    }
+
+    private void mockGetOrCreateStickerPackDirectory(String folderName, Uri stickerFolder) {
+        doReturn(stickerFolder)
+                .when(resourcesManagement)
+                .getOrCreateStickerPackDirectory(folderName);
+    }
+
+    @NonNull
+    private static StickerPack createMockedStickerPack(Boolean isAnimated) {
+        UUID packId = UUID.randomUUID();
+
+        StickerPack stickerPack = mock(StickerPack.class);
+        when(stickerPack.isStandardStickerPack()).thenReturn(!isAnimated);
+        when(stickerPack.getIdentifier()).thenReturn(packId);
+        when(stickerPack.getFolderName()).thenReturn("mypack");
+        return stickerPack;
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        closeable.close();
+    }
 }

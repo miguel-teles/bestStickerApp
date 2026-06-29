@@ -20,17 +20,26 @@ import io.github.miguelteles.beststickerapp.exception.StickerFatalErrorException
 import io.github.miguelteles.beststickerapp.exception.StickerWebCommunicationException;
 import io.github.miguelteles.beststickerapp.exception.enums.StickerWebCommunicationExceptionEnum;
 import io.github.miguelteles.beststickerapp.services.client.interfaces.VideoConverterWebpAPI;
+import io.github.miguelteles.beststickerapp.utils.Utils;
 import okhttp3.Call;
 import okhttp3.Response;
 
 public class VideoConverterWebpAPIImpl extends HttpClient implements VideoConverterWebpAPI {
 
+    private static VideoConverterWebpAPIImpl instance;
     private final Gson gson;
     private final String PRESIGNED_GENERATION_URL_UPLOAD_FILE = "/video-converter-url";
 
     public VideoConverterWebpAPIImpl(Context context) throws StickerFatalErrorException {
         super(BuildConfig.API_ENDPOINT, context);
         gson = new Gson();
+    }
+
+    public static VideoConverterWebpAPI getInstance() throws StickerFatalErrorException {
+        if (instance == null) {
+            instance = new VideoConverterWebpAPIImpl(Utils.getApplicationContext());
+        }
+        return instance;
     }
 
     @Override

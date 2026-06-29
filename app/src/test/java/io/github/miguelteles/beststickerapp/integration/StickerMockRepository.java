@@ -1,6 +1,4 @@
-package io.github.miguelteles.beststickerapp.integration.stickerPack;
-
-import android.database.sqlite.SQLiteDatabase;
+package io.github.miguelteles.beststickerapp.integration;
 
 import java.util.ArrayList;
 import java.util.HashMap;

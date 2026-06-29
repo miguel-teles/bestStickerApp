@@ -1,6 +1,7 @@
-package io.github.miguelteles.beststickerapp.integration.stickerPack;
+package io.github.miguelteles.beststickerapp.integration;
 
 import static org.junit.Assert.*;
+import static org.robolectric.Shadows.shadowOf;
 
 import static io.github.miguelteles.beststickerapp.repository.contentProvider.StickerContentProvider.ANDROID_APP_DOWNLOAD_LINK_IN_QUERY;
 import static io.github.miguelteles.beststickerapp.repository.contentProvider.StickerContentProvider.ANIMATED_STICKER_PACK;
@@ -32,6 +33,7 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Build;
 import android.os.ParcelFileDescriptor;
+import android.webkit.MimeTypeMap;
 
 import androidx.annotation.NonNull;
 import androidx.test.core.app.ApplicationProvider;
@@ -84,44 +86,40 @@ public class StickerContentProviderTest {
                 ApplicationProvider.getApplicationContext().getContentResolver());
 
         StickerImageConvertionService stickerImageConvertionService = new StickerImageConvertionService(resourcesManagement,
-                new ImageConverterWebpAPIImpl(ApplicationProvider.getApplicationContext()),
+                ImageConverterWebpAPIImpl.getInstance(),
                 ApplicationProvider.getApplicationContext().getContentResolver());
 
         stickerService = new StickerService(new StickerMockRepository(),
                 resourcesManagement,
                 ApplicationProvider.getApplicationContext().getContentResolver(),
                 StickerPackValidator.getInstance(),
-                stickerImageConvertionService);
+                stickerImageConvertionService,
+                null);
         stickerPackService = new StickerPackService(resourcesManagement,
                 new StickerPackMockRepository(),
                 ApplicationProvider.getApplicationContext().getContentResolver(),
                 stickerService,
                 StickerPackValidator.getInstance(),
-                stickerImageConvertionService,
-                ApplicationProvider.getApplicationContext().getResources());
+                stickerImageConvertionService);
 
         stickerContentProviderReader = new StickerContentProviderReader(stickerPackService,
                 resourcesManagement,
                 ApplicationProvider.getApplicationContext());
 
         stickerUriProvider = new StickerUriProvider();
+
+        shadowOf(MimeTypeMap.getSingleton()).addExtensionMimeTypMapping("jpg", "image/jpeg");
+        shadowOf(MimeTypeMap.getSingleton()).addExtensionMimeTypMapping("mp4", "video/mp4");
+        shadowOf(MimeTypeMap.getSingleton()).addExtensionMimeTypMapping("gif", "image/gif");
     }
 
     @Test
     public void testQuery() throws StickerException, IOException {
-        stickerPackService.createStickerPack("teste",
+        createdStickerPack = stickerPackService.createStickerPack("teste",
                 "teste",
                 stickerPackImage,
-                new OperationCallback<StickerPack>() {
-                    @Override
-                    public void onCreationFinish(StickerPack createdEntity, StickerException stickerException) {
-                        createdStickerPack = createdEntity;
-                    }
-
-                    @Override
-                    public void onProgressUpdate(int process) {
-                    }
-                });
+                false,
+                OperationCallback.EMPTY);
 
         Uri stickerImage = Uri.fromFile(new File("src/test/resources/io/github/miguelteles/beststickerapp/unit/service/test_image.jpg"));
 
@@ -193,20 +191,11 @@ public class StickerContentProviderTest {
         assertNotNull(stickerPack.getImageDataVersion()); //IMAGE_DATA_VERSION
     }
 
-    private Sticker createSticker(Uri stickerImage) {
+    private Sticker createSticker(Uri stickerImage) throws StickerException {
         Sticker[] sticker = new Sticker[]{null};
-        stickerPackService.createSticker(createdStickerPack,
+        sticker[0] = stickerService.createSticker(createdStickerPack,
                 stickerImage,
-                new OperationCallback<Sticker>() {
-                    @Override
-                    public void onCreationFinish(Sticker createdEntity, StickerException stickerException) {
-                        sticker[0] = createdEntity;
-                    }
-
-                    @Override
-                    public void onProgressUpdate(int process) {
-                    }
-                });
+                OperationCallback.EMPTY);
         return sticker[0];
     }
 

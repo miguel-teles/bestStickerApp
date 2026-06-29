@@ -17,6 +17,7 @@ import java.util.UUID;
 
 import io.github.miguelteles.beststickerapp.domain.entity.Sticker;
 import io.github.miguelteles.beststickerapp.domain.entity.StickerPack;
+import io.github.miguelteles.beststickerapp.domain.pojo.VisualMediaType;
 import io.github.miguelteles.beststickerapp.exception.StickerException;
 import io.github.miguelteles.beststickerapp.exception.StickerFolderException;
 import io.github.miguelteles.beststickerapp.exception.enums.StickerExceptionEnum;
@@ -43,8 +44,8 @@ public class StickerService {
     private StickerService(Context context) throws StickerException {
         this.stickerRepository = new StickerRepository(MyDatabase.getInstance().getSqLiteDatabase());
         this.stickerPackValidator = StickerPackValidator.getInstance();
-        resourcesManagement = FileResourceManagement.getInstance();
-        contentResolver = context.getContentResolver();
+        this.resourcesManagement = FileResourceManagement.getInstance();
+        this.contentResolver = context.getContentResolver();
         this.stickerImageConvertionService = StickerImageConvertionService.getInstance();
         this.stickerVideoConvertionService = StickerVideoConvertionService.getInstance();
     }
@@ -73,9 +74,10 @@ public class StickerService {
     public Sticker createSticker(StickerPack stickerPack,
                                  Uri selectedStickerImage,
                                  OnProgressUpdate callbackClass) throws StickerException {
+        callbackClass.onProgressUpdate(30);
         SavedMedia savedMedia = null;
         try {
-            callbackClass.onProgressUpdate(30);
+            validateSelectedMediaAndPackType(stickerPack, selectedStickerImage);
             Uri stickerPackFolder = resourcesManagement.getOrCreateStickerPackDirectory(stickerPack.getFolderName());
             String stickerImageFile = generateStickerImageName();
             savedMedia = convertAndSaveMedia(stickerPack, selectedStickerImage, stickerPackFolder, stickerImageFile, callbackClass);
@@ -95,9 +97,20 @@ public class StickerService {
         }
     }
 
+    private void validateSelectedMediaAndPackType(StickerPack stickerPack, Uri selectedStickerImage) throws StickerException {
+        VisualMediaType typeOfVisualMedia = resourcesManagement.getTypeOfVisualMedia(selectedStickerImage);
+        if (stickerPack.isStandardStickerPack() && (typeOfVisualMedia.isAnimated())) {
+            throw new StickerException(null, StickerExceptionEnum.WTSP, "Tipo do pacote é padrão, porém figurinha é animada");
+        } else if (stickerPack.isAnimatedStickerPack() && typeOfVisualMedia.isImage()) {
+            throw new StickerException(null, StickerExceptionEnum.WTSP, "Tipo do pacote é animado, porém figurinha é estática");
+        }
+    }
+
     @NonNull
     private static Sticker buildSticker(StickerPack stickerPack, SavedMedia savedMedia) {
-        return new Sticker(savedMedia.savedImage().getLastPathSegment(), stickerPack.getIdentifier(), savedMedia.stickerImageInBytes());
+        return new Sticker(savedMedia.savedImage().getLastPathSegment(),
+                stickerPack.getIdentifier(),
+                savedMedia.stickerImageInBytes());
     }
 
     @NonNull
@@ -150,14 +163,11 @@ public class StickerService {
                 savedImage);
     }
 
-    private record SavedMedia(byte[] stickerImageInBytes, Uri savedImage) {
-    }
-
     private Uri saveConvertedVideoToDevice(String stickerImageFile,
-                                           Uri stickerPackFile,
+                                           Uri stickerPackFolder,
                                            URL linkToDownloadMedia,
                                            OnProgressUpdate onProgressUpdate) throws StickerException {
-        Uri stickerUri = resourcesManagement.getOrCreateFile(stickerPackFile, stickerImageFile);
+        Uri stickerUri = resourcesManagement.getOrCreateFile(stickerPackFolder, stickerImageFile);
 
         downloadVideoWithRetries(linkToDownloadMedia, stickerUri, onProgressUpdate);
 
@@ -182,7 +192,8 @@ public class StickerService {
                 aguardaConversao();
             }
             onProgressUpdate.onProgressUpdate(1);
-        };
+        }
+        ;
     }
 
     private static void aguardaConversao() {
@@ -197,13 +208,13 @@ public class StickerService {
                                            byte[] convertImageToWebp) throws StickerFolderException {
         return this.resourcesManagement.saveFileToDevice(
                 stickerPackFolder,
-                createNameConvertedImageFile(stickerPackFolder),
+                createNameConvertedImageFile(),
                 convertImageToWebp
         );
     }
 
-    private String createNameConvertedImageFile(@NonNull Uri stickerPackFolder) {
-        return stickerPackFolder.getLastPathSegment().replace(this.resourcesManagement.getFileExtension(stickerPackFolder, true), ".webp");
+    private String createNameConvertedImageFile() {
+        return UUID.randomUUID().toString().replace("-", "");
     }
 
     private void deleteStickerImages(SavedMedia savedMedia) {
@@ -236,7 +247,7 @@ public class StickerService {
 
     public List<Sticker> fetchAllStickerFromPackWithAssets(UUID packIdentifier, String folderName) throws StickerException {
         validateParametersFetchAllStickerFromPack(packIdentifier);
-        List<Sticker> stickers = stickerRepository.findByPackIdentifier(packIdentifier);
+        List<Sticker> stickers = fetchAllStickerFromPackWithoutAssets(packIdentifier);
 
         for (Sticker sticker : stickers) {
             final byte[] bytes;
@@ -280,5 +291,8 @@ public class StickerService {
 
     private String generateStickerImageName() {
         return "sticker" + Utils.formatData(new Date(), "yyyyMMddHHmmss");
+    }
+
+    private record SavedMedia(byte[] stickerImageInBytes, Uri savedImage) {
     }
 }

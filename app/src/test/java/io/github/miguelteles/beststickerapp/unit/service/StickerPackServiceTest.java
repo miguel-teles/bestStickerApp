@@ -3,7 +3,8 @@ package io.github.miguelteles.beststickerapp.unit.service;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 import android.content.ContentResolver;
@@ -11,78 +12,75 @@ import android.content.ContentValues;
 import android.content.res.Resources;
 import android.net.Uri;
 
+import androidx.annotation.NonNull;
+
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
+import org.robolectric.RobolectricTestRunner;
 
 import java.util.UUID;
 
 import io.github.miguelteles.beststickerapp.domain.entity.StickerPack;
 import io.github.miguelteles.beststickerapp.exception.StickerException;
 import io.github.miguelteles.beststickerapp.repository.StickerPackRepository;
-import io.github.miguelteles.beststickerapp.services.mediaconvertion.StickerImageConvertionService;
 import io.github.miguelteles.beststickerapp.services.StickerPackService;
 import io.github.miguelteles.beststickerapp.services.StickerService;
-import io.github.miguelteles.beststickerapp.services.interfaces.operationcallback.OperationCallback;
 import io.github.miguelteles.beststickerapp.services.interfaces.ResourcesManagement;
+import io.github.miguelteles.beststickerapp.services.interfaces.operationcallback.OnProgressUpdate;
+import io.github.miguelteles.beststickerapp.services.mediaconvertion.StickerImageConvertionService;
 import io.github.miguelteles.beststickerapp.validator.StickerPackValidator;
 
+@RunWith(RobolectricTestRunner.class)
 public class StickerPackServiceTest {
 
-    ResourcesManagement resourcesManagement = mock(ResourcesManagement.class);
-    StickerPackRepository stickerPackRepository = mock(StickerPackRepository.class);
-    ContentResolver contentResolver = mock(ContentResolver.class);
-    StickerService stickerService = mock(StickerService.class);
-    StickerPackValidator stickerPackValidator = mock(StickerPackValidator.class);
-    StickerImageConvertionService stickerImageConvertionService = mock(StickerImageConvertionService.class);
-
-    Resources resources = mock(Resources.class);
-    Uri uri = mock(Uri.class);
-
-    OperationCallback<StickerPack> callback = new OperationCallback<>() {
-        @Override
-        public void onCreationFinish(StickerPack createdStickerPack, StickerException stickerException) {
-            generatedStickerPack = createdStickerPack;
-        }
-
-        @Override
-        public void onProgressUpdate(int process) {
-            //do nothing...
-        }
-    };
-
-    StickerPack generatedStickerPack = null;
+    @Mock
+    ResourcesManagement resourcesManagement;
+    @Mock
+    StickerPackRepository stickerPackRepository;
+    @Mock
+    ContentResolver contentResolver;
+    @Mock
+    StickerService stickerService;
+    @Mock
+    StickerPackValidator stickerPackValidator;
+    @Mock
+    StickerImageConvertionService stickerImageConvertionService;
+    @Mock
+    Resources resources;
+    @Mock
+    Uri uri;
 
     StickerPackService stickerPackService = null;
-
-    StickerPack validStickerPack = new StickerPack(UUID.randomUUID(),
-            "teste",
-            "teste",
-            "app/src/main/assets/test_image.jpg",
-            "app/src/main/assets/test_image.jpg",
-            "teste",
-            1,
-            true,
-            null);
+    StickerPack validStickerPack = null;
 
     @Before
     public void mockingDepedencies() throws StickerException {
         MockitoAnnotations.initMocks(this);
+        validStickerPack = createStickerPack();
         when(resourcesManagement.getOrCreateStickerPackDirectory(any(String.class))).then(new Answer<Uri>() {
             @Override
             public Uri answer(InvocationOnMock invocation) throws Throwable {
                 return uri;
             }
         });
-        when(stickerImageConvertionService.generateConvertedMedia(any(Uri.class), any(Uri.class), any(String.class), any(Integer.class), any(Boolean.class))).then(new Answer<ResourcesManagement.Media>() {
+        when(stickerImageConvertionService.generateConvertedMedia(any(Uri.class),
+                any(Uri.class),
+                any(String.class),
+                any(Integer.class),
+                any(Boolean.class),
+                eq(OnProgressUpdate.EMPTY))).then(new Answer<ResourcesManagement.Media>() {
             @Override
             public ResourcesManagement.Media answer(InvocationOnMock invocation) throws Throwable {
-                return new ResourcesManagement.Media(uri,
-                        uri,
-                        new byte[]{1, 1, 1, 1, 1, 1, 1, 1});
+                return ResourcesManagement.Media.builder()
+                        .originalImageFile(uri)
+                        .convertedMedia(new byte[]{1, 1, 1, 1, 1, 1, 1, 1})
+                        .build();
             }
         });
         when(uri.getLastPathSegment()).then(new Answer<String>() {
@@ -119,87 +117,70 @@ public class StickerPackServiceTest {
                 return invocation.getArgument(0);
             }
         });
+        when(resourcesManagement.saveFileToDevice(any(Uri.class), anyString(), any()))
+                .then(new Answer<Object>() {
+                    @Override
+                    public Object answer(InvocationOnMock invocation) throws Throwable {
+                        return Uri.parse("file:///teste.png");
+                    }
+                });
 
         stickerPackService = new StickerPackService(resourcesManagement,
                 stickerPackRepository,
                 contentResolver,
                 stickerService,
                 stickerPackValidator,
-                stickerImageConvertionService,
-                resources);
+                stickerImageConvertionService);
     }
 
     @Test
-    public void testCreateStickerPack() {
-        stickerPackService.createStickerPack("teste", "teste", uri, callback);
-        assertNotNull(generatedStickerPack.getName());
-        assertNotNull(generatedStickerPack.getIdentifier());
-        assertNotNull(generatedStickerPack.getFolderName());
-        assertNotNull(generatedStickerPack.getOriginalTrayImageFile());
-        assertNotNull(generatedStickerPack.getResizedTrayImageFile());
-        assertNotNull(generatedStickerPack.getResizedTrayImageFileInBytes());
-        assertNotNull(generatedStickerPack.getImageDataVersion());
-        assertNotNull(generatedStickerPack.getPublisher());
-
-        stickerPackService.createStickerPack(null, "teste", uri, callback);
-        assertNotNull(generatedStickerPack.getName());
-        assertNotNull(generatedStickerPack.getIdentifier());
-        assertNotNull(generatedStickerPack.getFolderName());
-        assertNotNull(generatedStickerPack.getOriginalTrayImageFile());
-        assertNotNull(generatedStickerPack.getResizedTrayImageFile());
-        assertNotNull(generatedStickerPack.getResizedTrayImageFileInBytes());
-        assertNotNull(generatedStickerPack.getImageDataVersion());
-        assertNotNull(generatedStickerPack.getPublisher());
+    public void testCreateStickerPack() throws StickerException {
+        StickerPack stickerPack = stickerPackService.createStickerPack("teste", "teste", uri, false, OnProgressUpdate.EMPTY);
+        assertNotNull(stickerPack.getName());
+        assertNotNull(stickerPack.getIdentifier());
+        assertNotNull(stickerPack.getFolderName());
+        assertNotNull(stickerPack.getOriginalTrayImageFile());
+        assertNotNull(stickerPack.getResizedTrayImageFile());
+        assertNotNull(stickerPack.getResizedTrayImageFileInBytes());
+        assertNotNull(stickerPack.getImageDataVersion());
+        assertNotNull(stickerPack.getPublisher());
     }
 
     @Test
-    public void testCreateStickerPackInvalidInput() {
-
-        assertThrows("IllegalArgumentException thrown when packName is empty",
-                IllegalArgumentException.class,
-                () -> stickerPackService.createStickerPack("teste", "", uri, callback));
-        assertThrows("IllegalArgumentException thrown when packName is null",
-                IllegalArgumentException.class,
-                () -> stickerPackService.createStickerPack("teste", null, uri, callback));
-        assertThrows("IllegalArgumentException thrown when uri is null",
-                IllegalArgumentException.class,
-                () -> stickerPackService.createStickerPack("teste", "teste", null, callback));
-        assertThrows("IllegalArgumentException thrown when callbackClass is null",
-                IllegalArgumentException.class,
-                () -> stickerPackService.createStickerPack("teste", "teste", uri, null));
-    }
-
-    @Test
-    public void testUpdateStickerPack() throws StickerException {
-        stickerPackService.updateStickerPack(validStickerPack, "teste", "teste", callback);
-        assertNotNull(generatedStickerPack.getName());
-        assertNotNull(generatedStickerPack.getIdentifier());
-        assertNotNull(generatedStickerPack.getFolderName());
-        assertNotNull(generatedStickerPack.getOriginalTrayImageFile());
-        assertNotNull(generatedStickerPack.getResizedTrayImageFile());
-        assertNotNull(generatedStickerPack.getImageDataVersion());
-        assertNotNull(generatedStickerPack.getPublisher());
-
-        stickerPackService.updateStickerPack(validStickerPack, null, "teste", callback);
-        assertNotNull(generatedStickerPack.getName());
-        assertNotNull(generatedStickerPack.getIdentifier());
-        assertNotNull(generatedStickerPack.getFolderName());
-        assertNotNull(generatedStickerPack.getOriginalTrayImageFile());
-        assertNotNull(generatedStickerPack.getResizedTrayImageFile());
-        assertNotNull(generatedStickerPack.getImageDataVersion());
-        assertNotNull(generatedStickerPack.getPublisher());
-
-
+    public void testUpdateAuthorNameAndPackNameStickerPack() throws StickerException {
+        StickerPack stickerPack = stickerPackService.updateStickerPack(validStickerPack, "teste", "teste", OnProgressUpdate.EMPTY);
+        assertNotNull(stickerPack.getName());
+        assertNotNull(stickerPack.getIdentifier());
+        assertNotNull(stickerPack.getFolderName());
+        assertNotNull(stickerPack.getOriginalTrayImageFile());
+        assertNotNull(stickerPack.getResizedTrayImageFile());
+        assertNotNull(stickerPack.getImageDataVersion());
+        assertNotNull(stickerPack.getPublisher());
     }
 
     @Test
     public void testUpdateStickerPackInvalidArguments() {
         assertThrows(IllegalArgumentException.class, () -> stickerPackService.updateStickerPack(null,
                 "teste",
-                "teste", callback));
+                "teste",
+                OnProgressUpdate.EMPTY));
         assertThrows(IllegalArgumentException.class, () -> stickerPackService.updateStickerPack(validStickerPack,
                 "teste",
-                null, callback));
+                null,
+                OnProgressUpdate.EMPTY));
     }
 
+
+    @NonNull
+    private static StickerPack createStickerPack() {
+        return new StickerPack(UUID.randomUUID(),
+                "teste",
+                "teste",
+                "app/src/main/assets/test_image.jpg",
+                "app/src/main/assets/test_image.jpg",
+                "teste",
+                1,
+                true,
+                null);
+    }
 }

@@ -10,12 +10,12 @@ import io.github.miguelteles.beststickerapp.utils.Utils;
 
 public class StickerImageConvertionWarmer {
 
-    private static ImageConverterWebpAPI imageConverterWebpAPI;
-    private static Executor executor;
+    private static final ImageConverterWebpAPI imageConverterWebpAPI;
+    private static final Executor executor;
 
     static {
         try {
-            imageConverterWebpAPI = new ImageConverterWebpAPIImpl(Utils.getApplicationContext());
+            imageConverterWebpAPI = ImageConverterWebpAPIImpl.getInstance();
             executor = Executors.newSingleThreadExecutor();
         } catch (StickerException e) {
             throw new RuntimeException(e); //o global exception handler pega

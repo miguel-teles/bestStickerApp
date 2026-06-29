@@ -6,8 +6,10 @@ import android.content.res.AssetFileDescriptor;
 import android.database.Cursor;
 import android.net.Uri;
 import android.provider.OpenableColumns;
+import android.webkit.MimeTypeMap;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
@@ -101,12 +103,6 @@ public class FileResourceManagement implements ResourcesManagement {
 
     private Uri getOrCreateDirectory(Uri folder, String folderName) {
         File file = new File(folder.getPath(), folderName);
-        file.mkdir();
-        return Uri.fromFile(file);
-    }
-
-    private Uri getOrCreateDirectory(String folder) {
-        File file = new File(folder);
         file.mkdir();
         return Uri.fromFile(file);
     }
@@ -312,7 +308,7 @@ public class FileResourceManagement implements ResourcesManagement {
 
     @Override
     public VisualMediaType getTypeOfVisualMedia(Uri uri) throws StickerFolderException {
-        String mimeType = contentResolver.getType(uri);
+        String mimeType = getTypeOfFileInUri(uri);
 
         if (mimeType != null) {
             if (mimeType.equals(MediaType.GIF)) {
@@ -324,6 +320,15 @@ public class FileResourceManagement implements ResourcesManagement {
             }
         }
         throw new StickerFolderException(null, StickerFolderExceptionEnum.GET_FILE_TYPE, "Erro ao ler arquivo da uri");
+    }
+
+    @Nullable
+    private String getTypeOfFileInUri(Uri file) {
+        return switch (file.getScheme()) {
+            case ContentResolver.SCHEME_CONTENT -> contentResolver.getType(file);
+            case ContentResolver.SCHEME_FILE -> MimeTypeMap.getSingleton().getMimeTypeFromExtension(getFileExtension(file, false));
+            default -> throw new IllegalArgumentException("Tipo da URL não permitida");
+        };
     }
 
     @Override

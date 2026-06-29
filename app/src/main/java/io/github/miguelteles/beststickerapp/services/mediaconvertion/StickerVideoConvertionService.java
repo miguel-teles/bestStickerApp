@@ -1,6 +1,7 @@
 package io.github.miguelteles.beststickerapp.services.mediaconvertion;
 
 import android.content.ContentResolver;
+import android.content.Context;
 import android.net.Uri;
 
 import androidx.annotation.NonNull;
@@ -32,9 +33,9 @@ public class StickerVideoConvertionService extends StickerMediaConvertionService
     private static StickerVideoConvertionService instance;
     private final VideoConverterWebpAPI videoConverterWebpAPI;
 
-    private StickerVideoConvertionService() throws StickerException {
-        super(FileResourceManagement.getInstance(), Utils.getApplicationContext().getContentResolver());
-        videoConverterWebpAPI = new VideoConverterWebpAPIImpl(Utils.getApplicationContext());
+    private StickerVideoConvertionService(Context context) throws StickerException {
+        super(FileResourceManagement.getInstance(), context.getContentResolver());
+        videoConverterWebpAPI = VideoConverterWebpAPIImpl.getInstance();
     }
 
     public StickerVideoConvertionService(ResourcesManagement resourcesManagement,
@@ -112,7 +113,7 @@ public class StickerVideoConvertionService extends StickerMediaConvertionService
 
     public static StickerVideoConvertionService getInstance() throws StickerException {
         if (instance == null) {
-            instance = new StickerVideoConvertionService();
+            instance = new StickerVideoConvertionService(Utils.getApplicationContext());
         }
         return instance;
     }

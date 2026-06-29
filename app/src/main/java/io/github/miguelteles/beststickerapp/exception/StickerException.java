@@ -8,9 +8,7 @@ public class StickerException extends Exception {
 
     private Exception exception;
     private String msgErro;
-    private String dsErro;
     private StickerExceptionEnum stickerExceptionEnum;
-    private Date dtException;
     private String locationException;
 
     public StickerException(Exception ex,
@@ -19,7 +17,6 @@ public class StickerException extends Exception {
         super(msgErro, ex);
         this.msgErro = msgErro;
         this.stickerExceptionEnum = stickerExceptionEnum;
-        this.dtException = new Date();
         this.exception = ex;
         StackTraceElement stackTraceElement = null;
         if (ex != null) {
@@ -46,12 +43,11 @@ public class StickerException extends Exception {
         return "";
     }
 
-    public Date getDtException() {
-        return dtException;
-    }
-
     public String getLocationException() {
         return locationException;
     }
 
+    public StickerExceptionEnum getStickerExceptionEnum() {
+        return stickerExceptionEnum;
+    }
 }

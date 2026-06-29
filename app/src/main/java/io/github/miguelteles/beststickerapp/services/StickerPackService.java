@@ -244,9 +244,4 @@ public class StickerPackService {
             throw new StickerFolderException(ex, StickerFolderExceptionEnum.GET_FILE, "Erro when fetching sticker pack asset");
         }
     }
-
-    public void deleteSticker(Sticker sticker, StickerPack stickerPack) throws StickerException {
-        stickerService.deleteSticker(sticker, stickerPack);
-        stickerPackRepository.update(stickerPack);
-    }
 }

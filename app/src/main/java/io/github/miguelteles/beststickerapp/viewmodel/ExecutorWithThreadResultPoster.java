@@ -10,7 +10,7 @@ import io.github.miguelteles.beststickerapp.utils.thread.StickerExceptionRunnabl
 import io.github.miguelteles.beststickerapp.view.interfaces.UiThreadPoster;
 import io.github.miguelteles.beststickerapp.view.threadHandlers.AndroidUiThreadPoster;
 
-class ExecutorWithThreadResultPoster<T> {
+public class ExecutorWithThreadResultPoster<T> {
 
     private static ExecutorWithThreadResultPoster instance;
 
