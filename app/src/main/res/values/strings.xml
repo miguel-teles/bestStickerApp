@@ -1,24 +1,6 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- This is the app's name, translators please do not translate and put in the same text as English version. Developers can consider putting in their own translation, this string must be changed before publishing -->
     <string name="app_name" translatable="false">Best Sticker App</string>
-    <!-- Content description for the sticker pack tray image -->
-    <string name="tray_image_content_description">Sticker Pack Tray Image</string>
-    <!-- Text to be shown on the button that user can click to add the sticker pack to WhatsApp -->
-    <string name="add_to_whatsapp">Add to WhatsApp</string>
-
-    <!-- Message to show in a dialog when user fails to add sticker pack -->
-    <string name="add_pack_fail_prompt_update_whatsapp">Sticker pack not added. If you\'d like to add it, make sure you update to the latest version of WhatsApp.</string>
-    <!-- Text in dialog button when a user has an old version of WhatsApp that prevents them from adding the sticker pack, clicking on it will take user to play store -->
-    <string name="add_pack_fail_prompt_update_play_link">Update</string>
-    <!-- Toast text when we could not take user to play store because they don't have Google Play app installed -->
-    <string name="cannot_find_play_store">Google Play is not installed on the device.</string>
-    <!-- Content description indicating the sticker pack is an animated pack -->
-    <string name="sticker_pack_animation_indicator">Animated sticker pack</string>
-    <!-- text we display at the end of sticker pack details page showing that users can tap sticker to see bigger version -->
-    <string name="sticker_pack_details_tap_to_preview">Tap to preview sticker</string>
-    <string name="defaultPublisher">WhatsApp stickers app - Miguel Teles</string>
-    <string name="sticker_pack_image">Sticker pack image</string>
-    <string name="not_enough_stickers_to_add_to_whatsapp">There must be at least three stickers in a pack</string>
 
     <string name="new_update_available" translatable="false">Nova atualização disponível!</string>
     <string name="new_optional_update_text" translatable="false">A atualização não é obrigatória, porém recomendo fortemente baixar e instalar as atualizações disponibilizadas.\n\nCom o aplicativo na versão mais recente, menor a chance de você encontrar bugs no nele! :)</string>
@@ -32,16 +14,39 @@
     <string name="download_update" translatable="false">BAIXAR ATUALIZAÇÃO</string>
     <string name="no_secure_token_found" translatable="false">SecureToken não foi encontrado</string>
     <string name="no_api_endpoint_found" translatable="false">API endpoint não foi encontrado</string>
-    <string name="installing_new_version_text2">Diferente da Google Play que baixa a atualização automaticamente sem necessidade de uma nova instalação, este aplicativo precisa que a nova versão seja instalada. Isso acontece porque este app não consegue baixar somente os trechos de código atualizados, coisa que a Google Play faz.</string>
-    <string name="installing_new_version_text1">Para prosseguir com a atualizaçãp, é preciso instalar a nova versão recém baixada. Já que este aplicativo não é distribuído via Google Play, o processo de atualização do Best Sticker App é totalmente gerenciado por ele mesmo.</string>
-    <string name="installing_new_version_title">Instalar a nova versão</string>
-    <string name="installing_new_version_text3">Para que o Best Sticker App possa instalar a nova versão por você, é necessário que você permita que este possa \'\'instalar apps desconhecidos\'\'.</string>
-    <string name="give_permission_here">Dê permissão aqui!</string>
-    <string name="not_allowed">Não permitido :(</string>
-    <string name="allowed">Permitido :D</string>
-    <string name="skip_already_downloaded">Já baixado, próxima etapa!</string>
-    <string name="install_version">Instalar nova versão</string>
-    <string name="details_pack_already_added">Pack has been already added to WhatsApp, please close and open WhatsApp again to reflect the new stickers</string>
+    <string name="installing_new_version_text2" translatable="false">Diferente da Google Play que baixa a atualização automaticamente sem necessidade de uma nova instalação, este aplicativo precisa que a nova versão seja instalada. Isso acontece porque este app não consegue baixar somente os trechos de código atualizados, coisa que a Google Play faz.</string>
+    <string name="installing_new_version_text1" translatable="false">Para prosseguir com a atualizaçãp, é preciso instalar a nova versão recém baixada. Já que este aplicativo não é distribuído via Google Play, o processo de atualização do Best Sticker App é totalmente gerenciado por ele mesmo.</string>
+    <string name="installing_new_version_title" translatable="false">Instalar a nova versão</string>
+    <string name="installing_new_version_text3" translatable="false">Para que o Best Sticker App possa instalar a nova versão por você, é necessário que você permita que este possa \'\'instalar apps desconhecidos\'\'.</string>
+    <string name="give_permission_here" translatable="false">Dê permissão aqui!</string>
+    <string name="not_allowed" translatable="false">Não permitido :(</string>
+    <string name="allowed" translatable="false">Permitido :D</string>
+    <string name="skip_already_downloaded" translatable="false">Já baixado, próxima etapa!</string>
+    <string name="install_version" translatable="false">Instalar nova versão</string>
+
+    <!-- Content description for the sticker pack tray image -->
+    <string name="tray_image_content_description" translatable="false">Miniatura de pacote de figurinhas</string>
+    <!-- Text to be shown on the button that user can click to add the sticker pack to WhatsApp -->
+    <string name="add_to_whatsapp" translatable="false">Adicionar ao WhatsApp</string>
+
+    <!-- Message to show in a dialog when user fails to add sticker pack -->
+    <string name="add_pack_fail_prompt_update_whatsapp" translatable="false">Não foi possível adicionar o pacote de figurinhas. Se você quiser adicioná-lo, certifique-se de atualizar o WhatsApp para a última versão.</string>
+    <!-- Text in dialog button when a user has an old version of WhatsApp that prevents them from adding the sticker pack, clicking on it will take user to play store -->
+    <string name="add_pack_fail_prompt_update_play_link" translatable="false">Atualizar</string>
+    <!-- Toast text when we could not take user to play store because they don't have Google Play app installed -->
+    <string name="cannot_find_play_store" translatable="false">O Google Play não foi instalado no aparelho.</string>
+
+    <string name="defaultPublisher" translatable="false">Aplicativo de figurinhas - Miguel Teles</string>
+    <string name="sticker_pack_image" translatable="false">Imagem do pacote</string>
+    <string name="not_enough_stickers_to_add_to_whatsapp" translatable="false">É necessário que o pacote tenha pelo menos três figurinhas</string>
+
+    <!-- Content description indicating the sticker pack is an animated pack -->
+    <string name="sticker_pack_animation_indicator" translatable="false">Pacote de figurinhas animadas</string>
+    <!-- text we display at the end of sticker pack details page showing that users can tap sticker to see bigger version -->
+    <string name="sticker_pack_details_tap_to_preview" translatable="false">Toque para visualizar a figurinha</string>
+
+
+    <string name="details_pack_already_added" translatable="false">Pacote já foi adicionado! Para refletir alterações feitas, é necessário atualizar o pacote no WhatsApp.</string>
 
     <!-- Exception enums   -->
     <string name="MKDIR" translatable="false">Erro ao criar pasta</string>
@@ -88,4 +93,6 @@
     <string name="CONVERTION_TIME_OUT" translatable="false">Figurinha não foi convertida a tempo para baixá-la. Tente novamente.</string>
     <string name="WARN_FILE_BIGGER_THAN_ALLOWED" translatable="false">Wow! Arquivo grande demais para transformar em figurinha.</string>
     <string name="WARN_DURATION_OF_VIDEO" translatable="false">O vídeo pode ser cortado, pois a duração máxima de uma figurinha animada é de 10 segundos.</string>
+    <string name="how_to_update_stickerpack">Como atualizar o pacote de figurinhas no WhatsApp</string>
+    <string name="how_to_update">Antigamente, só era necessário abrir e fechar o WhatsApp ou até mesmo sair e entrar de alguma conversa. Atualmente (texto feito em 29 de Junho de 2026), existe um botão que atualiza um pacote específico:</string>
 </resources>

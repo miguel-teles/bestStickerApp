@@ -247,17 +247,35 @@
         android:layout_marginRight="@dimen/preview_side_margin"
         android:minHeight="60dp">
 
-        <TextView
-            android:id="@+id/already_added_text"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:gravity="center"
-            android:text="@string/details_pack_already_added"
-            android:textColor="#9B9B9B"
-            android:textSize="14sp"
-            android:visibility="gone"
-            tools:visibility="visible" />
+            android:layout_height="match_parent"
+            android:paddingHorizontal="10dp"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/already_added_text"
+                android:layout_width="0dp"
+                android:layout_weight="18"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:justificationMode="inter_word"
+                android:text="@string/details_pack_already_added"
+                android:textColor="#9B9B9B"
+                android:textSize="14sp"
+                android:visibility="gone"
+                tools:visibility="visible" />
+
+            <ImageView
+                android:id="@+id/btn_already_added_more_info"
+                android:layout_width="wrap_content"
+                android:layout_weight="2"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:contentDescription="@string/sticker_pack_animation_indicator"
+                android:src="@drawable/question_outlined" />
+
+        </LinearLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -271,6 +289,7 @@
                 android:gravity="center"
                 android:textSize="10sp"
                 android:layout_marginBottom="4dp"
+                android:visibility="gone"
                 android:text="@string/not_enough_stickers_to_add_to_whatsapp" />
 
             <FrameLayout
@@ -282,7 +301,8 @@
                 android:clickable="true"
                 android:focusable="true"
                 android:foreground="?attr/selectableItemBackgroundBorderless"
-                android:orientation="vertical">
+                android:orientation="vertical"
+                android:visibility="gone">
 
                 <TextView
                     style="@style/StickerPreviewButtonText"
@@ -307,7 +327,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:gravity="center"
-                android:text="@string/sticker_pack_details_tap_to_preview" />
+                android:text="@string/sticker_pack_details_tap_to_preview"
+                android:visibility="gone"/>
         </LinearLayout>
 
 

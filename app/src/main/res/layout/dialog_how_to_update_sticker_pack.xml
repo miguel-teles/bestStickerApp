@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/dialog_rounded_bg"
+    android:padding="32dp">
+
+    <TextView
+        android:id="@+id/title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/how_to_update_stickerpack"
+        android:textAlignment="center"
+        android:textAppearance="?android:attr/textAppearanceLarge"/>
+
+    <TextView
+        android:id="@+id/txt_how_to_update"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/how_to_update"
+        android:justificationMode="inter_word"
+        android:layout_marginTop="8dp"/>
+
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:src="@drawable/atualizar_pacote"
+        android:layout_marginTop="8dp"/>
+
+    <TextView
+        android:id="@+id/txtPressOutsideToCloseUpdateDialog"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Você pode apertar fora desta caixa para fechá-la"
+        android:textAlignment="center"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:textColor="@color/gray"
+        android:layout_marginTop="8dp"/>
+
+
+
+</LinearLayout>

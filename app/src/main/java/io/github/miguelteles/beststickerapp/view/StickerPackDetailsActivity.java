@@ -38,6 +38,8 @@ import io.github.miguelteles.beststickerapp.services.FileResourceManagement;
 import io.github.miguelteles.beststickerapp.services.interfaces.ResourcesManagement;
 import io.github.miguelteles.beststickerapp.services.interfaces.operationcallback.OperationCallback;
 import io.github.miguelteles.beststickerapp.validator.WhitelistCheck;
+import io.github.miguelteles.beststickerapp.view.dialogs.HowToUpdateStickerPackDialogFragment;
+import io.github.miguelteles.beststickerapp.view.dialogs.UpdateDialogFragment;
 import io.github.miguelteles.beststickerapp.view.recyclerViewAdapters.stickers.StickerPreviewAdapter;
 import io.github.miguelteles.beststickerapp.viewmodel.StickerPackViewModel;
 import io.github.miguelteles.beststickerapp.viewmodel.StickerViewModel;
@@ -60,6 +62,8 @@ public class StickerPackDetailsActivity extends AddStickerPackToWhatsappActivity
     private ResourcesManagement resourcesManagement;
     private ProgressBar progressBar;
     private TextView alreadyAddedText;
+
+    private ImageView btnAlreadyAddedMoreInfo;
 
     private TextView txtNotEnoughStickers;
 
@@ -183,6 +187,7 @@ public class StickerPackDetailsActivity extends AddStickerPackToWhatsappActivity
         progressBar = findViewById(R.id.pg_sticker_pack_edit);
         txtNotEnoughStickers = findViewById(R.id.txt_not_enough_stickers);
         alreadyAddedText = findViewById(R.id.already_added_text);
+        btnAlreadyAddedMoreInfo = findViewById(R.id.btn_already_added_more_info);
     }
 
     private void setOnClickListeners() {
@@ -190,6 +195,11 @@ public class StickerPackDetailsActivity extends AddStickerPackToWhatsappActivity
         btnDeleteStickerPack.setOnClickListener(btn -> deleteStickerPack());
         btnAddNewSticker.setOnClickListener(btn -> addNewSticker());
         btnGoBack.setOnClickListener(btn -> addGoBack());
+        btnAlreadyAddedMoreInfo.setOnClickListener(btn -> showDialogAlreadyAddedMoreInfo());
+    }
+
+    private void showDialogAlreadyAddedMoreInfo() {
+        new HowToUpdateStickerPackDialogFragment().show(getSupportFragmentManager(), "howToUpdateStickerPackDialog");
     }
 
     private void setAddStickerPackToWhatsappListener() {
@@ -306,14 +316,17 @@ public class StickerPackDetailsActivity extends AddStickerPackToWhatsappActivity
     }
 
     private void updateAddUI(Boolean isWhitelisted) {
+        isWhitelisted = true;
         if (isWhitelisted) {
             btnAddToWhatsapp.setVisibility(View.GONE);
             alreadyAddedText.setVisibility(View.VISIBLE);
+            btnAlreadyAddedMoreInfo.setVisibility(View.VISIBLE);
             txtNotEnoughStickers.setVisibility(View.GONE);
             findViewById(R.id.sticker_pack_details_tap_to_preview).setVisibility(View.GONE);
         } else {
             btnAddToWhatsapp.setVisibility(View.VISIBLE);
             alreadyAddedText.setVisibility(View.GONE);
+            btnAlreadyAddedMoreInfo.setVisibility(View.GONE);
             findViewById(R.id.sticker_pack_details_tap_to_preview).setVisibility(View.VISIBLE);
         }
     }
