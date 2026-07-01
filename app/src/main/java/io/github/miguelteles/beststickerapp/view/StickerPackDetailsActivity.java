@@ -316,7 +316,6 @@ public class StickerPackDetailsActivity extends AddStickerPackToWhatsappActivity
     }
 
     private void updateAddUI(Boolean isWhitelisted) {
-        isWhitelisted = true;
         if (isWhitelisted) {
             btnAddToWhatsapp.setVisibility(View.GONE);
             alreadyAddedText.setVisibility(View.VISIBLE);

@@ -263,8 +263,7 @@
                 android:text="@string/details_pack_already_added"
                 android:textColor="#9B9B9B"
                 android:textSize="14sp"
-                android:visibility="gone"
-                tools:visibility="visible" />
+                android:visibility="gone" />
 
             <ImageView
                 android:id="@+id/btn_already_added_more_info"
@@ -273,7 +272,8 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
                 android:contentDescription="@string/sticker_pack_animation_indicator"
-                android:src="@drawable/question_outlined" />
+                android:src="@drawable/question_outlined"
+                android:visibility="gone"/>
 
         </LinearLayout>
 
@@ -289,7 +289,7 @@
                 android:gravity="center"
                 android:textSize="10sp"
                 android:layout_marginBottom="4dp"
-                android:visibility="gone"
+                android:visibility="visible"
                 android:text="@string/not_enough_stickers_to_add_to_whatsapp" />
 
             <FrameLayout
@@ -302,7 +302,7 @@
                 android:focusable="true"
                 android:foreground="?attr/selectableItemBackgroundBorderless"
                 android:orientation="vertical"
-                android:visibility="gone">
+                android:visibility="visible">
 
                 <TextView
                     style="@style/StickerPreviewButtonText"
