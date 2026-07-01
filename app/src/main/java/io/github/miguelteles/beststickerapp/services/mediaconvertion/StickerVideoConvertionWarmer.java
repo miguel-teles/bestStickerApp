@@ -4,18 +4,17 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
 import io.github.miguelteles.beststickerapp.exception.StickerException;
-import io.github.miguelteles.beststickerapp.services.client.ImageConverterWebpAPIImpl;
-import io.github.miguelteles.beststickerapp.services.client.interfaces.ImageConverterWebpAPI;
-import io.github.miguelteles.beststickerapp.utils.Utils;
+import io.github.miguelteles.beststickerapp.services.client.VideoConverterWebpAPIImpl;
+import io.github.miguelteles.beststickerapp.services.client.interfaces.VideoConverterWebpAPI;
 
-public class StickerImageConvertionWarmer {
+public class StickerVideoConvertionWarmer {
 
-    private static final ImageConverterWebpAPI imageConverterWebpAPI;
+    private static final VideoConverterWebpAPI videoConverterWebpAPI;
     private static final Executor executor;
 
     static {
         try {
-            imageConverterWebpAPI = ImageConverterWebpAPIImpl.getInstance();
+            videoConverterWebpAPI = VideoConverterWebpAPIImpl.getInstance();
             executor = Executors.newSingleThreadExecutor();
         } catch (StickerException e) {
             throw new RuntimeException(e); //o global exception handler pega
@@ -25,10 +24,11 @@ public class StickerImageConvertionWarmer {
     public static void warm() {
         executor.execute(() -> {
             try {
-                imageConverterWebpAPI.warm();
+                videoConverterWebpAPI.warm();
             } catch (StickerException e) {
                 throw new RuntimeException(e);
             }
+
         });
     }
 }

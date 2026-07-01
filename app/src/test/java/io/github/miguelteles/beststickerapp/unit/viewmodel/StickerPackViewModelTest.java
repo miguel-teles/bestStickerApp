@@ -70,7 +70,7 @@ public class StickerPackViewModelTest {
     public void teste_createStickerPack() throws StickerException {
         Uri stickerPackLogo = Uri.parse("file:///teste.png");
 
-        stickerPackService.createStickerPack("authorName",
+        stickerPackViewModel.createStickerPack("authorName",
                 "packName",
                 stickerPackLogo,
                 true,
@@ -85,7 +85,7 @@ public class StickerPackViewModelTest {
         verify(stickerPackService).createStickerPack(eq("authorName"),
                 eq("packName"),
                 eq(stickerPackLogo),
-                true,
+                eq(true),
                 any(OperationCallback.class));
     }
 
@@ -102,7 +102,7 @@ public class StickerPackViewModelTest {
                 any()
         );
         supplier.getValue().get();
-        verify(stickerPackService).updateStickerPack(stickerPack,
+        verify(stickerPackService).updateStickerPack(eq(stickerPack),
                 eq("authorName"),
                 eq("packName"),
                 any(OperationCallback.class));
@@ -137,7 +137,7 @@ public class StickerPackViewModelTest {
                 any()
         );
         supplier.getValue().run();
-        verify(stickerPackService).deleteStickerPack(stickerPack,
+        verify(stickerPackService).deleteStickerPack(eq(stickerPack),
                 any(OperationCallback.class));
     }
 

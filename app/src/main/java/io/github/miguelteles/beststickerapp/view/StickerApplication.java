@@ -21,6 +21,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import io.github.miguelteles.beststickerapp.services.mediaconvertion.StickerImageConvertionWarmer;
+import io.github.miguelteles.beststickerapp.services.mediaconvertion.StickerVideoConvertionWarmer;
 
 public class StickerApplication extends Application {
 
@@ -76,6 +77,7 @@ public class StickerApplication extends Application {
         private void warmImageConvertion() {
             if (currentActivity.isEmpty()) {
                 StickerImageConvertionWarmer.warm();
+                StickerVideoConvertionWarmer.warm();
             }
         }
     }

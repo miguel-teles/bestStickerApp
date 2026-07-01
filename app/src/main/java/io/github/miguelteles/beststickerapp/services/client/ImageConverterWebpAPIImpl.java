@@ -50,7 +50,7 @@ public class ImageConverterWebpAPIImpl extends HttpClient implements ImageConver
 
     @Override
     public void warm() throws StickerException {
-        Call call = this.post("/converter", "{\"warmup\": true}");
+        Call call = this.postText("/converter", "warmer");
         try (Response response = call.execute()) {
             if (response.code() != 200) {
                 throw new StickerWebCommunicationException(null, StickerWebCommunicationExceptionEnum.POST, "warm up error");

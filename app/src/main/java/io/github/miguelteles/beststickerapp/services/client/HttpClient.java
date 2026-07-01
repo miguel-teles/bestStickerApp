@@ -21,6 +21,7 @@ import okhttp3.RequestBody;
 
 abstract class HttpClient {
     public static final MediaType JSON = MediaType.parse("application/json");
+    public static final MediaType TEXT_PLAIN = MediaType.parse("text/plain");
     private final String baseUrl;
     private final OkHttpClient okHttpClient;
     private final String secureToken;
@@ -40,6 +41,11 @@ abstract class HttpClient {
 
     protected Call post(String endpoint, String bodyContent) {
         RequestBody requestBody = RequestBody.create(bodyContent, JSON);
+        return okHttpClient.newCall(getRequestBuilderWithCommonAttributes(endpoint).post(requestBody).build());
+    }
+
+    protected Call postText(String endpoint, String bodyContent) {
+        RequestBody requestBody = RequestBody.create(bodyContent, TEXT_PLAIN);
         return okHttpClient.newCall(getRequestBuilderWithCommonAttributes(endpoint).post(requestBody).build());
     }
 

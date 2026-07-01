@@ -83,7 +83,7 @@ public class VideoConverterWebpAPIImpl extends HttpClient implements VideoConver
 
     @Override
     public void warm() throws StickerException {
-        Call call = this.post(PRESIGNED_GENERATION_URL_UPLOAD_FILE, "{\"warmup\": true}");
+        Call call = this.postText(PRESIGNED_GENERATION_URL_UPLOAD_FILE, "warmer");
         try (Response response = call.execute()) {
             if (response.code() != 200) {
                 throw new StickerWebCommunicationException(null, StickerWebCommunicationExceptionEnum.POST, "warm up error");
