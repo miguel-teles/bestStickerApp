@@ -50,8 +50,8 @@ jobs:
         
         echo "$API_KEY" > "$FILENAME"
         
-        echo "Created $FILENAME with content:"
-        cat "$FILENAME"
+        echo "Created $FILENAME"
+        
         aws s3 cp $FILENAME \
             s3://${{ secrets.NAME_S3_BUCKET_API_KEY }}/$FILENAME \
             --region ${{ secrets.REGION_S3_BUCKET_API_KEY }} \
