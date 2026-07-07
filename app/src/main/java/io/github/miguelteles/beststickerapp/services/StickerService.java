@@ -290,7 +290,7 @@ public class StickerService {
     }
 
     private String generateStickerImageName() {
-        return "sticker" + Utils.formatData(new Date(), "yyyyMMddHHmmss");
+        return "sticker" + UUID.randomUUID().toString().replace("-", "");
     }
 
     private record SavedMedia(byte[] stickerImageInBytes, Uri savedImage) {

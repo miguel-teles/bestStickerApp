@@ -18,6 +18,7 @@ public class StickerPackRepository extends CommonRepository implements Repositor
 
     private String PERSIST = "INSERT INTO packs VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
     private String UPDATE = "UPDATE packs SET name=?, publisher=?, imageDataVersion=(imageDataVersion + 1) WHERE identifier=?";
+    private String UPDATE_STICKERPACK_VERSION = "UPDATE packs SET imageDataVersion=(imageDataVersion + 1) WHERE identifier=?";
 
     public StickerRepository stickerRepository;
     private final SQLiteDatabase sqLiteDatabase;
@@ -68,7 +69,7 @@ public class StickerPackRepository extends CommonRepository implements Repositor
             stmt.bindString(2, stickerPack.getPublisher());
             stmt.bindString(3, stickerPack.getIdentifier().toString());
 
-            long result = (long) stmt.executeUpdateDelete();
+            long result = stmt.executeUpdateDelete();
             if (result != -1) {
                 return stickerPack;
             } else {
@@ -79,6 +80,24 @@ public class StickerPackRepository extends CommonRepository implements Repositor
             throw ex;
         } catch (Exception ex) {
             throw new StickerDataBaseException(ex, StickerDataBaseExceptionEnum.UPDATE, "Erro ao atualizar dados do pacote " + stickerPack.getIdentifier());
+        }
+    }
+
+    public void updateStickerPackVersion(UUID stickerPackIdentifier) throws StickerException {
+        try {
+            SQLiteStatement stmt = sqLiteDatabase.compileStatement(UPDATE_STICKERPACK_VERSION);
+
+            stmt.bindString(1, stickerPackIdentifier.toString());
+
+            long result = stmt.executeUpdateDelete();
+            if (result == -1) {
+                throw new StickerDataBaseException(null, StickerDataBaseExceptionEnum.UPDATE, "Erro ao chamar o update");
+            }
+
+        } catch (StickerException ex) {
+            throw ex;
+        } catch (Exception ex) {
+            throw new StickerDataBaseException(ex, StickerDataBaseExceptionEnum.UPDATE, "Erro ao atualizar versão do pacote " + stickerPackIdentifier.toString());
         }
     }
 

@@ -23,6 +23,7 @@ import org.robolectric.RobolectricTestRunner;
 import io.github.miguelteles.beststickerapp.domain.entity.Sticker;
 import io.github.miguelteles.beststickerapp.domain.entity.StickerPack;
 import io.github.miguelteles.beststickerapp.exception.StickerException;
+import io.github.miguelteles.beststickerapp.services.StickerPackService;
 import io.github.miguelteles.beststickerapp.services.StickerService;
 import io.github.miguelteles.beststickerapp.services.interfaces.operationcallback.OperationCallback;
 import io.github.miguelteles.beststickerapp.services.mediaconvertion.StickerVideoConvertionService;
@@ -40,6 +41,8 @@ public class StickerViewModelTest {
     @Mock
     private StickerService stickerService;
     @Mock
+    private StickerPackService stickerPackService;
+    @Mock
     private StickerPack mockedStickerPack;
     @Mock
     private Sticker mockedSticker;
@@ -52,14 +55,17 @@ public class StickerViewModelTest {
 
         stickerViewModel = new StickerViewModel(
                 executorWithThreadResultPoster,
-                stickerService
+                stickerService,
+                stickerPackService
         );
     }
 
     @Test
     public void teste_getInstance() throws StickerException {
-        try (MockedStatic<StickerService> mockedStickerService = Mockito.mockStatic(StickerService.class)){
-            mockedStickerService.when(()->StickerService.getInstance()).thenReturn(mock(StickerService.class));
+        try (MockedStatic<StickerService> mockedStickerService = Mockito.mockStatic(StickerService.class);
+             MockedStatic<StickerPackService> mockedStickerPackService = Mockito.mockStatic(StickerPackService.class)) {
+            mockedStickerService.when(() -> StickerService.getInstance()).thenReturn(mock(StickerService.class));
+            mockedStickerPackService.when(() -> StickerPackService.getInstance()).thenReturn(mock(StickerPackService.class));
             StickerViewModel instance = StickerViewModel.getInstance();
 
             assertNotNull(instance);
@@ -81,6 +87,7 @@ public class StickerViewModelTest {
         verify(stickerService).createSticker(eq(mockedStickerPack),
                 any(Uri.class),
                 any(OperationCallback.class));
+        verify(stickerPackService).updateStickerPackVersion(any());
     }
 
     @Test
@@ -90,6 +97,7 @@ public class StickerViewModelTest {
 
         verify(stickerService).deleteSticker(mockedSticker,
                 mockedStickerPack);
+        verify(stickerPackService).updateStickerPackVersion(any());
     }
 
     @Test

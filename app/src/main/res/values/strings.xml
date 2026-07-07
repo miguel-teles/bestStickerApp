@@ -62,6 +62,7 @@
     <string name="CREATE_FOLDER_PACOTE" translatable="false">Erro ao criar pasta do pacote de figurinhas</string>
     <string name="COPY" translatable="false">Erro ao copiar arquivo ao destino novo</string>
     <string name="RESIZE" translatable="false">Erro ao mudar tamanho da imagem</string>
+    <string name="FILE_NOT_FOUND" translatable="false">Arquivo não encontrado</string>
     <string name="DELETE_FOLDER" translatable="false">Erro ao apagar pasta</string>
     <string name="CONVERT_FILE" translatable="false">Erro ao converter arquivo</string>
     <string name="DOWNLOAD" translatable="false">Erro ao baixar arquivo</string>
@@ -89,7 +90,6 @@
     <string name="INVALID_DOWNLOAD_LINK" translatable="false">Link de download é inválido</string>
     <string name="TIMEOUT" translatable="false">Timeout, que chato!</string>
     <string name="IS_STICKER_PACK_ANIMATED" translatable="false">É para figurinhas animadas?</string>
-    <string name="FILE_NOT_FOUND" translatable="false">Arquivo não encontrado</string>
     <string name="CONVERTION_TIME_OUT" translatable="false">Figurinha não foi convertida a tempo para baixá-la. Tente novamente.</string>
     <string name="WARN_FILE_BIGGER_THAN_ALLOWED" translatable="false">Wow! Arquivo grande demais para transformar em figurinha.</string>
     <string name="WARN_DURATION_OF_VIDEO" translatable="false">O vídeo pode ser cortado, pois a duração máxima de uma figurinha animada é de 10 segundos.</string>

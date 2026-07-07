@@ -5,7 +5,9 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.robolectric.Shadows.shadowOf;
 
 import android.content.Context;
@@ -182,7 +184,9 @@ public class StickerAndStickerPackCreationIntegrationTest {
     @Test
     public void addMp4StickerToAnimatedStickerPackTest() throws StickerException {
         try (MockedStatic<Utils> mockedUtils = Mockito.mockStatic(Utils.class)) {
-            mockedUtils.when(() -> Utils.getApplicationContext()).thenReturn(mock(Context.class));
+            Context context = mock(Context.class);
+            mockedUtils.when(()->Utils.getApplicationContext()).thenReturn(context);
+            when(context.getString(anyInt())).thenReturn("Arquivo não encontrado");
 
             StickerPack createdStickerPack = createStickerPack(true);
 
@@ -195,7 +199,9 @@ public class StickerAndStickerPackCreationIntegrationTest {
     @Test
     public void addGifStickerToAnimatedStickerPackTest() throws StickerException {
         try (MockedStatic<Utils> mockedUtils = Mockito.mockStatic(Utils.class)){
-            mockedUtils.when(()->Utils.getApplicationContext()).thenReturn(mock(Context.class));
+            Context context = mock(Context.class);
+            mockedUtils.when(()->Utils.getApplicationContext()).thenReturn(context);
+            when(context.getString(anyInt())).thenReturn("Arquivo não encontrado");
 
             StickerPack createdStickerPack = createStickerPack(true);
 

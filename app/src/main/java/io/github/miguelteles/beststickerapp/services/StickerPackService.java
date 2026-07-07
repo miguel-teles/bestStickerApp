@@ -162,6 +162,10 @@ public class StickerPackService {
         return stickerPack;
     }
 
+    public void updateStickerPackVersion(StickerPack stickerPack) throws StickerException {
+        stickerPackRepository.updateStickerPackVersion(stickerPack.getIdentifier());
+    }
+
     private void validateParametersUpdateStickerPack(StickerPack stickerPack,
                                                      String nomePacote) {
         if (stickerPack == null) {
